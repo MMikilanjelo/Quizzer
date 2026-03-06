@@ -1,0 +1,46 @@
+{
+  "common": {
+    "error": "Error",
+    "dismiss": "Dismiss",
+    "retry": "Try Again",
+    "ok": "Ok"
+  },
+  "apiErrors": {
+    "USER_ALREADY_EXISTS": "An account with this email already exists.",
+    "INVALID_EMAIL": "The email address provided is not valid.",
+    "WEAK_PASSWORD": "Your password must be stronger (min. 8 characters).",
+    "INTERNAL_ERROR": "Our servers are acting up. Please try again later.",
+    "UNKNOWN": "Something went wrong. Please try again.",
+    "NETWORK_ERROR": "Please check your internet connection and try again.",
+    "titles": {
+      "error": "Oops!",
+      "auth_failed": "Session Expired",
+      "network": "Connection Lost"
+    }
+  },
+  "validation": {
+    "usernameMin": "Username must be at least 3 characters",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordsDontMatch": "Passwords don't match"
+  },
+  "login": {
+    "title": "Welcome Back!",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "Login",
+    "noAccount": "Don't have an account? ",
+    "registerNow": "Register Now"
+  },
+  "register": {
+    "title": "Register To Get Started",
+    "usernamePlaceholder": "Username",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm Password",
+    "registerButton": "Register",
+    "alreadyAccount": "Already have an account? ",
+    "loginNow": "Login Now"
+  }
+}
