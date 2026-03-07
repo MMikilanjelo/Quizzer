@@ -2,11 +2,16 @@ name: Deploy Quizzer
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master", "develop" ]
+
+env:
+  PROD_BRANCH: master
+  DEV_BRANCH: develop
+  REGISTRY: ghcr.io
 
 jobs:
   build-and-deploy:
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    environment: ${{ github.ref_name == 'master' && 'production' || 'development' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,7 +24,7 @@ jobs:
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -29,7 +34,7 @@ jobs:
           context: .
           file: src/Web.Api/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       - name: Dokploy Deployment
         uses: benbristow/dokploy-deploy-action@0.2.2
