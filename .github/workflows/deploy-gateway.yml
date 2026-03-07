@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "master", "develop" ]
     paths:
-      - 'server/Quizzer/ApiGateway/**'
+      - 'server/ApiGateway/**'
       - '.github/workflows/deploy-gateway.yml'
 
 env:
@@ -38,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: server/Quizzer
-          file: server/Quizzer/ApiGateway/Dockerfile
+          file: server/ApiGateway/ApiGateway/Dockerfile
           push: true
           platforms: linux/arm64 
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-gateway:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
