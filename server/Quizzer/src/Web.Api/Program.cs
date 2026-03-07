@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application;
 using Infrastructure;
 using Serilog;
 using Web.Api;
@@ -11,7 +12,7 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configu
 builder.Services.AddOpenApiWithAuth();
 
 builder.Services
-//     .AddApplication()
+    .AddApplication()
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 

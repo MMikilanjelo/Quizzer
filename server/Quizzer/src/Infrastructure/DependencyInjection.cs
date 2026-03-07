@@ -1,8 +1,19 @@
 ﻿using System.Text;
+using Application;
+using Application.Authentication;
+using Application.Repository;
+using Infrastructure.Authentication;
+using Infrastructure.Authorization;
+using Infrastructure.Configuration;
+using Infrastructure.Repository;
+using Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 
 namespace Infrastructure;
 
@@ -10,52 +21,62 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration) =>
+        IConfiguration configuration
+    )
+    {
         services
             .AddServices()
-            .AddDatabase(configuration)
-            .AddHealthChecks(configuration)
+            .AddDatabase()
             .AddAuthenticationInternal(configuration)
             .AddAuthorizationInternal();
 
+        return services;
+    }
+
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-        //
-        // services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         return services;
     }
 
-    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddDatabase(this IServiceCollection services)
     {
-        // string? connectionString = configuration.GetConnectionString("Database");
+        services.AddOptions<MongoDbOptions>()
+            .BindConfiguration(MongoDbOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        // services.AddDbContext<ApplicationDbContext>(
-        //     options => options
-        //         .UseNpgsql(connectionString, npgsqlOptions =>
-        //             npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
-        //         .UseSnakeCaseNamingConvention());
-        //
-        // services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddOptions<MongoDbOptions>().BindConfiguration(MongoDbOptions.SectionName);
 
-        return services;
-    }
+        services.AddSingleton<IMongoClient>(serviceProvider =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<MongoDbOptions>>().Value;
 
-    private static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
-    {
-        // services
-        //     .AddHealthChecks()
-        //     .AddNpgSql(configuration.GetConnectionString("Database")!);
+            return new MongoClient(options.ConnectionString);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<MongoDbOptions>>().Value;
+
+            var client = serviceProvider.GetRequiredService<IMongoClient>();
+
+            return client.GetDatabase(options.DatabaseName);
+        });
+
+        services.AddScoped<IQuizRepository, QuizRepository>();
 
         return services;
     }
 
     private static IServiceCollection AddAuthenticationInternal(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
                 o.RequireHttpsMetadata = false;
@@ -69,9 +90,12 @@ public static class DependencyInjection
             });
 
         services.AddHttpContextAccessor();
-        // services.AddScoped<IUserContext, UserContext>();
-        // services.AddSingleton<IPasswordHasher, PasswordHasher>();
-        // services.AddSingleton<ITokenProvider, TokenProvider>();
+
+        services.AddScoped<IUserContext, UserContext>();
+
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+
+        services.AddSingleton<ITokenProvider, TokenProvider>();
 
         return services;
     }
@@ -80,11 +104,11 @@ public static class DependencyInjection
     {
         services.AddAuthorization();
 
-        // services.AddScoped<PermissionProvider>();
-        //
-        // services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
-        //
-        // services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+        services.AddScoped<PermissionProvider>();
+
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         return services;
     }

@@ -2,4 +2,5 @@
 
 public static class Tags
 {
+    public const string Quizzes = "Quiz";
 }
