@@ -33,15 +33,16 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: src/Web.Api/Dockerfile
+          context: server/Quizzer
+          file: server/Quizzer/src/Web.Api/Dockerfile
+          
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       - name: Dokploy Deployment
         uses: benbristow/dokploy-deploy-action@0.2.2
         with:
-          # These secrets are pulled from the selected GitHub environment
+          # These secrets are pulled from your GitHub Environments
           api_token: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
           application_id: ${{ secrets.DOKPLOY_APPLICATION_ID }}
           dokploy_url: ${{ secrets.DOKPLOY_URL }}
