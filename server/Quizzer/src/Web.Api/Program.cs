@@ -7,7 +7,11 @@ using Web.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilog((context, loggerConfig) => loggerConfig
+    .ReadFrom
+    .Configuration(context.Configuration)
+    .Enrich.FromLogContext()
+);
 
 builder.Services.AddOpenApiWithAuth();
 
@@ -33,7 +37,7 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
 }
 
-app.UseAuthentication();
+app.UseGatewayAuthentication();
 
 app.UseAuthorization();
 

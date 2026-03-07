@@ -10,4 +10,9 @@ public static class MiddlewareExtensions
 
         return app;
     }
+
+    public static IApplicationBuilder UseGatewayAuthentication(this IApplicationBuilder builder)
+    {
+        return builder.UseMiddleware<GatewayAuthenticationMiddleware>();
+    }
 }

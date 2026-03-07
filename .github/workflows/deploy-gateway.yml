@@ -1,12 +1,11 @@
-name: Deploy Quizzer
+name: Deploy API Gateway
 
 on:
   push:
     branches: [ "master", "develop" ]
     paths:
-      - 'server/Quizzer/src/**'
-      - 'server/Quizzer/Directory.Packages.props'
-      - '.github/workflows/deploy-backend.yml'
+      - 'server/Quizzer/ApiGateway/**'
+      - '.github/workflows/deploy-gateway.yml'
 
 env:
   REGISTRY: ghcr.io
@@ -20,12 +19,10 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Lowercase Repository Name
-        run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -37,19 +34,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Gateway Image
         uses: docker/build-push-action@v5
         with:
           context: server/Quizzer
-          file: server/Quizzer/src/Web.Api/Dockerfile
+          file: server/Quizzer/ApiGateway/Dockerfile
           push: true
           platforms: linux/arm64 
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-gateway:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       - name: Dokploy Deployment
         uses: benbristow/dokploy-deploy-action@0.2.2
         with:
           api_token: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
-          application_id: ${{ secrets.DOKPLOY_APPLICATION_ID }}
+          application_id: ${{ secrets.DOKPLOY_GATEWAY_APP_ID }}
           dokploy_url: ${{ secrets.DOKPLOY_URL }}
           service_type: application

@@ -3,12 +3,10 @@ using Application;
 using Application.Authentication;
 using Application.Repository;
 using Infrastructure.Authentication;
-using Infrastructure.Authorization;
 using Infrastructure.Configuration;
 using Infrastructure.Repository;
 using Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -28,7 +26,7 @@ public static class DependencyInjection
             .AddServices()
             .AddDatabase()
             .AddAuthenticationInternal(configuration)
-            .AddAuthorizationInternal();
+            .AddAuthorization();
 
         return services;
     }
@@ -75,20 +73,6 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(o =>
-            {
-                o.RequireHttpsMetadata = false;
-                o.TokenValidationParameters = new TokenValidationParameters
-                {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
-                    ValidIssuer = configuration["Jwt:Issuer"],
-                    ValidAudience = configuration["Jwt:Audience"],
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
-
         services.AddHttpContextAccessor();
 
         services.AddScoped<IUserContext, UserContext>();
@@ -96,19 +80,6 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         services.AddSingleton<ITokenProvider, TokenProvider>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddAuthorizationInternal(this IServiceCollection services)
-    {
-        services.AddAuthorization();
-
-        services.AddScoped<PermissionProvider>();
-
-        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
-        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         return services;
     }
