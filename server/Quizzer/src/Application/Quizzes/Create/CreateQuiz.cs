@@ -23,7 +23,16 @@ internal sealed class CreateQuiz(
         };
 
         await repository.CreateAsync(quiz);
+        
+        var id2 = Guid.NewGuid();
 
+        var quiz2 = new Quiz
+        {
+            Id = id2.ToString()
+        };
+
+        await repository.CreateAsync(quiz2);
+        
         return id;
     }
 }
