@@ -35,8 +35,8 @@ jobs:
         with:
           context: server/Quizzer
           file: server/Quizzer/src/Web.Api/Dockerfile
-          
           push: true
+          platforms: linux/amd64 
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       - name: Dokploy Deployment
