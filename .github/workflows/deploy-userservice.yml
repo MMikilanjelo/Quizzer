@@ -2,12 +2,10 @@ name: Deploy UserService
 
 on:
   workflow_call:
-    secrets:
-      DOKPLOY_AUTH_TOKEN:
-        required: true
-      DOKPLOY_APPLICATION_ID:
-        required: true
-      DOKPLOY_URL:
+    inputs:
+      target_env:
+        description: 'The GitHub Environment to deploy to'
+        type: string
         required: true
 
 env:
@@ -51,6 +49,6 @@ jobs:
         uses: benbristow/dokploy-deploy-action@0.2.2
         with:
           api_token: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
-          application_id: ${{ secrets.DOKPLOY_APPLICATION_ID }}
+          application_id: ${{ secrets.DOKPLOY_USERSERVICE_APP_ID }}
           dokploy_url: ${{ secrets.DOKPLOY_URL }}
           service_type: application

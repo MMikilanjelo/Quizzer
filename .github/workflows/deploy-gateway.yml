@@ -2,12 +2,10 @@ name: Deploy API Gateway
 
 on:
   workflow_call:
-    secrets:
-      DOKPLOY_AUTH_TOKEN:
-        required: true
-      DOKPLOY_GATEWAY_APP_ID:
-        required: true
-      DOKPLOY_URL:
+    inputs:
+      target_env:
+        description: 'The GitHub Environment to deploy to'
+        type: string
         required: true
 
 env:
