@@ -28,8 +28,6 @@ builder.Services
     .AddAuthorizationBuilder()
     .AddPolicy("RequireValidToken", policy => policy.RequireAuthenticatedUser());
 
-
-
 builder.Services
     .AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
