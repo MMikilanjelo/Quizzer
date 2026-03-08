@@ -42,7 +42,7 @@ jobs:
           file: server/ApiGateway/ApiGateway/Dockerfile
           push: true
           platforms: linux/arm64 
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.target_env }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-gateway:${{ inputs.target_env }}
 
       - name: Dokploy Deployment
         uses: benbristow/dokploy-deploy-action@0.2.2

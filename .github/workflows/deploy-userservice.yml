@@ -43,7 +43,7 @@ jobs:
           file: server/UserService/src/Web.Api/Dockerfile
           push: true
           platforms: linux/arm64 
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.target_env }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-userservice:${{ inputs.target_env }}
 
       - name: Dokploy Deployment
         uses: benbristow/dokploy-deploy-action@0.2.2
