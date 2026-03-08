@@ -36,6 +36,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
+          # GITHUB_TOKEN is automatically provided by Actions
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Docker Image

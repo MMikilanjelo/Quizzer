@@ -1,11 +1,14 @@
 name: Deploy API Gateway
 
 on:
-  push:
-    branches: [ "master", "develop" ]
-    paths:
-      - 'server/ApiGateway/**'
-      - '.github/workflows/deploy-gateway.yml'
+  workflow_call:
+    secrets:
+      DOKPLOY_AUTH_TOKEN:
+        required: true
+      DOKPLOY_GATEWAY_APP_ID:
+        required: true
+      DOKPLOY_URL:
+        required: true
 
 env:
   REGISTRY: ghcr.io

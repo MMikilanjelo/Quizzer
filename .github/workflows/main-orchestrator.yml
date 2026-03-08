@@ -1,0 +1,44 @@
+name: Main Deployment Orchestrator
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      userservice: ${{ steps.filter.outputs.userservice }}
+      apigateway: ${{ steps.filter.outputs.apigateway }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            userservice:
+              - 'server/UserService/src/**'
+              - 'server/UserService/Directory.Packages.props'
+            apigateway:
+              - 'server/ApiGateway/**'
+
+  deploy-userservice:
+    name: Deploy User Service
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.userservice == 'true' }}
+    uses: ./.github/workflows/deploy-userservice.yml 
+    secrets:
+      DOKPLOY_AUTH_TOKEN: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
+      DOKPLOY_APPLICATION_ID: ${{ secrets.DOKPLOY_APPLICATION_ID }}
+      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+
+  deploy-gateway:
+    name: Deploy API Gateway
+    needs: [detect-changes, deploy-userservice]
+    if: ${{ !failure() && !cancelled() && needs.detect-changes.outputs.apigateway == 'true' }}
+    uses: ./.github/workflows/deploy-gateway.yml
+    secrets:
+      DOKPLOY_AUTH_TOKEN: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
+      DOKPLOY_GATEWAY_APP_ID: ${{ secrets.DOKPLOY_GATEWAY_APP_ID }}
+      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
