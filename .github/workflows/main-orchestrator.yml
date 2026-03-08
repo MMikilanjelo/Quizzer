@@ -3,7 +3,7 @@ name: Main Deployment Orchestrator
 on:
   push:
     branches: [ "master", "develop" ]
-    
+
 permissions:
   contents: read
   packages: write
@@ -39,7 +39,7 @@ jobs:
 
   deploy-gateway:
     name: Deploy API Gateway
-    needs: [detect-changes, deploy-userservice]
+    needs: detect-changes
     if: ${{ !failure() && !cancelled() && needs.detect-changes.outputs.apigateway == 'true' }}
     uses: ./.github/workflows/deploy-gateway.yml
     secrets:
