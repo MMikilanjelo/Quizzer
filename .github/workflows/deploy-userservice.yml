@@ -15,7 +15,7 @@ env:
 
 jobs:
   build-and-deploy:
-    environment: ${{ github.ref_name == 'master' && 'production' || 'development' }}
+    environment: ${{ inputs.target_env }}
     runs-on: ubuntu-24.04-arm 
     permissions:
       contents: read
@@ -36,7 +36,6 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          # GITHUB_TOKEN is automatically provided by Actions
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Docker Image
@@ -46,7 +45,7 @@ jobs:
           file: server/UserService/src/Web.Api/Dockerfile
           push: true
           platforms: linux/arm64 
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.target_env }}
 
       - name: Dokploy Deployment
         uses: benbristow/dokploy-deploy-action@0.2.2

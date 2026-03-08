@@ -22,6 +22,7 @@ builder.Services
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
+
 var app = builder.Build();
 
 app.UseExceptionHandler((_) => { });

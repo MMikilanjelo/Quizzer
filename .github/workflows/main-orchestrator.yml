@@ -32,17 +32,15 @@ jobs:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.userservice == 'true' }}
     uses: ./.github/workflows/deploy-userservice.yml 
-    secrets:
-      DOKPLOY_AUTH_TOKEN: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
-      DOKPLOY_APPLICATION_ID: ${{ secrets.DOKPLOY_APPLICATION_ID }}
-      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+    with:
+      target_env: ${{ github.ref_name == 'master' && 'production' || 'dev' }}
+    secrets: inherit 
 
   deploy-gateway:
     name: Deploy API Gateway
     needs: detect-changes
-    if: ${{ !failure() && !cancelled() && needs.detect-changes.outputs.apigateway == 'true' }}
+    if: ${{ needs.detect-changes.outputs.apigateway == 'true' }}
     uses: ./.github/workflows/deploy-gateway.yml
-    secrets:
-      DOKPLOY_AUTH_TOKEN: ${{ secrets.DOKPLOY_AUTH_TOKEN }}
-      DOKPLOY_GATEWAY_APP_ID: ${{ secrets.DOKPLOY_GATEWAY_APP_ID }}
-      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+    with:
+      target_env: ${{ github.ref_name == 'master' && 'production' || 'dev' }}
+    secrets: inherit
