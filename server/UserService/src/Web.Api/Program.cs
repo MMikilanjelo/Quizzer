@@ -22,7 +22,7 @@ builder.Services
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
-WebApplication app = builder.Build();
+var app = builder.Build();
 
 app.UseExceptionHandler((_) => { });
 
