@@ -1,0 +1,48 @@
+﻿{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "identity-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "identity-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{ include "identity-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{ include "identity-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "identity-service.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          {{- if or .Values.config .Values.appSecret.existingSecretName .Values.appSecret.data }}
+          envFrom:
+            {{- if .Values.config }}
+            - configMapRef:
+                name: {{ include "identity-service.configMapName" . }}
+            {{- end }}
+            {{- if or .Values.appSecret.existingSecretName .Values.appSecret.data }}
+            - secretRef:
+                name: {{ include "identity-service.secretName" . }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{ include "identity-service.postgresEnv" . | nindent 12 }}
+            {{ include "identity-service.kafkaEnv" . | nindent 12 }}
+{{- end }}

@@ -1,0 +1,13 @@
+﻿{{- if and .Values.enabled .Values.kafka.createUser .Values.kafka.userName }}
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaUser
+metadata:
+  name: {{ .Values.kafka.userName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "activity-service.labels" . | nindent 4 }}
+    strimzi.io/cluster: {{ required "kafka cluster name must be provided via values" .Values.global.kafka.clusterName }}
+spec:
+  authentication:
+    type: scram-sha-512
+{{- end }}

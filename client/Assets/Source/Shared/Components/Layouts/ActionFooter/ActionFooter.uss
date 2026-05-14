@@ -1,0 +1,26 @@
+.action-footer {
+    width: 100%;
+    align-items: center;
+    padding-bottom: var(--safe-area-bottom);
+}
+
+.action-footer__content {
+    width: 100%;
+    max-width: 420px;
+    padding-left: var(--spacing-l);
+    padding-right: var(--spacing-l);
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.action-footer__item {
+    width: 100%;
+}
+
+.action-footer__content > .action-footer__item {
+    margin-bottom: 12px;
+}
+
+.action-footer__content > .action-footer__item:last-child {
+    margin-bottom: 0;
+}

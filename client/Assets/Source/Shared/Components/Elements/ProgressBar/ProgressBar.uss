@@ -1,0 +1,60 @@
+.custom-progress-bar {
+    --pb-current-track: var(--progress-track-bg);
+    --pb-current-fill: var(--progress-fill-bg);
+    --pb-current-height: 8px;
+    --pb-current-radius: 4px;
+    width: 100%;
+}
+
+.custom-progress-bar .unity-progress-bar__container {
+    max-height: var(--pb-current-height);
+    min-height: var(--pb-current-height);
+
+    flex-grow: 1;
+}
+
+.custom-progress-bar .unity-progress-bar__background {
+    background-color: var(--pb-current-track);
+    border-radius: var(--pb-current-radius);
+    border-width: 0;
+    overflow: hidden;
+
+    flex-grow: 1;
+}
+
+.custom-progress-bar .unity-progress-bar__progress {
+    background-color: var(--pb-current-fill);
+    border-radius: var(--pb-current-radius);
+    margin: 0;
+
+    height: 100%;
+
+    transition-property: width;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out-sine;
+
+}
+
+.custom-progress-bar .unity-progress-bar__title {
+    display: none;
+}
+
+.custom-progress-bar.custom-progress-bar--large {
+    --pb-current-height: 12px;
+}
+
+.custom-progress-bar.custom-progress-bar--small {
+    --pb-current-height: 4px;
+}
+
+.custom-progress-bar--success {
+    --pb-current-fill: var(--palette-green-base);
+}
+
+.custom-progress-bar--warning {
+    --pb-current-fill: var(--palette-yellow-base);
+}
+
+.custom-progress-bar--danger {
+    --pb-current-fill: var(--palette-red-base);
+}

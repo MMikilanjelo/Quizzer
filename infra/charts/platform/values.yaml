@@ -1,0 +1,16 @@
+sealed-secrets:
+  enabled: true
+  fullnameOverride: sealed-secrets-controller
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+
+postgres:
+  enabled: true
+
+kafka:
+  enabled: true
+
+mongodb:
+  enabled: true

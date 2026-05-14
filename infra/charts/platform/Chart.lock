@@ -1,0 +1,15 @@
+dependencies:
+- name: sealed-secrets
+  repository: https://bitnami-labs.github.io/sealed-secrets
+  version: 2.18.5
+- name: postgres
+  repository: file://./charts/postgres
+  version: 1.0.0
+- name: kafka
+  repository: file://./charts/kafka
+  version: 1.0.0
+- name: mongodb
+  repository: file://./charts/mongodb
+  version: 1.0.0
+digest: sha256:92d6d9acc245030b2508792186f14e2ed71fdb13c0a11c9f916458bdbf28f900
+generated: "2026-05-11T12:14:08.880341+03:00"

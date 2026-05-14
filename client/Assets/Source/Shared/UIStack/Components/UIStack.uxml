@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Source.Shared.Components.Layouts.SafeArea.SafeAreaContainer name="AppShell" class="app-shell">
+        <ui:VisualElement name="Header" class="app-shell__header"/>
+        <ui:VisualElement name="Screens" class="app-shell__screens"/>
+        <ui:VisualElement name="Footer" class="app-shell__footer"/>
+    </Source.Shared.Components.Layouts.SafeArea.SafeAreaContainer>
+    <Source.Shared.Components.Elements.Backdrop.Backdrop name="Backdrop"/>
+    <ui:VisualElement name="Modals" picking-mode="Ignore" style="flex-grow: 1; width: 100%; height: 100%; position: absolute; -unity-background-image-tint-color: rgba(255, 255, 255, 0); display: flex;"/>
+    <ui:VisualElement name="Overlays" picking-mode="Ignore" enabled="true" style="flex-grow: 1; width: 100%; height: 100%; position: absolute; display: flex;"/>
+</ui:UXML>

@@ -1,0 +1,57 @@
+.app-shell {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: var(--theme-bg-main);
+}
+
+.app-shell__header {
+    flex-shrink: 0;
+    flex-grow: 0;
+    width: 100%;
+}
+
+.app-shell__screens {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.app-shell__footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+.screen {
+    flex-grow: 1;
+    width: 100%;
+    background-color: var(--theme-bg-main);
+}
+
+.screen__container {
+    max-width: 420px;
+    padding-left: var(--safe-area-left);
+    padding-right: var(--safe-area-right);
+
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 100%;
+    flex-grow: 1;
+}
+
+.unity-ui-document__root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+}

@@ -1,0 +1,22 @@
+﻿enabled: true
+
+nameOverride: ""
+fullnameOverride: ""
+
+clusterName: "quizzer-kafka"
+version: "4.2.0"
+metadataVersion: "4.2-IV1"
+
+replicas: 3
+minInsyncReplicas: 2
+
+storage:
+  className: "local-path"
+  size: "10Gi"
+
+retention:
+  hours: 168
+
+partitions: 3
+
+topics: [ ]

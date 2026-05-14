@@ -1,0 +1,5 @@
+﻿apiVersion: v2
+name: activity-service
+description: Activity service
+type: application
+version: 1.0.0

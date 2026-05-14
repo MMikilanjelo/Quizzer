@@ -1,0 +1,47 @@
+﻿{{- if .Values.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "postgres.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "postgres.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.instances }}
+  enableSuperuserAccess: {{ .Values.superuserAccess.enabled }}
+  storage:
+    storageClass: {{ .Values.storage.className | quote }}
+    size: {{ .Values.storage.size | quote }}
+  {{- if .Values.additionalRoles }}
+  managed:
+    roles:
+      {{- range .Values.additionalRoles }}
+      - name: {{ .name | quote }}
+        ensure: present
+        login: true
+        createdb: true
+        passwordSecret:
+          name: {{ .passwordSecretName | quote }}
+          key: {{ .passwordSecretKey | default "password" | quote }}
+      {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.enabled .Values.databases }}
+{{- range .Values.databases }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ include "postgres.fullname" $ }}-{{ .name | replace "_" "-" }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{ include "postgres.labels" $ | nindent 4 }}
+spec:
+  name: {{ .name | quote }}
+  owner: {{ .owner | quote }}
+  cluster:
+    name: {{ include "postgres.fullname" $ }}
+  databaseReclaimPolicy: {{ .reclaimPolicy | default "retain" }}
+{{- end }}
+{{- end }}

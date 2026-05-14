@@ -1,0 +1,18 @@
+﻿enabled: true
+
+nameOverride: ""
+fullnameOverride: ""
+
+clusterName: "quizzer-postgres"
+instances: 1
+
+storage:
+  className: "local-path"
+  size: "10Gi"
+
+superuserAccess:
+  enabled: false
+
+additionalRoles: []
+
+databases: []

@@ -1,0 +1,21 @@
+.backdrop {
+    background-color: var(--backdrop-color);
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    visibility: hidden;
+    opacity: 0;
+
+    transition-property: opacity, visibility;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.backdrop--active {
+    visibility: visible;
+    opacity: 1;
+}

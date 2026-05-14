@@ -1,0 +1,12 @@
+dependencies:
+- name: api-gateway
+  repository: file://./charts/api-gateway
+  version: 1.0.0
+- name: identity-service
+  repository: file://./charts/identity-service
+  version: 1.0.0
+- name: activity-service
+  repository: file://./charts/activity-service
+  version: 1.0.0
+digest: sha256:5d87c55e855b1c2a6372c1439e6d02118323ff863e4a6544b2f66766480f95df
+generated: "2026-05-11T12:13:50.9160047+03:00"

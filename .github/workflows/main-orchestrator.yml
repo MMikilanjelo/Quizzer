@@ -1,0 +1,57 @@
+name: Main Deployment Orchestrator
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      identity-service: ${{ steps.filter.outputs.identity-service }}
+      apigateway: ${{ steps.filter.outputs.apigateway }}
+      activity-service: ${{ steps.filter.outputs.activity-service }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            identity-service:
+              - 'server/IdentityService/**'
+            apigateway:
+              - 'server/ApiGateway/**'
+            activity-service:
+              - 'server/ActivityService/**'
+
+  deploy-identity-service:
+    name: Deploy User Service
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.identity-service == 'true' }}
+    uses: ./.github/workflows/deploy-identity-service.yml
+    with:
+      target_env: ${{ github.ref_name == 'master' && 'production' || 'dev' }}
+    secrets: inherit
+
+  deploy-activity-service:
+    name: Deploy Activity Service
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.activity-service == 'true' }}
+    uses: ./.github/workflows/deploy-activity-service.yml
+    with:
+      target_env: ${{ github.ref_name == 'master' && 'production' || 'dev' }}
+    secrets: inherit
+
+  deploy-gateway:
+    name: Deploy API Gateway
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.apigateway == 'true' }}
+    uses: ./.github/workflows/deploy-gateway.yml
+    with:
+      target_env: ${{ github.ref_name == 'master' && 'production' || 'dev' }}
+    secrets: inherit

@@ -1,0 +1,13 @@
+﻿{{- if .Values.config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "activity-service.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "activity-service.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}

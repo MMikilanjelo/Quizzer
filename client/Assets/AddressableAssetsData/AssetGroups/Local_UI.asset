@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Local_UI
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Local_UI
+  m_GUID: d59b3cc5b8f20d9408f9b43959c5be5b
+  m_SerializeEntries:
+  - m_GUID: 12bd6a337424bad449ba8e9cac9690d1
+    m_Address: UIStack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 314c9f9fc5fc1a54ca0fad96b8f59f98
+    m_Address: Backdrop
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3dd1d7ab61a646b4cabbfa8b86824505
+    m_Address: Variables
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5bb887c2df9d1f64d80aea2e9eaa4a9a
+    m_Address: Inter-Bold SDF
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77427fb588fb99d4aa3de7386c71fde1
+    m_Address: LocalIcons
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 832025149eb24da48a921b1ac4c35810
+    m_Address: LoadingOverlay
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UIAssets
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8477679c22da3264fad3b697bebaeba4
+    m_Address: Dialogs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86e0c596524a2224eb41cbf1294a3d09
+    m_Address: MobilePanelSettings
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9246de95361c2d8478afbc4ebf99a751
+    m_Address: Inter-SemiBold SDF
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad91d2592d6543b2be8edb781629f5ec
+    m_Address: FinishedQuizScreen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b11e6d97f024d2945ab571a42ec2be7a
+    m_Address: Labels
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b267eba062b9a0a41bc0493426cf5a59
+    m_Address: Inter-Medium SDF
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2e0f8b71778b014381228f9b32fcb34
+    m_Address: Buttons
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d06421de6008dad4a975c7c70fee7656
+    m_Address: Inter-Regular SDF
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db15ba75b9658ef46a0852f5ea42df7e
+    m_Address: Screens
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd902261eceaba94aac2b2151f5e3da2
+    m_Address: LoadingOverlay
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eff49511c9922c04b9b4b6d7344e5a46
+    m_Address: ProgressBar
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c4990746b5ffa4c4398f0b96ba1ea2f5, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 9f1eb0bc07d486446b027977f455b1fe, type: 2}
+    - {fileID: 11400000, guid: 1f81842dc651ef94bb6f3984191a147b, type: 2}

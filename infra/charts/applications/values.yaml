@@ -1,0 +1,8 @@
+﻿api-gateway:
+  enabled: true
+
+identity-service:
+  enabled: true
+
+activity-service:
+  enabled: true

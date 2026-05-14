@@ -1,0 +1,54 @@
+.dialog {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.dialog__content {
+    background-color: white;
+    border-radius: 32px;
+    padding: 32px 24px 12px 24px;
+    width: 100%;
+    max-width: 420px;
+    align-items: center;
+}
+
+.dialog__icon {
+    width: 96px;
+    height: 96px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-bottom: 24px;
+}
+
+.dialog__actions {
+    width: 100%;
+    flex-direction: column;
+    margin-top: 16px;
+}
+
+.dialog__actions > .btn {
+    margin-bottom: 12px;
+}
+
+.dialog__icon--default {
+    -unity-background-image-tint-color: var(--palette-sky-light);
+}
+
+/* Success */
+.dialog__icon--success {
+    -unity-background-image-tint-color: var(--palette-green-base);
+}
+
+.dialog__icon--warning {
+    -unity-background-image-tint-color: var(--palette-yellow-base);
+}
+
+.dialog__icon--error {
+    -unity-background-image-tint-color: var(--palette-red-base);
+}

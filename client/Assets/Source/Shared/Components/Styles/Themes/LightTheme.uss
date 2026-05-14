@@ -1,0 +1,72 @@
+:root {
+    --btn-primary-bg: var(--palette-primary-base);
+    --btn-primary-bg-pressed: var(--palette-primary-dark);
+    --btn-primary-text: var(--palette-sky-white);
+
+    --btn-secondary-bg: var(--palette-primary-lightest);
+    --btn-secondary-bg-pressed: var(--palette-primary-lighter);
+    --btn-secondary-text: var(--palette-primary-base);
+
+    --btn-outline-border: var(--palette-primary-base);
+    --btn-outline-text: var(--palette-primary-base);
+    --btn-outline-text-pressed: var(--palette-primary-dark);
+
+    --btn-ghost-bg: var(--palette-primary-lightest-0);
+    --btn-ghost-bg-pressed: var(--palette-primary-lightest);
+    --btn-ghost-text: var(--palette-primary-base);
+
+    --btn-disabled-bg: var(--palette-sky-light);
+    --btn-disabled-text: var(--palette-sky-dark);
+
+    --chip-selected-bg: var(--palette-primary-lightest);
+    --chip-selected-text: var(--palette-primary-base);
+
+    --chip-outline-border: var(--palette-sky-lighter);
+    --chip-outline-text: var(--palette-ink-darkest);
+
+    --chip-default-bg: var(--palette-sky-lighter);
+    --chip-default-text: var(--palette-ink-darkest);
+
+    --theme-text-main: var(--palette-ink-darkest);
+    --theme-text-sub: var(--palette-ink-lighter);
+    --theme-bg-main: var(--palette-sky-white);
+
+    --text-color-main: var(--palette-ink-darkest);
+    --text-color-subtle: var(--palette-ink-light);
+    --text-color-primary: var(--palette-primary-base);
+    --text-color-error: var(--palette-red-base);
+    --text-color-white: var(--palette-sky-white);
+
+    --input-text-placeholder: var(--palette-ink-lighter);
+    --input-text-default: var(--palette-ink-darkest);
+    --input-text-disabled: var(--palette-sky-base);
+
+    --input-border-default: var(--palette-sky-light);
+    --input-border-selected: var(--palette-primary-base);
+    --input-border-error: var(--palette-red-base);
+    --input-border-success: var(--palette-green-base);
+
+    --input-bg-default: var(--palette-sky-white);
+    --input-bg-disabled: var(--palette-sky-lighter);
+
+    --progress-track-bg: var(--palette-sky-light);
+    --progress-fill-bg: var(--palette-primary-base);
+
+    --backdrop-color: var(--palette-ink-darkest70);
+
+    --progress-dot-fill-bg: var(--palette-primary-base);
+    --progress-dot-bg: var(--palette-sky-light);
+
+    --header-back-btn-bg: var(--palette-ink-darkest);
+
+    --sk-bg-base: var(--palette-sky-light);
+    --sk-bg-dimmed: var(--palette-sky-lighter);
+
+    --sk-height-title1: 48px;
+    --sk-height-title2: 32px;
+    --sk-height-title3: 24px;
+    --sk-height-large: 18px;
+    --sk-height-regular: 16px;
+    --sk-height-small: 14px;
+    --sk-height-tiny: 12px;
+}

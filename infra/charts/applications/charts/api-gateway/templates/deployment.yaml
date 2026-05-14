@@ -1,0 +1,45 @@
+﻿{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "api-gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{ include "api-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{ include "api-gateway.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "api-gateway.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          {{- if or .Values.config .Values.appSecret.existingSecretName .Values.appSecret.data }}
+          envFrom:
+            {{- if .Values.config }}
+            - configMapRef:
+                name: {{ include "api-gateway.configMapName" . }}
+            {{- end }}
+            {{- if or .Values.appSecret.existingSecretName .Values.appSecret.data }}
+            - secretRef:
+                name: {{ include "api-gateway.secretName" . }}
+            {{- end }}
+          {{- end }}
+{{- end }}

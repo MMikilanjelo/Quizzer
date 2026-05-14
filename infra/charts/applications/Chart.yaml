@@ -1,0 +1,21 @@
+﻿apiVersion: v2
+name: applications
+description: Application services for Quizzer
+type: application
+version: 1.0.0
+
+dependencies:
+  - name: api-gateway
+    version: 1.0.0
+    repository: "file://./charts/api-gateway"
+    condition: api-gateway.enabled
+
+  - name: identity-service
+    version: 1.0.0
+    repository: "file://./charts/identity-service"
+    condition: identity-service.enabled
+
+  - name: activity-service
+    version: 1.0.0
+    repository: "file://./charts/activity-service"
+    condition: activity-service.enabled

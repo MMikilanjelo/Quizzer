@@ -1,0 +1,8 @@
+# Local plaintext inputs used only before running kubeseal.
+bootstrap/**/plain-secrets/
+*.plain.yaml
+*.secret.local.yaml
+*.decrypted.yaml
+
+# Local Sealed Secrets public certificates.
+*.sealed-secrets-cert.pem

@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Source/Features/LoadingOverlays/Components/LoadingOverlay.uss?fileID=7433441132597879392&amp;guid=dd902261eceaba94aac2b2151f5e3da2&amp;type=3#LoadingOverlay"/>
+    <Style src="project://database/Assets/Source/Shared/Components/Elements/ProgressBar/ProgressBar.uss?fileID=7433441132597879392&amp;guid=eff49511c9922c04b9b4b6d7344e5a46&amp;type=3#ProgressBar"/>
+    <ui:VisualElement name="Root" class="loading-screen" style="flex-grow: 1;">
+        <ui:VisualElement class="loading-container">
+            <ui:VisualElement name="dot1" class="dot"/>
+            <ui:VisualElement name="dot2" class="dot"/>
+            <ui:VisualElement name="dot3" class="dot"/>
+        </ui:VisualElement>
+        <Source.Shared.Components.Elements.ProgressBar.CustomProgressBar style="width: 100%;"/>
+    </ui:VisualElement>
+</ui:UXML>

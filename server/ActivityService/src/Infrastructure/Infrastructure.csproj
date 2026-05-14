@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="AspNetCore.HealthChecks.NpgSql"/>
+        <PackageReference Include="BCrypt.Net-Next" />
+        <PackageReference Include="Confluent.Kafka" />
+        <PackageReference Include="Marten" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"/>
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks"/>
+        <PackageReference Include="Microsoft.Extensions.VectorData.Abstractions" />
+        <PackageReference Include="Microsoft.SemanticKernel" />
+        <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" />
+        <PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" />
+        <PackageReference Include="Neo4j.Driver" />
+        <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="StrictId.EFCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Identity.Contracts\Identity.Contracts.csproj" />
+      <ProjectReference Include="..\Application\Application.csproj" />
+    </ItemGroup>
+
+</Project>

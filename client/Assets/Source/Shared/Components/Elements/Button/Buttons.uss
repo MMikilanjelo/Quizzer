@@ -1,0 +1,166 @@
+CustomButton {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    background-color: var(--btn-current-bg, transparent);
+    color: var(--btn-current-text, #000000);
+    border-color: var(--btn-current-border, transparent);
+    border-radius: var(--btn-current-radius, 24px);
+    border-width: var(--btn-current-border-width, 0);
+    -unity-font-definition: var(--font-inter);
+    -unity-text-align: middle-center;
+
+    --btn-current-icon-tint: var(--btn-current-text);
+
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+}
+
+CustomButton:active {
+    scale: 0.96 0.96;
+}
+
+CustomButton.btn--size-large {
+    height: 48px;
+    padding: 0 24px;
+    font-size: 16px;
+}
+
+CustomButton.btn--size-small {
+    height: 32px;
+    padding: 0 16px;
+    font-size: 14px;
+}
+
+CustomButton.btn--shape-pill {
+    --btn-current-radius: var(--radius-xl);
+    width: auto;
+}
+
+CustomButton.btn--shape-circle {
+    --btn-current-radius: 999px;
+    padding: 0;
+}
+
+CustomButton.btn--shape-circle.btn--size-large {
+    width: 48px;
+    height: 48px;
+}
+
+CustomButton.btn--shape-circle.btn--size-small {
+    width: 32px;
+    height: 32px;
+}
+
+CustomButton.btn--primary {
+    --btn-current-bg: var(--btn-primary-bg);
+    --btn-current-text: var(--btn-primary-text);
+}
+
+CustomButton.btn--primary:active {
+    --btn-current-bg: var(--btn-primary-bg-pressed);
+}
+
+CustomButton.btn--secondary {
+    --btn-current-bg: var(--btn-secondary-bg);
+    --btn-current-text: var(--btn-secondary-text);
+}
+
+CustomButton.btn--secondary:active {
+    --btn-current-bg: var(--btn-secondary-bg-pressed);
+    --btn-current-text: var(--palette-primary-dark);
+}
+
+CustomButton.btn--outline {
+    --btn-current-border-width: 2px;
+    --btn-current-border: var(--btn-outline-border);
+    --btn-current-text: var(--btn-outline-text);
+}
+
+CustomButton.btn--outline:active {
+    --btn-current-border: var(--btn-outline-text-pressed);
+    --btn-current-text: var(--btn-outline-text-pressed);
+}
+
+CustomButton.btn--ghost {
+    --btn-current-bg: var(--btn-ghost-bg);
+    --btn-current-text: var(--btn-ghost-text);
+}
+
+CustomButton.btn--ghost:active {
+    --btn-current-bg: var(--btn-ghost-bg-pressed);
+}
+
+CustomButton.btn--disabled,
+CustomButton:disabled {
+    --btn-current-bg: var(--btn-disabled-bg);
+    --btn-current-text: var(--btn-disabled-text);
+    --btn-current-border: transparent;
+    scale: 1 1;
+}
+
+CustomButton .custom-label {
+    margin: 0;
+    padding: 0;
+    color: var(--btn-current-text);
+    transition-property: opacity;
+    transition-duration: 0.1s;
+}
+
+CustomButton.btn--size-small .btn__spinner {
+    width: 14px;
+    height: 14px;
+}
+
+CustomButton.btn--loading .custom-label,
+CustomButton.btn--loading .btn__icon {
+    opacity: 0;
+}
+
+CustomButton.btn--loading .btn__spinner {
+    display: flex;
+}
+
+.btn__icon {
+    width: 24px;
+    height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: var(--btn-current-icon-tint);
+    transition-property: opacity;
+    transition-duration: 0.1s;
+}
+
+.btn__icon--leading {
+    margin-right: 8px;
+    margin-left: 0;
+}
+
+.btn__icon--trailing {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+.btn__icon--icon-only {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.btn__spinner {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+    border-radius: 50%;
+    border-left-color: var(--btn-current-text);
+    border-top-color: var(--btn-current-text);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    position: absolute;
+    display: none;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+}

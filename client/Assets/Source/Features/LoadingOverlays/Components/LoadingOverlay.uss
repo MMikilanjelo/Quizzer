@@ -1,0 +1,22 @@
+.loading-screen {
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+    padding: 60px 40px;
+    background-color: var(--theme-bg-main);
+}
+
+.loading-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: var(--palette-primary-base);
+    margin: 0 5px;
+}

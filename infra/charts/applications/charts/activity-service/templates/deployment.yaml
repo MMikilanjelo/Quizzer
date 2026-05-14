@@ -1,0 +1,48 @@
+﻿{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "activity-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "activity-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{ include "activity-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{ include "activity-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "activity-service.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          {{- if or .Values.config .Values.appSecret.existingSecretName .Values.appSecret.data }}
+          envFrom:
+            {{- if .Values.config }}
+            - configMapRef:
+                name: {{ include "activity-service.configMapName" . }}
+            {{- end }}
+            {{- if or .Values.appSecret.existingSecretName .Values.appSecret.data }}
+            - secretRef:
+                name: {{ include "activity-service.secretName" . }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{ include "activity-service.postgresEnv" . | nindent 12 }}
+            {{ include "activity-service.kafkaEnv" . | nindent 12 }}
+{{- end }}

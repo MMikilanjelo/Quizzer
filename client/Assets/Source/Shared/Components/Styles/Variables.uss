@@ -1,0 +1,64 @@
+:root {
+    --palette-transparent: #00000000;
+    --palette-white-transparent: #FFFFFF00;
+
+    --radius-none: 0px;
+    --radius-xs: 4px;
+    --radius-s: 8px;
+    --radius-m: 12px;
+    --radius-l: 16px;
+    --radius-xl: 24px;
+    --radius-xxl: 32px;
+    --radius-pill: 999px;
+
+    --spacing-xxs: 4px;
+    --spacing-xs: 8px;
+    --spacing-s: 12px;
+    --spacing-sm: 10px;
+    --spacing-m: 16px;
+    --spacing-md: 20px;
+    --spacing-l: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 40px;
+    --spacing-3xl: 48px;
+
+    --safe-area-left: 24px;
+    --safe-area-right: 24px;
+    --safe-area-bottom: 24px;
+
+    --palette-ink-lighter: #72777A;
+    --palette-ink-light: #6C7072;
+    --palette-ink-base: #404446;
+    --palette-ink-dark: #303437;
+    --palette-ink-darker: #202325;
+    --palette-ink-darkest: #090A0A;
+    --palette-ink-darkest70: #090A0AB3;
+
+    --palette-sky-lightest: #F7F9FA;
+    --palette-sky-lighter: #F2F4F5;
+    --palette-sky-light: #E3E5E5;
+    --palette-sky-base: #CDCFD0;
+    --palette-sky-dark: #979C9E;
+    --palette-sky-white: #FFFFFF;
+
+    --palette-primary-lightest-0: #E7E7FF00;
+    --palette-primary-lightest: #E7E7FF;
+    --palette-primary-lighter: #C6C4FF;
+    --palette-primary-light: #9990FF;
+    --palette-primary-base: #6B4EFF;
+    --palette-primary-dark: #5538EE;
+
+    --palette-red-base: #FF5247;
+    --palette-green-base: #23C16B;
+    --palette-green-lightest: #ECFCE5;
+    --palette-green-darkest: #198155;
+
+    --palette-blue-lightest: #C9F0FF;
+    --palette-blue-darkest: #0065D0;
+
+    --palette-yellow-base: #FFB323;
+    --palette-yellow-light: #FFC462;
+    --palette-yellow-lightest: #FFEFD7;
+
+    --font-inter: url('project://database/Assets/Source/Shared/Fonts/Inter-Regular SDF.asset');
+}

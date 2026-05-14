@@ -1,0 +1,21 @@
+.progress-dots-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--progress-dot-bg);
+    margin-right: 8px;
+}
+
+.progress-dot--active {
+    background-color: var(--progress-dot-fill-bg);
+}
+
+.progress-dot:last-child {
+    margin-right: 0;
+}

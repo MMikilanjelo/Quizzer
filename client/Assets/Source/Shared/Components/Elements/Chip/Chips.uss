@@ -1,0 +1,54 @@
+Chip {
+    padding: 0 16px;
+    height: 48px;
+    min-height: 48px;
+
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+
+    position: relative;
+    overflow: hidden;
+
+    border-radius: var(--radius-xl);
+
+    color: var(--chip-text);
+    background-color: var(--chip-bg);
+
+    border-color: var(--chip-border);
+    border-width: var(--chip-border-width);
+
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+}
+
+Chip:active {
+    scale: 0.96 0.96;
+}
+
+Chip .chip__text {
+    color: var(--chip-text);
+    -unity-text-align: middle-center;
+}
+
+Chip.chip--default {
+    --chip-bg: var(--chip-default-bg);
+    --chip-text: var(--chip-default-text);
+    --chip-border: transparent;
+    --chip-border-width: 0;
+}
+
+Chip.chip--outline {
+    --chip-bg: transparent;
+    --chip-text: var(--chip-outline-text);
+    --chip-border: var(--chip-outline-border);
+    --chip-border-width: 1px;
+}
+
+Chip.chip--filled {
+    --chip-bg: var(--chip-selected-bg);
+    --chip-text: var(--chip-selected-text);
+    --chip-border: transparent;
+    --chip-border-width: 1px;
+}

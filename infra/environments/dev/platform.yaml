@@ -1,0 +1,75 @@
+sealed-secrets:
+  enabled: true
+  fullnameOverride: sealed-secrets-controller
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+
+postgres:
+  enabled: true
+  clusterName: "dev-postgres"
+  instances: 1
+  storage:
+    className: "local-path"
+    size: "5Gi"
+  superuserAccess:
+    enabled: true
+  additionalRoles:
+    - name: "identity_service_user"
+      passwordSecretName: "identity-service-postgres-auth"
+      passwordSecretKey: "password"
+
+    - name: "activity_service_user"
+      passwordSecretName: "activity-service-postgres-auth"
+      passwordSecretKey: "password"
+
+  databases:
+    - name: "dev_identity_db"
+      owner: "identity_service_user"
+      reclaimPolicy: "retain"
+
+    - name: "dev_activity_db"
+      owner: "activity_service_user"
+      reclaimPolicy: "retain"
+
+kafka:
+  enabled: true
+  clusterName: "dev-kafka"
+  version: "4.2.0"
+  metadataVersion: "4.2-IV1"
+  replicas: 1
+  minInsyncReplicas: 1
+  storage:
+    className: "local-path"
+    size: "10Gi"
+  retention:
+    hours: 168
+  partitions: 3
+  topics:
+    - "identity.user.registered"
+    - "activity.learning-activity.requested"
+    - "activity.learning-activity.generated"
+
+mongodb:
+  enabled: true
+  clusterName: "dev-mongodb"
+  crVersion: "1.22.0"
+  secrets:
+    users: "dev-mongodb-secrets"
+
+  replsets:
+    - name: "rs0"
+      size: 1
+      storage:
+        className: "local-path"
+        size: "5Gi"
+
+  users:
+    - name: "identity_service_mongo_user"
+      db: "dev_identity_mongo_db"
+      passwordSecretName: "identity-service-mongo-auth"
+      passwordSecretKey: "password"
+      roles:
+        - name: "readWrite"
+          db: "dev_identity_mongo_db"

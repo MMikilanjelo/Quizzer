@@ -1,0 +1,14 @@
+.reactive-list{
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0; 
+}
+
+.reactive-list__scroll-view {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.reactive-list .unity-scroll-view__content-container > * {
+    flex-shrink: 0;
+}

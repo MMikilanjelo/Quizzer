@@ -1,0 +1,104 @@
+﻿global:
+  kafka:
+    clusterName: "dev-kafka"
+
+api-gateway:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "api-gateway"
+  imagePullSecrets:
+    - name: "registry-credentials"
+  image:
+    repository: "ghcr.io/mmikilanjelo/quizzer-gateway"
+    tag: "dev"
+    pullPolicy: Always
+  config:
+    NODE_ENV: "development"
+    JWT__AUDIENCE: "QuizzerApp"
+    JWT__ISSUER: "https://dev-api.quizzer.it.com"
+  appSecret:
+    existingSecretName: "api-gateway-app-secret"
+  ingress:
+    enabled: true
+    className: "traefik"
+    host: "dev-api.quizzer.it.com"
+    path: "/api"
+    tls: true
+    tlsSecretName: "cloudflare-origin-cert"
+    pathType: Prefix
+    annotations: { }
+
+identity-service:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "identity-service"
+  imagePullSecrets:
+    - name: "registry-credentials"
+
+  image:
+    repository: "ghcr.io/mmikilanjelo/quizzer-identity-service"
+    tag: "dev"
+    pullPolicy: Always
+
+  config:
+    ASPNETCORE_ENVIRONMENT: "Development"
+    KAFKA__SECURITYPROTOCOL: "SASL_PLAINTEXT"
+    KAFKA__SASLMECHANISM: "SCRAM-SHA-512"
+    JWT__AUDIENCE: "QuizzerApp"
+    JWT__ISSUER: "https://dev-api.quizzer.it.com"
+    JWT__ExpirationInMinutes: 60
+
+  appSecret:
+    existingSecretName: "identity-service-app-secret"
+
+  postgres:
+    host: "dev-postgres-rw"
+    port: "5432"
+    name: "dev_identity_db"
+    user: "identity_service_user"
+    passwordSecretName: "identity-service-postgres-auth"
+    passwordSecretKey: "password"
+
+  kafka:
+    bootstrapServers: "dev-kafka-kafka-bootstrap.quizzer-dev.svc.cluster.local:9092"
+    userName: "identity-service-user"
+    passwordSecretName: "identity-service-user"
+    passwordSecretKey: "password"
+    createUser: true
+
+
+activity-service:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "activity-service"
+  imagePullSecrets:
+    - name: "registry-credentials"
+
+  image:
+    repository: "ghcr.io/mmikilanjelo/quizzer-activity-service"
+    tag: "dev"
+    pullPolicy: Always
+
+  config:
+    ASPNETCORE_ENVIRONMENT: "Development"
+    KAFKA__SECURITYPROTOCOL: "SASL_PLAINTEXT"
+    KAFKA__SASLMECHANISM: "SCRAM-SHA-512"
+    Qdrant__PORT: 6334
+    Qdrant__HTTPS: "true"
+  appSecret:
+    existingSecretName: "activity-service-app-secret"
+
+  postgres:
+    host: "dev-postgres-rw"
+    port: "5432"
+    name: "dev_activity_db"
+    user: "activity_service_user"
+    passwordSecretName: "activity-service-postgres-auth"
+    passwordSecretKey: "password"
+
+  kafka:
+    bootstrapServers: "dev-kafka-kafka-bootstrap.quizzer-dev.svc.cluster.local:9092"
+    userName: "activity-service-user"
+    passwordSecretName: "activity-service-user"
+    passwordSecretKey: "password"
+    createUser: true

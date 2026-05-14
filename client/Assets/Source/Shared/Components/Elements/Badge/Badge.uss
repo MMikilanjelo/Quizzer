@@ -1,0 +1,58 @@
+﻿.badge {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-m);
+    border-width: 1px;
+    align-self: flex-start;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.badge--small {
+    padding: var(--spacing-xxs) var(--spacing-xs);
+}
+
+
+.badge--medium {
+    padding: var(--spacing-xs) var(--spacing-s);
+}
+
+.badge--large {
+    padding: var(--spacing-sm) var(--spacing-m);
+}
+
+.badge--success {
+    background-color: var(--palette-green-lightest);
+    border-color: var(--palette-transparent);
+}
+
+.badge--success .badge__text {
+    color: var(--palette-green-darkest);
+}
+
+.badge--info {
+    background-color: var(--palette-blue-lightest);
+    border-color: var(--palette-transparent);
+}
+
+.badge--info .badge__text {
+    color: var(--palette-blue-darkest);
+}
+
+.badge--neutral {
+    background-color: var(--palette-sky-lightest);
+    border-color: var(--palette-sky-light);
+}
+
+.badge--neutral .badge__text {
+    color: var(--text-color-subtle);
+}
+
+.badge--pill {
+    border-radius: var(--radius-pill);
+}
+
+.badge--rounded {
+    border-radius: var(--radius-s);
+}

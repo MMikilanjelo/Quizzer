@@ -1,0 +1,113 @@
+﻿.mode-tile {
+    padding: 16px;
+    border-radius: 20px;
+    align-items: center;
+    justify-content: center;
+    border-width: 2px;
+    flex-grow: 1;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.mode-tile--unselected {
+    border-color: var(--palette-sky-light);
+    background-color: var(--palette-sky-white);
+}
+
+.mode-tile--selected {
+    border-color: var(--palette-primary-base);
+    background-color: var(--palette-primary-lightest);
+}
+
+.mode-tile__icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+    transition: -unity-background-image-tint-color 0.2s;
+}
+
+.mode-tile__title {
+    margin-bottom: 2px;
+    color: var(--text-color-main);
+}
+
+.mode-tile__subtitle {
+    color: var(--text-color-subtle);
+}
+
+.mode-tile--unselected .mode-tile__icon {
+    -unity-background-image-tint-color: var(--palette-ink-lighter);
+}
+
+.mode-tile--selected .mode-tile__icon {
+    -unity-background-image-tint-color: var(--palette-primary-base);
+}
+
+.smart-info-card {
+    flex-direction: row;
+    background-color: var(--palette-primary-lightest);
+    border-color: var(--palette-primary-light);
+    border-width: 1px;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 24px;
+    align-items: flex-start;
+}
+
+.smart-info-card__icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    -unity-background-image-tint-color: var(--palette-primary-base);
+}
+
+.smart-info-card__content {
+    flex-grow: 1;
+}
+
+.smart-info-card__title {
+    color: var(--text-color-main);
+    margin-bottom: 4px;
+}
+
+.smart-info-card__bullet-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.smart-info-card__bullet-dot {
+    width: 4px;
+    height: 4px;
+    background-color: var(--text-color-subtle);
+    border-radius: 2px;
+    margin-right: 8px;
+    margin-left: 2px;
+}
+
+.smart-info-card__bullet-text {
+    color: var(--text-color-subtle);
+}
+
+.number-stepper__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.number-stepper__number-label {
+    color: var(--text-color-main);
+}
+
+.number-stepper__suffix-label {
+    color: var(--text-color-subtle);
+}
+
+.number-stepper__value-container {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: var(--spacing-l);
+    margin-right: var(--spacing-l);
+}
+

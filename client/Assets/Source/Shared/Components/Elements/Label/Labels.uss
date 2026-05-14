@@ -1,0 +1,42 @@
+.custom-label {
+    margin: 0;
+    padding: 0;
+    -unity-font-definition: var(--font-inter);
+    -unity-text-align: middle-left;
+    color: var(--text-color-main);
+}
+
+.custom-label--variant-title1 {
+    font-size: 48px;
+    min-height: 56px;
+}
+
+.custom-label--variant-title2 {
+    font-size: 32px;
+    min-height: 36px;
+}
+
+.custom-label--variant-title3 {
+    font-size: 24px;
+    min-height: 32px;
+}
+
+.custom-label--variant-large {
+    font-size: 18px;
+    min-height: 24px;
+}
+
+.custom-label--variant-regular {
+    font-size: 16px;
+    min-height: 24px;
+}
+
+.custom-label--variant-small {
+    font-size: 14px;
+    min-height: 20px;
+}
+
+.custom-label--variant-tiny {
+    font-size: 12px;
+    min-height: 16px;
+}

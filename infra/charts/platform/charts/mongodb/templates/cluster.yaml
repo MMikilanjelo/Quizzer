@@ -1,0 +1,51 @@
+﻿{{- if .Values.enabled }}
+apiVersion: psmdb.percona.com/v1
+kind: PerconaServerMongoDB
+metadata:
+  name: {{ include "mongodb.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "mongodb.labels" . | nindent 4 }}
+spec:
+  crVersion: {{ .Values.crVersion | quote }}
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  allowUnsafeConfigurations: true
+  unsafeFlags:
+    replsetSize: true
+  updateStrategy: SmartUpdate
+
+  secrets:
+    users: {{ include "mongodb.usersSecretName" . | quote }}
+
+  replsets:
+    {{- range .Values.replsets }}
+    - name: {{ .name | quote }}
+      size: {{ .size }}
+      volumeSpec:
+        persistentVolumeClaim:
+          storageClassName: {{ .storage.className | quote }}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ .storage.size | quote }}
+    {{- end }}
+
+  sharding:
+    enabled: false
+
+  users:
+    {{- range .Values.users }}
+    - name: {{ .name | quote }}
+      db: {{ .db | quote }}
+      passwordSecretRef:
+        name: {{ .passwordSecretName | quote }}
+        key: {{ .passwordSecretKey | default "password" | quote }}
+      roles:
+        {{- range .roles }}
+        - name: {{ .name | quote }}
+          db: {{ .db | quote }}
+        {{- end }}
+    {{- end }}
+{{- end }}

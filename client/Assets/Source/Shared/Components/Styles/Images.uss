@@ -1,0 +1,6 @@
+﻿.img-fullscreen {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}

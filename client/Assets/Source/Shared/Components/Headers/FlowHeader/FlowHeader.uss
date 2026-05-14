@@ -1,0 +1,27 @@
+﻿.flow-header {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 18px;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+}
+
+.flow-header__side-slot {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 100%;
+    justify-content: center;
+}
+
+CustomButton.flow-header__back-button {
+    margin: 0;
+    --btn-current-icon-tint: var(--palette-ink-darkest);
+}
+
+.flow-header__center-slot {
+    flex-grow: 0;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}

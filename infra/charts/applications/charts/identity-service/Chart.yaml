@@ -1,0 +1,5 @@
+﻿apiVersion: v2
+name: identity-service
+description: Identity service with DB migration and Kafka user
+type: application
+version: 1.0.0

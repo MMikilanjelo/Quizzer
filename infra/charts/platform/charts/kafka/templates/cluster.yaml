@@ -1,0 +1,88 @@
+﻿{{- if .Values.enabled }}
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: {{ include "kafka.fullname" . }}-pool
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "kafka.labels" . | nindent 4 }}
+    strimzi.io/cluster: {{ include "kafka.fullname" . }}
+spec:
+  replicas: {{ .Values.replicas }}
+  roles:
+    - controller
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: {{ .Values.storage.size | quote }}
+        class: {{ .Values.storage.className | quote }}
+        deleteClaim: false
+        kraftMetadata: shared
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  jvmOptions:
+    -Xms: "512m"
+    -Xmx: "1g"
+---
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "kafka.labels" . | nindent 4 }}
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
+spec:
+  kafka:
+    version: {{ .Values.version | quote }}
+    metadataVersion: {{ .Values.metadataVersion | quote }}
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+        authentication:
+          type: scram-sha-512
+    config:
+      offsets.topic.replication.factor: {{ .Values.replicas }}
+      transaction.state.log.replication.factor: {{ .Values.replicas }}
+      transaction.state.log.min.isr: {{ .Values.minInsyncReplicas }}
+      default.replication.factor: {{ .Values.replicas }}
+      min.insync.replicas: {{ .Values.minInsyncReplicas }}
+      auto.create.topics.enable: "false"
+      log.retention.hours: {{ .Values.retention.hours }}
+      log.retention.bytes: "5368709120"
+      log.segment.bytes: "536870912"
+      num.partitions: {{ .Values.partitions }}
+      group.initial.rebalance.delay.ms: "0"
+  entityOperator:
+    topicOperator:
+      watchedNamespace: {{ .Release.Namespace }}
+    userOperator:
+      watchedNamespace: {{ .Release.Namespace }}
+
+---
+{{- range .Values.topics }}
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: {{ . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    strimzi.io/cluster: {{ include "kafka.fullname" $ }}
+spec:
+  partitions: {{ $.Values.partitions }}
+  replicas: {{ $.Values.replicas }}
+---
+{{- end }}
+{{- end }}

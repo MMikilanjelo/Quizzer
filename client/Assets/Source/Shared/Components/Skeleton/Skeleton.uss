@@ -1,0 +1,69 @@
+.skeleton {
+    background-color: var(--sk-bg-base);
+    border-radius: var(--radius-xs);
+    margin-bottom: var(--spacing-xxs);
+    width: 100%;
+    transition-property: background-color;
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out;
+}
+
+.skeleton--dimmed {
+    background-color: var(--sk-bg-dimmed);
+}
+
+.skeleton--block {
+    flex-grow: 1;
+    min-height: 20px;
+    border-radius: var(--radius-s);
+}
+
+.skeleton--avatar {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+    border-radius: var(--radius-pill);
+}
+
+.skeleton--title1 {
+    height: var(--sk-height-title1);
+    min-height: var(--sk-height-title1);
+    border-radius: var(--radius-s);
+}
+
+.skeleton--title2 {
+    height: var(--sk-height-title2);
+    min-height: var(--sk-height-title2);
+    border-radius: var(--radius-s);
+}
+
+.skeleton--title3 {
+    height: var(--sk-height-title3);
+    min-height: var(--sk-height-title3);
+    border-radius: var(--radius-s);
+}
+
+.skeleton--large {
+    height: var(--sk-height-large);
+    min-height: var(--sk-height-large);
+    border-radius: var(--radius-xs);
+}
+
+.skeleton--regular {
+    height: var(--sk-height-regular);
+    min-height: var(--sk-height-regular);
+    border-radius: var(--radius-xs);
+}
+
+.skeleton--small {
+    height: var(--sk-height-small);
+    min-height: var(--sk-height-small);
+    border-radius: var(--radius-xs);
+}
+
+.skeleton--tiny {
+    height: var(--sk-height-tiny);
+    min-height: var(--sk-height-tiny);
+    border-radius: var(--radius-xs);
+}

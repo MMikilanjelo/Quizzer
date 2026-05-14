@@ -1,0 +1,26 @@
+﻿apiVersion: v2
+name: platform
+description: Shared platform dependencies for Quizzer
+type: application
+version: 1.0.0
+
+dependencies:
+  - name: sealed-secrets
+    version: 2.18.5
+    repository: "https://bitnami-labs.github.io/sealed-secrets"
+    condition: sealed-secrets.enabled
+
+  - name: postgres
+    version: 1.0.0
+    repository: "file://./charts/postgres"
+    condition: postgres.enabled
+
+  - name: kafka
+    version: 1.0.0
+    repository: "file://./charts/kafka"
+    condition: kafka.enabled
+
+  - name: mongodb
+    version: 1.0.0
+    repository: "file://./charts/mongodb"
+    condition: mongodb.enabled

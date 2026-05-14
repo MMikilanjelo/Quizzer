@@ -1,0 +1,86 @@
+Label, TextField, CustomLabel {
+    -unity-font-definition: var(--font-inter);
+    color: var(--theme-text-main);
+}
+
+.text-default {
+    color: var(--theme-text-main);
+}
+
+.text-title1 {
+    font-size: 48px;
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+}
+
+.text-title2 {
+    font-size: 32px;
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+}
+
+.text-title3 {
+    font-size: 24px;
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+}
+
+.text-large-none {
+    font-size: 18px;
+    -unity-text-align: middle-left;
+}
+
+.text-large-tight {
+    font-size: 18px;
+    -unity-text-align: middle-left;
+}
+
+.text-large-normal {
+    font-size: 18px;
+    -unity-text-align: middle-left;
+}
+
+.text-regular-none {
+    font-size: 16px;
+    -unity-text-align: middle-left;
+}
+
+.text-regular-tight {
+    font-size: 16px;
+    -unity-text-align: middle-left;
+}
+
+.text-regular-normal {
+    font-size: 16px;
+    -unity-text-align: middle-left;
+}
+
+.text-small-none {
+    font-size: 14px;
+    -unity-text-align: middle-left;
+}
+
+.text-small-tight {
+    font-size: 14px;
+    -unity-text-align: middle-left;
+}
+
+.text-small-normal {
+    font-size: 14px;
+    -unity-text-align: middle-left;
+}
+
+.text-tiny-none {
+    font-size: 12px;
+    -unity-text-align: middle-left;
+}
+
+.text-tiny-tight {
+    font-size: 12px;
+    -unity-text-align: middle-left;
+}
+
+.text-tiny-normal {
+    font-size: 12px;
+    -unity-text-align: middle-left;
+}
