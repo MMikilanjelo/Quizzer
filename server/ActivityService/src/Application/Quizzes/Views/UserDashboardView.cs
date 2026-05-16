@@ -2,7 +2,7 @@
 
 public sealed record UserDashboardView
 {
-    public required string UserId { get; set; }
+    public required string Id { get; set; }
     public float AverageScore { get; set; }
     public int TotalQuizzes { get; set; }
     public int PerfectQuizzes { get; set; }

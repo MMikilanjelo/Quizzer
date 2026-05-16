@@ -16,7 +16,7 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
     public UserDashboardView Create(QuizCompleted @event) =>
         new()
         {
-            UserId = @event.UserId,
+            Id = @event.UserId,
             TotalQuizzes = 1,
             PerfectQuizzes = @event.IsPerfect ? 1 : 0,
             AverageScore = @event.ScorePercentage,
