@@ -30,13 +30,14 @@ public static class ManualScheduleQuiz
 
             var nextSequence = userQuizCount + 1;
 
-            var quizScheduled = new QuizScheduled(
-                Guid.NewGuid().ToString(),
-                command.UserId,
-                command.TopicId,
-                nextSequence,
-                dateTimeProvider.UtcNow
-            );
+            var quizScheduled = new QuizScheduled
+            {
+                QuizId = Guid.NewGuid().ToString(),
+                UserId = command.UserId,
+                Topic = command.TopicId,
+                SequenceNumber = nextSequence,
+                CreatedAt = dateTimeProvider.UtcNow,
+            };
 
             documentSession.Events.StartStream<Quiz>(quizScheduled.QuizId, quizScheduled);
 

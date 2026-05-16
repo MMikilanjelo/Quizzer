@@ -24,29 +24,28 @@ public sealed record Quiz
     public required IReadOnlyList<string> AnsweredQuestionIds { get; init; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? CompletedAt { get; init; }
+    public bool IsPerfect => AnsweredQuestionIds.Count == Questions.Count;
+    public float ScorePercentage => (float)AnsweredQuestionIds.Count / Questions.Count;
 
-    public ErrorOr<QuizContentGenerated> Fill(ImmutableList<QuizQuestion> questions, DateTime generatedAt)
+    public ErrorOr<QuizContentGenerated> Fill(FillQuizCommand command)
     {
         if (Status != QuizStatus.Pending)
-        {
             return QuizErrors.NotPending;
-        }
 
-        if (questions.Count == 0)
-        {
+        if (command.Questions.Count == 0)
             return QuizErrors.EmptyQuestions;
-        }
 
-        return new QuizContentGenerated(Id, questions.ToList(), generatedAt);
+        return new QuizContentGenerated
+        {
+            QuizId = Id,
+            Questions = command.Questions.ToList(),
+            GeneratedAt = command.GeneratedAt
+        };
     }
 
-    public ErrorOr<IReadOnlyList<IEvent>> AnswerQuestion(
-        string questionId,
-        int selectedIndex,
-        string attemptingUserId,
-        DateTime answeredAt)
+    public ErrorOr<IReadOnlyList<IEvent>> AnswerQuestion(AnswerQuestionCommand command)
     {
-        if (UserId != attemptingUserId)
+        if (UserId != command.AttemptingUserId)
         {
             return QuizErrors.Forbidden;
         }
@@ -56,38 +55,46 @@ public sealed record Quiz
             return QuizErrors.NotActive;
         }
 
-        if (AnsweredQuestionIds.Contains(questionId))
+        if (AnsweredQuestionIds.Contains(command.QuestionId))
         {
             return QuizErrors.AlreadyAnswered;
         }
 
-        var question = Questions.FirstOrDefault(q => q.Id == questionId);
+        var question = Questions.FirstOrDefault(q => q.Id == command.QuestionId);
 
         if (question is null)
         {
             return QuizErrors.QuestionNotFound;
         }
 
-        var isCorrect = question.CorrectIndex == selectedIndex;
+        var isCorrect = question.CorrectIndex == command.SelectedIndex;
 
         var events = new List<IEvent>
         {
-            new QuizQuestionAnswered(
-                Id,
-                UserId,
-                question.ConceptId,
-                questionId,
-                selectedIndex,
-                isCorrect,
-                answeredAt)
+            new QuizQuestionAnswered
+            {
+                QuizId = Id,
+                UserId = UserId,
+                ConceptId = question.ConceptId,
+                QuestionId = command.QuestionId,
+                SelectedIndex = command.SelectedIndex,
+                IsCorrect = isCorrect,
+                AnsweredAt = command.AnsweredAt
+            }
         };
 
         var answeredCount = AnsweredQuestionIds.Count + 1;
 
-        if (Status != QuizStatus.Completed &&
-            answeredCount >= Questions.Count)
+        if (Status != QuizStatus.Completed && answeredCount >= Questions.Count)
         {
-            events.Add(new QuizCompleted(Id, answeredAt));
+            events.Add(new QuizCompleted
+            {
+                QuizId = Id,
+                UserId = UserId,
+                IsPerfect = IsPerfect, 
+                ScorePercentage = ScorePercentage, 
+                CompletedAt = command.AnsweredAt
+            });
         }
 
         return events;

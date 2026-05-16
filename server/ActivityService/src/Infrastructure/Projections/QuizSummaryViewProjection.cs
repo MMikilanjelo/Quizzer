@@ -24,7 +24,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
             Name = $"Quiz #{@event.SequenceNumber}",
             UserId = @event.UserId,
             Topics = [],
-            Status = "Pending",
+            Status = QuizStatus.Pending,
             CreatedAt = @event.CreatedAt,
             QuestionCount = 0,
             AnsweredCount = 0,
@@ -35,7 +35,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
     public QuizSummaryView Apply(QuizContentGenerated @event, QuizSummaryView current) =>
         current with
         {
-            Status = "Ready",
+            Status = QuizStatus.Ready,
             Topics = @event.Questions.Select(q => q.ConceptId).Distinct().ToList(),
             QuestionCount = @event.Questions.Count,
             Questions = @event.Questions.Select(q => new QuestionView
@@ -63,7 +63,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
 
         return current with
         {
-            Status = "InProgress",
+            Status = QuizStatus.InProgress,
             AnsweredCount = current.AnsweredCount + 1,
             Questions = updatedQuestions
         };
@@ -72,7 +72,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
     public QuizSummaryView Apply(QuizCompleted @event, QuizSummaryView current) =>
         current with
         {
-            Status = "Completed"
+            Status = QuizStatus.Completed
         };
 
     public QuizSummaryView Apply(ConceptMasteryUpdated @event, QuizSummaryView current)

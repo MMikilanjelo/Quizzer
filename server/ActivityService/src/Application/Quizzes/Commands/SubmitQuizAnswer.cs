@@ -41,12 +41,15 @@ public static class SubmitQuizAnswer
                 return QuizErrors.QuestionNotFound;
             }
 
-            var answerResult = quiz.AnswerQuestion(
-                command.QuestionId,
-                command.SelectedAnswerIndex,
-                command.UserId,
-                dateTimeProvider.UtcNow
-            );
+            var answerQuestionCommand = new AnswerQuestionCommand
+            {
+                QuestionId = command.QuestionId,
+                SelectedIndex = command.SelectedAnswerIndex,
+                AttemptingUserId = command.UserId,
+                AnsweredAt = dateTimeProvider.UtcNow
+            };
+
+            var answerResult = quiz.AnswerQuestion(answerQuestionCommand);
 
             if (answerResult.IsError)
             {

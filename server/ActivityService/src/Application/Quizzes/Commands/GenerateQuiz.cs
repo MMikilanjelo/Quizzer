@@ -91,8 +91,11 @@ public static class GenerateQuiz
             }
 
             var domainResult = quiz.Fill(
-                geminiResult.Value.Questions.ToImmutableList(),
-                dateTimeProvider.UtcNow
+                new FillQuizCommand
+                {
+                    Questions = geminiResult.Value.Questions.ToImmutableList(),
+                    GeneratedAt = dateTimeProvider.UtcNow
+                }
             );
 
             if (domainResult.IsError)

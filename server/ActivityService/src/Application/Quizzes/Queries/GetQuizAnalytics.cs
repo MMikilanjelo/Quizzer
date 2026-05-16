@@ -21,7 +21,7 @@ public static class GetQuizAnalytics
         public required string UserId { get; init; }
         public required string Name { get; init; }
         public required List<string> Topics { get; init; }
-        public required string Status { get; init; }
+        public required QuizStatus Status { get; init; }
         public DateTime CreatedAt { get; init; }
         public int TotalQuestions { get; init; }
         public int AnsweredCount { get; init; }

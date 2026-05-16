@@ -21,7 +21,7 @@ public static class GetQuiz
         public required string UserId { get; init; }
         public required string Name { get; init; }
         public required List<string> Topics { get; init; }
-        public required string Status { get; init; }
+        public required QuizStatus Status { get; init; }
         public required List<QuestionModel> Questions { get; init; }
         public required List<string> AnsweredQuestionIds { get; init; }
 

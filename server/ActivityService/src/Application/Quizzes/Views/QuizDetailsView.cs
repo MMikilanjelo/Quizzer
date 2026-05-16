@@ -1,1 +1,0 @@
-﻿namespace Application.Quizzes.Views;
