@@ -95,7 +95,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             ContinueQuizCommand = SyncCommand<QuizItemViewModel>.Create(viewModel =>
             {
-                if (viewModel.Status.Value == "Completed")
+                if (viewModel.IsCompleted)
                 {
                     StateMachine.Enter<FinishedQuizState, FinishedQuizStatePayload>(new FinishedQuizStatePayload()
                     {

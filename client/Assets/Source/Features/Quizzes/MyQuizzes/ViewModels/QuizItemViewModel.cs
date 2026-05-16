@@ -10,6 +10,7 @@ namespace Source.Features.Quizzes.MyQuizzes.ViewModels
     public class QuizItemViewModel
     {
         public string Id { get; }
+        public bool IsCompleted => Status.Value == "completed";
         public IReactiveProperty<string> Name { get; }
         public IReactiveProperty<string> Status { get; }
         public IReactiveProperty<int> ProgressCount { get; }

@@ -50,6 +50,7 @@ kafka:
     - "identity.user.registered"
     - "activity.learning-activity.requested"
     - "activity.learning-activity.generated"
+    - "identity.user.onboarding-completed"
 
 mongodb:
   enabled: true

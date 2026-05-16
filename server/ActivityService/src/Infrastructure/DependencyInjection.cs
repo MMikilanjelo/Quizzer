@@ -6,12 +6,14 @@ using Confluent.Kafka;
 using Domain;
 using Domain.Learning;
 using Domain.Quizzes;
+using Domain.Users;
 using Infrastructure.Authentication;
 using Infrastructure.Clients;
 using Infrastructure.Generators;
 using Infrastructure.Messaging;
 using Infrastructure.Options;
 using Infrastructure.Projections;
+using Infrastructure.QueueMessaging;
 using Infrastructure.Subscriptions;
 using Infrastructure.Subscriptions.Kafka;
 using Infrastructure.Subscriptions.Kafka.Mapping;
@@ -70,6 +72,8 @@ public static class DependencyInjection
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsImplementedInterfaces()
             .WithSingletonLifetime());
+
+        services.AddHostedService<UserOnboardingCompletedConsumer>();
 
         return services;
     }
@@ -150,9 +154,7 @@ public static class DependencyInjection
                 options.Projections.Add<QuizSummaryViewProjection>(ProjectionLifecycle.Async);
                 options.Projections.Add<UserDashboardProjection>(ProjectionLifecycle.Async);
 
-                options.Schema
-                    .For<ConceptMastery>()
-                    .Identity(x => x.Id);
+                options.Schema.For<User>().Identity(x => x.Id);
 
                 return options;
             })

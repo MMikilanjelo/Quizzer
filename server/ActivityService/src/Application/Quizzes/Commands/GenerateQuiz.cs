@@ -3,6 +3,7 @@ using Application.Abstractions;
 using Application.Abstractions.Messaging;
 using Application.Abstractions.Providers;
 using Domain.Quizzes;
+using Domain.Users;
 using ErrorOr;
 using Marten;
 using Microsoft.Extensions.Logging;
@@ -39,51 +40,68 @@ public static class GenerateQuiz
                 return QuizErrors.NotPending;
             }
 
-            var targetNodes = await graphClient.GetDiscoveryNodesAsync(
-                quiz.Topic, quiz.UserId, limit: 5, cancellationToken);
+            var user = await documentSession.LoadAsync<User>(quiz.UserId, cancellationToken);
 
-            var masteryContext = string.Join("\n", targetNodes.Select(n =>
-                $"- {n.Name} (ID: {n.Id}): Mastery Level {n.Mastery:P0}"));
+            if (user is null)
+            {
+                return UserErrors.NotFound;
+            }
 
+            var targetNodes = await graphClient.GetDiscoveryNodesAsync(quiz.Topic, quiz.UserId, limit: 5, cancellationToken);
+            var masteryContext = string.Join("\n", targetNodes.Select(n => $"- {n.Name} (ID: {n.Id}): Mastery Level {n.Mastery:P0}"));
             var nodeIds = targetNodes.Select(n => n.Id).ToList();
 
-            string graphContext = await graphClient.GetGraphContextAsync(nodeIds, cancellationToken);
+            var graphContext = await graphClient.GetGraphContextAsync(nodeIds, cancellationToken);
+
+            var goalsContext = string.Join(", ", user.Goals);
+            var interestsContext = string.Join(", ", user.Interests);
 
             string prompt = $@"
             You are an elite educational architect and subject matter expert designing an adaptive, highly engaging quiz about '{quiz.Topic}'. 
 
             Your goal is to test the student's true understanding of the concepts and how they relate to one another in the real world.
 
-            ### 1. STUDENT MASTERY STATE
-            The student's current proficiency in these specific concepts is:
+            ### 1. STUDENT GLOBAL PROFILE
+            - Baseline Proficiency: {user.Proficiency}
+            - Core Learning Goals: {goalsContext}
+            - Topic Interests: {interestsContext}
+
+            ### 2. CONCEPT-SPECIFIC MASTERY STATE
+            The student's current proficiency in these targeted sub-concepts is:
             {masteryContext}
 
-            ### 2. CURRICULUM TOPOLOGY (How concepts relate)
+            ### 3. CURRICULUM TOPOLOGY (How concepts relate)
             {graphContext}
 
-            ### 3. GENERATION RULES & ADAPTIVE DIFFICULTY
+            ### 4. GENERATION RULES & ADAPTIVE DIFFICULTY
             Generate exactly 10 questions using the following difficulty distribution based on the student's Mastery State:
             - For Concepts with Mastery < 30% (Novice): Write fundamental, definitional, or 'What is' questions. Use simple, clear language.
             - For Concepts with Mastery 30% - 60% (Intermediate): Write 'How' and 'Why' questions. Test their understanding of mechanisms or common use cases.
             - For Concepts with Mastery > 60% (Advanced): Write complex, scenario-based, or troubleshooting questions. Force the student to apply the concept to a realistic problem.
 
-            ### 4. TESTING RELATIONSHIPS (The 'Secret Sauce')
+            ### 5. PERSONALIZATION & CONTEXT MATCHING
+            Tailor the framing, flavor scenarios, and technical vocabulary of the questions using the Student Global Profile. 
+            - If their goal is 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
+            - If their interest includes 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
+            - Keep the baseline linguistic tone aligned with their overall '{user.Proficiency}' level, while still adhering to the concept-specific mastery thresholds defined above.
+
+            ### 6. TESTING RELATIONSHIPS (The 'Secret Sauce')
             Use the Curriculum Topology to write questions that test the boundaries between concepts. 
             - If A is a 'Hierarchy/Prerequisite' to B: Ask a question about why A must be understood before implementing B, or how A forms the foundation of B.
             - If A 'Contributes to' or 'Impacts' B: Ask a scenario question about technical tradeoffs. (e.g., 'If we optimize A, what is the expected impact on B?')
             - If A is 'Equivalent' to B: Test the student's ability to recognize both terms interchangeably in a practical context.
 
-            ### 5. STRICT NEGATIVE CONSTRAINTS (CRITICAL)
+            ### 7. STRICT NEGATIVE CONSTRAINTS (CRITICAL)
             - NEVER use phrases like 'According to the context', 'Based on the graph', or 'As shown in the topology'. The questions must read naturally.
-            - DO NOT reveal that you are adapting the difficulty. Never write 'Since your mastery is low...'.
+            - DO NOT reveal that you are adapting the difficulty or reading their profile. Never write 'Since your goal is CareerBoost...'.
             - DO NOT break character. Act strictly as the exam interface.
 
-            ### 6. OUTPUT FORMAT
+            ### 8. OUTPUT FORMAT
             For each generated question, you MUST return the exact `ConceptId` (Node ID) from the Mastery State that the question is primarily testing.";
 
             logger.LogInformation(prompt);
 
-            ErrorOr<GenerateContentResponse> geminiResult = await geminiClient.GenerateAsync<GenerateContentResponse>(prompt, cancellationToken);
+            var geminiResult = await geminiClient.GenerateAsync<GenerateContentResponse>(prompt, cancellationToken);
 
             if (geminiResult.IsError)
             {
