@@ -38,6 +38,11 @@
     background-color: var(--theme-bg-main);
 }
 
+.screen__title {
+    margin-bottom: 24px;
+    margin-left: 24px;
+}
+
 .screen__container {
     max-width: 420px;
     padding-left: var(--safe-area-left);

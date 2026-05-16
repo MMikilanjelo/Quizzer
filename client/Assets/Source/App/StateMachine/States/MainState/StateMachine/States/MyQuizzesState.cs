@@ -34,11 +34,14 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         IExitState,
         IMyQuizzesScreenViewModel
     {
+        public IReadOnlyReactiveProperty<bool> IsLoading => _isLoading;
+        public ICommand FetchQuizzesCommand { get; private set; }
         public ICommand<QuizItemViewModel> ContinueQuizCommand { get; private set; }
         public ICommand<QuizzesStateFilterItemViewModel> SelectStateFilter => _stateFilters.SelectCommand;
         public IReadOnlyReactiveList<QuizzesStateFilterItemViewModel> States => _stateFilters.Items;
         public IReadOnlyReactiveList<QuizItemViewModel> Quizzes => _quizzes;
         public NoQuizzesViewModel EmptyState { get; private set; }
+        private ICommand _createQuizCommand;
 
         private readonly IQuizzesMediator _quizzesMediator;
         private readonly IUIStackMediator _uiStackMediator;
@@ -49,6 +52,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly IUseCase<FetchQuizzes.Request, FetchQuizzes.Response> _fetchQuizzes;
         private readonly SelectableList<QuizzesStateFilterItemViewModel> _stateFilters = SelectableList<QuizzesStateFilterItemViewModel>.Exclusive();
         private readonly ReactiveList<QuizItemViewModel> _quizzes = new();
+        private readonly ReactiveProperty<bool> _isLoading = new(false);
 
         private CancellationTokenSource _cancellationTokenSource;
         private CompositeDisposable _bindings;
@@ -75,34 +79,19 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _bindings = new CompositeDisposable();
+            EmptyState = new NoQuizzesViewModel(Icons.SealQuestion, string.Empty, string.Empty);
 
-            _tabBarMediator.Show();
-            EmptyState = new NoQuizzesViewModel(
-                Icons.SealQuestion,
-                string.Empty,
-                string.Empty
-            );
-
-            _stateFilters.Set(Enum.GetValues(typeof(QuizFilter))
-                .Cast<QuizFilter>()
-                .ToList()
-                .Select(v => new QuizzesStateFilterItemViewModel(new QuizFilterModel(v), v == QuizFilter.All))
-            );
-
-            _fabMediator.Set(new List<FabActionViewModel>
-            {
-                new("Create Quiz", Icons.SealQuestion, SyncCommand.Create(() => StateMachine.Enter<CreateQuizState, CreateQuizStatePayload>(new CreateQuizStatePayload
-                    {
-                        GoBackAction = () => StateMachine.Enter<MyQuizzesState>()
-                    }
-                )))
-            });
-
-            _stateFilters.ItemSelectionChanged
-                .Subscribe(OnStateFilterSelectionChanged)
+            _createQuizCommand = SyncCommand.Create(() => { });
+            _createQuizCommand.Executed
+                .Subscribe(_ =>
+                {
+                    StateMachine.Enter<CreateQuizState, CreateQuizStatePayload>(new CreateQuizStatePayload
+                        {
+                            GoBackAction = () => StateMachine.Enter<MyQuizzesState>()
+                        }
+                    );
+                })
                 .AddTo(_bindings);
-
-            _quizzesMediator.CreateMyQuizzesScreen(this);
 
             ContinueQuizCommand = SyncCommand<QuizItemViewModel>.Create(viewModel =>
             {
@@ -123,16 +112,38 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     });
                 }
             });
+            FetchQuizzesCommand = AsyncCommand.Create(() =>
+            {
+                var filter = _stateFilters.Items.First(i => i.IsSelected.Value).Model.Filter;
 
-            var initialFilter = _stateFilters.Items.First(i => i.IsSelected.Value).Model.Filter;
+                return FetchQuizzes(filter);
+            });
 
-            UpdateEmptyStateContent(initialFilter);
+            _tabBarMediator.Show();
+            _fabMediator.Set(new List<FabActionViewModel>
+            {
+                new("Create Quiz", Icons.SealQuestion, _createQuizCommand)
+            });
 
-            FetchQuizzes(initialFilter).Forget();
+            _stateFilters.ItemSelectionChanged
+                .Subscribe(OnStateFilterSelectionChanged)
+                .AddTo(_bindings);
+
+            _stateFilters.Set(Enum.GetValues(typeof(QuizFilter))
+                .Cast<QuizFilter>()
+                .ToList()
+                .Select(v => new QuizzesStateFilterItemViewModel(new QuizFilterModel(v), v == QuizFilter.All))
+            );
+
+            UpdateEmptyStateContent(_stateFilters.Items.First(i => i.IsSelected.Value).Model.Filter);
+
+            _quizzesMediator.CreateMyQuizzesScreen(this);
         }
 
         private UniTask FetchQuizzes(QuizFilter filter)
         {
+            _isLoading.Value = true;
+
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -152,7 +163,8 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     _quizzes.Clear();
                     _quizzes.AddRange(response.Quizzes.Items.Select(q => new QuizItemViewModel(q, ContinueQuizCommand)));
                 })
-                .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error));
+                .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error))
+                .Finally(() => _isLoading.Value = false);
         }
 
         private void OnStateFilterSelectionChanged(QuizzesStateFilterItemViewModel viewModel)
@@ -172,54 +184,42 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             switch (filter)
             {
                 case QuizFilter.Pending:
-                    EmptyState.Update(
-                        Icons.Coffee,
-                        "All caught up!",
-                        "You don't have any pending quizzes right now. Take a breather or start a new topic.");
+                    EmptyState.Update(Icons.Coffee, "All caught up!", "You don't have any pending quizzes right now. Take a breather or start a new topic.");
                     break;
-
                 case QuizFilter.Active:
-                    EmptyState.Update(
-                        Icons.Lightbulb,
-                        "No active sessions",
-                        "You aren't currently taking any quizzes.");
+                    EmptyState.Update(Icons.Lightbulb, "No active sessions", "You aren't currently taking any quizzes.");
                     break;
-
                 case QuizFilter.Completed:
-                    EmptyState.Update(
-                        Icons.Trophy,
-                        "Ready to earn your first badge?",
-                        "Quizzes you finish will show up here along with your performance analytics.");
+                    EmptyState.Update(Icons.Trophy, "Ready to earn your first badge?", "Quizzes you finish will show up here along with your performance analytics.");
                     break;
-
                 case QuizFilter.All:
                 default:
-                    EmptyState.Update(
-                        Icons.MagicWand,
-                        "No quizzes found",
-                        "You haven't generated any quizzes yet. Tap the Create button to get started!");
+                    EmptyState.Update(Icons.MagicWand, "No quizzes found", "You haven't generated any quizzes yet. Tap the Create button to get started!");
                     break;
             }
         }
 
         public void Exit()
         {
-            ContinueQuizCommand.Dispose();
-            EmptyState.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
 
-            _uiStackMediator.PopAllScreens();
-
-            _fabMediator.Clear();
-            _quizzes.Clear();
-
-            _stateFilters.Dispose();
+            _isLoading.Value = false;
 
             _bindings.Dispose();
             _bindings = null;
 
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            ContinueQuizCommand.Dispose();
+            FetchQuizzesCommand.Dispose();
+            _createQuizCommand.Dispose();
+
+            _stateFilters.Dispose();
+            EmptyState?.Dispose();
+
+            _uiStackMediator.PopAllScreens();
+            _fabMediator.Clear();
+            _quizzes.Clear();
         }
     }
 }

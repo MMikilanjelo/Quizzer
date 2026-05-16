@@ -32,6 +32,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         IExitState,
         IFinishedQuizScreenViewModel
     {
+        public IReactiveProperty<bool> IsLoading => _isLoading;
         public IReadOnlyReactiveProperty<string> QuizName => _quizName;
         public ICommand GoBackCommand { get; private set; }
         public IReadOnlyReactiveList<KnowledgeAreaItemViewModel> KnowledgeAreas => _knowledgeAreas;
@@ -39,6 +40,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
         private readonly ReactiveList<KnowledgeAreaItemViewModel> _knowledgeAreas = new();
         private readonly ReactiveProperty<string> _quizName = new(string.Empty);
+        private readonly ReactiveProperty<bool> _isLoading = new(false);
 
         private readonly IQuizzesMediator _quizzesMediator;
         private readonly IUIStackMediator _uiStackMediator;
@@ -79,6 +81,8 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
         private UniTask FetchAnalytics(string id)
         {
+            _isLoading.Value = true;
+
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -89,14 +93,15 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     _cancellationTokenSource.Token
                 )
                 .Tap(response => { BindAnalyticsData(response.Analytics); })
-                .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error));
+                .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error))
+                .Finally(() => _isLoading.Value = false);
         }
 
         private void BindAnalyticsData(FetchQuizAnalytics.QuizAnalyticsModel data)
         {
             _quizName.Value = data.Name;
 
-            float total = data.AnsweredCount > 0 ? data.AnsweredCount : 1f;
+            var total = data.AnsweredCount > 0 ? data.AnsweredCount : 1f;
             Performance.CorrectCount.Value = data.CorrectCount;
             Performance.IncorrectCount.Value = data.IncorrectCount;
             Performance.CorrectNormalized.Value = data.CorrectCount / total;
@@ -111,16 +116,13 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 var delta = end - start;
 
                 var needsReview = delta < 0;
-                var isImprovement = delta > 0;
 
-                string statusText;
-
-                if (isImprovement)
-                    statusText = $"+{delta}% improvement";
-                else if (needsReview)
-                    statusText = "Needs review";
-                else
-                    statusText = "No change";
+                var statusText = delta switch
+                {
+                    < 0 => "Needs review",
+                    > 0 => $"+{delta}% improvement",
+                    _ => "No change"
+                };
 
                 return new KnowledgeAreaItemViewModel
                 {
@@ -139,9 +141,10 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public void Exit()
         {
             _payload = null;
-            
+
             _uiStackMediator.PopAllScreens();
             _uiStackMediator.PopAllDialogs();
+            _isLoading.Dispose();
 
             GoBackCommand.Dispose();
 

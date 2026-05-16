@@ -98,6 +98,11 @@ namespace Source.App.StateMachine.States.MainState
 
         private void OnTechnicalErrorOccured(Error error)
         {
+            if (error == Error.Cancelled)
+            {
+                return;
+            }
+
             _technicalDialogsMediator.CreateErrorDialog(new ErrorDialogViewModel(
                 SyncCommand.Create(_uiStackMediator.PopDialog),
                 ErrorModel.From(error)

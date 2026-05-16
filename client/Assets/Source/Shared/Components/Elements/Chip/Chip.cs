@@ -1,11 +1,12 @@
 ﻿using System;
+using Source.Shared.Components.Elements.CustomVisualElement;
 using Source.Shared.Components.Elements.Label;
 using UnityEngine.UIElements;
 
 namespace Source.Shared.Components.Elements.Chip
 {
     [UxmlElement]
-    public partial class Chip : VisualElement
+    public partial class Chip : ReactiveVisualElement
     {
         public enum ChipVariant
         {

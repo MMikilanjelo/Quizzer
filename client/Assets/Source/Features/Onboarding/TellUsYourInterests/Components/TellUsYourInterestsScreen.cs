@@ -82,7 +82,7 @@ namespace Source.Features.Onboarding.TellUsYourInterests.Components
 
             _interestsList.Bind(
                 makeItem: () => new Chip(),
-                bindItem: (chip, model, disposable) =>
+                bindItem: (chip, model) =>
                 {
                     chip.Text = model.Name;
                     chip.BindProperty(
@@ -91,7 +91,7 @@ namespace Source.Features.Onboarding.TellUsYourInterests.Components
                                 ? Chip.ChipVariant.Filled
                                 : Chip.ChipVariant.Outline
                         )
-                        .AddTo(disposable);
+                        .AddTo(chip.Disposables);
                 }
             );
 

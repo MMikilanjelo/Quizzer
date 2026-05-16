@@ -1,11 +1,12 @@
 ﻿using System;
+using Source.Shared.Components.Elements.CustomVisualElement;
 using Source.Shared.Components.Elements.Label;
 using Unity.VectorGraphics;
 using UnityEngine.UIElements;
 
 namespace Source.Shared.Components.Elements.Badge
 {
-    public partial class Badge : VisualElement
+    public partial class Badge : ReactiveVisualElement
     {
         public enum BadgeVariant
         {

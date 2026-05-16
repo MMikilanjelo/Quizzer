@@ -7,6 +7,7 @@ namespace Source.Features.Quizzes.FinishedQuiz.ViewModels
 {
     public interface IFinishedQuizScreenViewModel
     {
+        IReactiveProperty<bool> IsLoading { get; }
         IReadOnlyReactiveProperty<string> QuizName { get; }
         ICommand GoBackCommand { get; }
         IReadOnlyReactiveList<KnowledgeAreaItemViewModel> KnowledgeAreas { get; }

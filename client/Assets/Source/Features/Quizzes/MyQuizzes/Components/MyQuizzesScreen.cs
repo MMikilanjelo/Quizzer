@@ -19,6 +19,7 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
 
         private readonly ReactiveVisualElementList<QuizzesStateFilterItemViewModel> _quizStateFiltersList;
         private readonly ReactiveVisualElementList<QuizItemViewModel> _quizzesList;
+        private readonly ReactiveVisualElementList _quizzesSkeletonList;
         private readonly NoQuizzesFound _noQuizzesFound;
 
         private readonly IMyQuizzesScreenViewModel _viewModel;
@@ -38,23 +39,25 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
                 Variant = CustomLabel.TextVariant.Title2,
                 Weight = CustomLabel.FontWeight.Bold,
                 Alignment = TextAnchor.MiddleLeft,
-                text = "Quizzes",
-                style = { marginBottom = 24, marginLeft = 24 }
+                text = "Quizzes"
             };
+            Header.AddToClassList("screen__title");
 
             _quizStateFiltersList = new ReactiveVisualElementList<QuizzesStateFilterItemViewModel>
             {
                 ColumnGap = 8,
                 Direction = FlexDirection.Row,
-                style =
-                {
-                    flexGrow = 0,
-                    flexShrink = 0,
-                    marginBottom = 24
-                }
             };
+            _quizStateFiltersList.AddToClassList("screen__filters-list");
 
             _quizzesList = new ReactiveVisualElementList<QuizItemViewModel>
+            {
+                ColumnGap = 16,
+                Direction = FlexDirection.Column,
+                BottomPadding = 104
+            };
+
+            _quizzesSkeletonList = new ReactiveVisualElementList
             {
                 ColumnGap = 16,
                 Direction = FlexDirection.Column,
@@ -63,6 +66,7 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
             _noQuizzesFound = new NoQuizzesFound(iconProvider);
 
             screenContainer.Add(_quizStateFiltersList);
+            screenContainer.Add(_quizzesSkeletonList);
             screenContainer.Add(_quizzesList);
             screenContainer.Add(_noQuizzesFound);
 
@@ -75,13 +79,13 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
 
             _quizStateFiltersList.Bind(
                 makeItem: () => new Chip(),
-                bindItem: (chip, model, disposable) =>
+                bindItem: (chip, model) =>
                 {
                     chip.Text = model.Name;
                     chip.Variant = model.IsSelected.Value ? Chip.ChipVariant.Filled : Chip.ChipVariant.Outline;
                     chip
                         .BindProperty(model.IsSelected, (c, isSelected) => { c.Variant = isSelected ? Chip.ChipVariant.Filled : Chip.ChipVariant.Outline; })
-                        .AddTo(disposable);
+                        .AddTo(chip.Disposables);
                 }
             );
 
@@ -93,17 +97,28 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
 
             _quizzesList.Bind(
                 makeItem: () => new QuizCard(),
-                bindItem: (card, model, disposable) => { card.Bind(model).AddTo(disposable); });
-
+                bindItem: (card, model) =>
+                {
+                    card.Bind(model)
+                        .AddTo(card.Disposables);
+                }
+            );
             _quizzesList.Set(_viewModel.Quizzes);
+
+            _quizzesSkeletonList.AddItem(new QuizCardSkeleton());
+            _quizzesSkeletonList.AddItem(new QuizCardSkeleton());
+            _quizzesSkeletonList.AddItem(new QuizCardSkeleton());
 
             _noQuizzesFound.Bind(_viewModel.EmptyState).AddTo(_disposable);
 
-            _viewModel.Quizzes.Added.Subscribe(_ => OnQuizzesListModified()).AddTo(_disposable);
-            _viewModel.Quizzes.Removed.Subscribe(_ => OnQuizzesListModified()).AddTo(_disposable);
-            _viewModel.Quizzes.Cleared.Subscribe(_ => OnQuizzesListModified()).AddTo(_disposable);
+            _viewModel.Quizzes.Added.Subscribe(_ => UpdateViewState()).AddTo(_disposable);
+            _viewModel.Quizzes.Removed.Subscribe(_ => UpdateViewState()).AddTo(_disposable);
+            _viewModel.Quizzes.Cleared.Subscribe(_ => UpdateViewState()).AddTo(_disposable);
+            _viewModel.IsLoading.Subscribe(_ => UpdateViewState()).AddTo(_disposable);
 
-            OnQuizzesListModified();
+            UpdateViewState();
+
+            _viewModel.FetchQuizzesCommand.Execute();
         }
 
         public void Dispose()
@@ -111,18 +126,25 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
             _disposable.Dispose();
         }
 
-        private void OnQuizzesListModified()
+        private void UpdateViewState()
         {
+            var isLoading = _viewModel.IsLoading.Value;
             var isEmpty = _viewModel.Quizzes.Count == 0;
 
-            if (isEmpty)
+            _quizzesSkeletonList.style.display = DisplayStyle.None;
+            _quizzesList.style.display = DisplayStyle.None;
+            _noQuizzesFound.style.display = DisplayStyle.None;
+
+            if (isLoading)
+            {
+                _quizzesSkeletonList.style.display = DisplayStyle.Flex;
+            }
+            else if (isEmpty)
             {
                 _noQuizzesFound.style.display = DisplayStyle.Flex;
-                _quizzesList.style.display = DisplayStyle.None;
             }
             else
             {
-                _noQuizzesFound.style.display = DisplayStyle.None;
                 _quizzesList.style.display = DisplayStyle.Flex;
             }
         }

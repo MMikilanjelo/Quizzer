@@ -2,9 +2,11 @@
 using Source.Features.Quizzes.MyQuizzes.ViewModels;
 using Source.Shared.Components.Elements.Badge;
 using Source.Shared.Components.Elements.Button;
+using Source.Shared.Components.Elements.CustomVisualElement;
 using Source.Shared.Components.Elements.Label;
 using Source.Shared.Components.Elements.ProgressBar;
 using Source.Shared.Components.List;
+using Source.Shared.Components.Skeleton;
 using Source.Shared.Icons;
 using Source.Shared.Reactive;
 using Source.Shared.Reactive.Disposables;
@@ -13,7 +15,66 @@ using UnityEngine.UIElements;
 
 namespace Source.Features.Quizzes.MyQuizzes.Components
 {
-    public class QuizCard : VisualElement
+    public class QuizCardSkeleton : VisualElement
+    {
+        public QuizCardSkeleton()
+        {
+            AddToClassList("quiz-card");
+
+            var headerContainer = new VisualElement();
+            headerContainer.AddToClassList("quiz-card__header");
+
+            var titleRow = new VisualElement();
+            titleRow.AddToClassList("quiz-card__title-row");
+
+            var titleSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Title2 };
+            titleSkeleton.AddToClassList("quiz-card__skeleton-title");
+
+            var badgeSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
+            badgeSkeleton.AddToClassList("quiz-card__skeleton-badge");
+
+            titleRow.Add(titleSkeleton);
+            titleRow.Add(badgeSkeleton);
+
+            var tagsRow = new VisualElement();
+            tagsRow.AddToClassList("quiz-card__tags-row");
+            tagsRow.style.display = DisplayStyle.Flex;
+
+            var tag1 = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
+            tag1.AddToClassList("quiz-card__skeleton-tag-1"); 
+
+            var tag2 = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
+            tag2.AddToClassList("quiz-card__skeleton-tag-2");
+
+            tagsRow.Add(tag1);
+            tagsRow.Add(tag2);
+
+            headerContainer.Add(titleRow);
+            headerContainer.Add(tagsRow);
+
+            var statsContainer = new VisualElement();
+            statsContainer.AddToClassList("quiz-card__stats-row");
+
+            var questionsSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
+            questionsSkeleton.AddToClassList("quiz-card__skeleton-questions");
+
+            statsContainer.Add(questionsSkeleton);
+
+            var progressBarSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Block };
+            progressBarSkeleton.AddToClassList("quiz-card__progress-bar");
+            progressBarSkeleton.AddToClassList("quiz-card__skeleton-progress");
+
+            var buttonSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Block };
+            buttonSkeleton.AddToClassList("quiz-card__skeleton-button");
+
+            Add(headerContainer);
+            Add(statsContainer);
+            Add(progressBarSkeleton);
+            Add(buttonSkeleton);
+        }
+    }
+
+    public class QuizCard : ReactiveVisualElement
     {
         private readonly CustomLabel _titleLabel;
         private readonly Badge _statusBadge;
@@ -57,7 +118,6 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
                 ColumnGap = 4,
                 Direction = FlexDirection.Row,
                 Wrap = Wrap.Wrap,
-                style = { marginBottom = 4 }
             };
             _quizTagsList.AddToClassList("quiz-card__tags-row");
 
@@ -110,7 +170,7 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
                     Variant = Badge.BadgeVariant.Neutral,
                     Shape = Badge.BadgeShape.Rounded
                 },
-                bindItem: (badge, tag, _) => badge.Text = tag
+                bindItem: (badge, tag) => badge.Text = tag
             );
 
             _quizTagsList.Set(viewModel.Topics);

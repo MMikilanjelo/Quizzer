@@ -1,4 +1,5 @@
 ﻿using System;
+using Source.Shared.Components.Elements.CustomVisualElement;
 using Source.Shared.Components.Elements.Label;
 using Source.Shared.Components.Manipulators;
 using Source.Shared.Reactive.Commands;
@@ -9,7 +10,7 @@ using UnityEngine.UIElements;
 namespace Source.Shared.Components.Elements.Button
 {
     [UxmlElement]
-    public partial class CustomButton : VisualElement
+    public partial class CustomButton : ReactiveVisualElement
     {
         public enum ButtonVariant
         {
@@ -151,7 +152,13 @@ namespace Source.Shared.Components.Elements.Button
             RefreshIconPlacement();
 
             RegisterCallback<AttachToPanelEvent>(OnAttachedToPanel);
-            RegisterCallback<DetachFromPanelEvent>(OnDetachedFromPanel);
+
+            Disposables.Add(new Disposable(() =>
+            {
+                UnregisterCallback<CommandStateChangedEvent>(OnStateChanged);
+                _spinnerTask?.Pause();
+                Unbind();
+            }));
         }
 
         private void RefreshIconPlacement()
@@ -185,30 +192,28 @@ namespace Source.Shared.Components.Elements.Button
         private void OnAttachedToPanel(AttachToPanelEvent evt) =>
             RegisterCallback<CommandStateChangedEvent>(OnStateChanged);
 
-        private void OnDetachedFromPanel(DetachFromPanelEvent evt)
-        {
-            UnregisterCallback<CommandStateChangedEvent>(OnStateChanged);
-            _spinnerTask?.Pause();
-        }
 
         public IDisposable Bind(ICommand command)
         {
             Unbind();
 
             _currentManipulator = new CommandManipulator(command);
+
             this.AddManipulator(_currentManipulator);
 
-            return new Disposable(Unbind);
+            var disposable = new Disposable(Unbind);
+
+            Disposables.Add(disposable);
+
+            return disposable;
         }
 
         public void Unbind()
         {
-            if (_currentManipulator == null)
-            {
-                return;
-            }
+            if (_currentManipulator == null) return;
 
             this.RemoveManipulator(_currentManipulator);
+
             _currentManipulator = null;
         }
 

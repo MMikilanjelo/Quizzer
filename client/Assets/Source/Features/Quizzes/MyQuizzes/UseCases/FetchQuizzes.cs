@@ -48,11 +48,11 @@ namespace Source.Features.Quizzes.MyQuizzes.UseCases
                 _serializer = serializer;
             }
 
-            public UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken = default)
+            public async UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken = default)
             {
                 var endpoint = $"{URL}{request.ToQueryString()}";
-
-                return _webApi
+                
+                return await _webApi
                     .Get(endpoint, cancellationToken: cancellationToken)
                     .Bind(serializedResponse => _serializer.Deserialize<Response>(serializedResponse))
                     .Map(response => response);

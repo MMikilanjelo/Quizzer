@@ -39,7 +39,6 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly IOnboardingMediator _onboardingMediator;
         private readonly IScreenStackMediator _screenStackMediator;
         private readonly IOnboardingRepository _onboardingRepository;
-
         private readonly IUseCase<SubmitOnboarding.Response> _submitOnboardingUseCase;
 
         private readonly SelectableList<ProficiencyItemViewModel> _proficiencies = SelectableList<ProficiencyItemViewModel>.Exclusive();

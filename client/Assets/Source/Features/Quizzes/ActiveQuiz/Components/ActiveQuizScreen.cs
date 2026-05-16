@@ -132,7 +132,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.Components
 
             _optionsList.Bind(
                 makeItem: () => new QuizOption(),
-                bindItem: (element, optionVm, disposable) => { element.Bind(optionVm).AddTo(disposable); }
+                bindItem: (element, optionVm) => { element.Bind(optionVm).AddTo(element.Disposables); }
             );
 
             _optionsList.Set(_viewModel.Options);
@@ -148,7 +148,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.Components
                     Variant = Badge.BadgeVariant.Neutral,
                     Shape = Badge.BadgeShape.Rounded
                 },
-                bindItem: (badge, tag, _) => badge.Text = tag
+                bindItem: (badge, tag) => badge.Text = tag
             );
 
             _quizTagsList.Set(_viewModel.Topics);

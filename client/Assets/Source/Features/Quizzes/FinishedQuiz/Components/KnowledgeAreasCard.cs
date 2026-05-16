@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Source.Features.Quizzes.FinishedQuiz.ViewModels;
+using Source.Shared.Components.Elements.CustomVisualElement;
 using Source.Shared.Components.Elements.Label;
 using Source.Shared.Components.List;
+using Source.Shared.Components.Skeleton;
 using Source.Shared.Reactive;
 using Source.Shared.Reactive.Disposables;
 using Source.Shared.Reactive.List;
@@ -47,9 +49,9 @@ namespace Source.Features.Quizzes.FinishedQuiz.Components
 
             _areasList.Bind(
                 makeItem: () => new KnowledgeAreaSubCard(_iconProvider),
-                bindItem: (view, itemVm, disposable) => view
+                bindItem: (view, itemVm) => view
                     .Bind(itemVm)
-                    .AddTo(disposable)
+                    .AddTo(view.Disposables)
             );
 
             _areasList.Set(viewModels);
@@ -58,7 +60,7 @@ namespace Source.Features.Quizzes.FinishedQuiz.Components
         }
     }
 
-    public class KnowledgeAreaSubCard : VisualElement
+    public class KnowledgeAreaSubCard : ReactiveVisualElement
     {
         private readonly CustomLabel _titleLabel;
         private readonly VisualElement _statusIcon;
@@ -98,7 +100,7 @@ namespace Source.Features.Quizzes.FinishedQuiz.Components
             statusRow.Add(_statusLabel);
 
             leftCol.Add(_titleLabel);
-            leftCol.Add(statusRow); 
+            leftCol.Add(statusRow);
 
             _progressionLabel = new CustomLabel
             {
@@ -141,6 +143,78 @@ namespace Source.Features.Quizzes.FinishedQuiz.Components
             }
 
             return Disposable.Empty;
+        }
+    }
+
+    public class KnowledgeAreaSubCardSkeleton : VisualElement
+    {
+        public KnowledgeAreaSubCardSkeleton()
+        {
+            AddToClassList("knowledge-sub-card");
+            style.marginBottom = 8;
+
+            var leftCol = new VisualElement();
+            leftCol.AddToClassList("knowledge-sub-card__left");
+
+            var titleSkeleton = new Skeleton
+            {
+                Variant = Skeleton.SkeletonVariant.Small,
+                style =
+                {
+                    width = 120,
+                    marginBottom = 8
+                }
+            };
+
+            var statusRow = new VisualElement();
+            statusRow.AddToClassList("knowledge-sub-card__status-row");
+            statusRow.style.flexDirection = FlexDirection.Row;
+            statusRow.style.alignItems = Align.Center;
+
+            var iconSkeleton = new Skeleton
+            {
+                Variant = Skeleton.SkeletonVariant.Small,
+                style =
+                {
+                    width = 16,
+                    height = 16,
+                    marginRight = 4
+                }
+            };
+
+            var statusTextSkeleton = new Skeleton
+            {
+                Variant = Skeleton.SkeletonVariant.Small,
+                style =
+                {
+                    width = 100
+                }
+            };
+
+            statusRow.Add(iconSkeleton);
+            statusRow.Add(statusTextSkeleton);
+
+            leftCol.Add(titleSkeleton);
+            leftCol.Add(statusRow);
+
+            var progressionSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
+            progressionSkeleton.AddToClassList("knowledge-sub-card__progression");
+            progressionSkeleton.style.width = 60;
+            progressionSkeleton.style.alignSelf = Align.FlexStart;
+
+            var mainLayout = new VisualElement
+            {
+                style =
+                {
+                    flexDirection = FlexDirection.Row,
+                    justifyContent = Justify.SpaceBetween
+                }
+            };
+
+            mainLayout.Add(leftCol);
+            mainLayout.Add(progressionSkeleton);
+
+            Add(mainLayout);
         }
     }
 }

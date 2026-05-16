@@ -36,7 +36,6 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public ICommand ContinueCommand { get; private set; }
         public IReactiveProperty<float> Progress => _progress;
         public IReadOnlyReactiveList<string> Topics => _topics;
-
         public IReadOnlyReactiveProperty<string> QuestionText => _questionText;
         public IReadOnlyReactiveList<QuizOptionViewModel> Options => _options.Items;
         public IReactiveProperty<string> QuizName => _quizName;
@@ -54,6 +53,9 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly IUseCase<FetchQuiz.Request, FetchQuiz.Response> _fetchQuizUseCase;
         private readonly IUseCase<SubmitAnswer.Request, SubmitAnswer.Response> _submitAnswerUseCase;
         private readonly IActiveQuizRepository _activeQuizRepository;
+
+        private ICommand _goToFinishedQuizCommand;
+        private ICommand _goBackCommand;
 
         private CancellationTokenSource _cancellationTokenSource;
         private ActiveQuizStatePayload _payload;
@@ -85,6 +87,15 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             GoBackCommand = SyncCommand.Create(() => { _payload.GoBackAction?.Invoke(); });
             ContinueCommand = AsyncCommand.Create(SubmitAnswer);
+            _goToFinishedQuizCommand = SyncCommand.Create(() =>
+            {
+                StateMachine.Enter<FinishedQuizState, FinishedQuizStatePayload>(new FinishedQuizStatePayload
+                {
+                    QuizId = _activeQuizRepository.Get().Id,
+                    GoBackAction = () => StateMachine.Enter<MyQuizzesState>()
+                });
+            });
+            _goBackCommand = SyncCommand.Create(() => _payload.GoBackAction?.Invoke());
 
             _quizzesMediator.CreateActiveQuizScreen(this);
 
@@ -109,7 +120,6 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     QuizName.Value = activeQuiz.Name;
 
                     _topics.Clear();
-
                     _topics.AddRange(activeQuiz.Topics);
 
                     AdvanceToNextQuestion();
@@ -140,14 +150,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     },
                     _cancellationTokenSource.Token
                 )
-                .Tap(_ =>
-                {
-                    var activeQuiz = _activeQuizRepository.Get();
-
-                    activeQuiz.RecordAnswer(submittedQuestionId);
-
-                    AdvanceToNextQuestion();
-                })
+                .Tap(_ => { AdvanceToNextQuestion(); })
                 .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error));
         }
 
@@ -167,15 +170,8 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             if (nextQuestion is null)
             {
                 var quizFinishedViewModel = new QuizFinishedDialogViewModel(
-                    SyncCommand.Create(() =>
-                    {
-                        StateMachine.Enter<FinishedQuizState, FinishedQuizStatePayload>(new FinishedQuizStatePayload
-                        {
-                            QuizId = quiz.Id,
-                            GoBackAction = () => StateMachine.Enter<MyQuizzesState>()
-                        });
-                    }),
-                    SyncCommand.Create(() => _payload.GoBackAction?.Invoke())
+                    _goToFinishedQuizCommand,
+                    _goBackCommand
                 );
 
                 _quizzesMediator.CreateQuizFinishedDialog(quizFinishedViewModel);
@@ -205,6 +201,8 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             GoBackCommand.Dispose();
             ContinueCommand.Dispose();
+            _goToFinishedQuizCommand.Dispose();
+            _goBackCommand.Dispose();
 
             _topics.Dispose();
             _options.Dispose();

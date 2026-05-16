@@ -1,6 +1,7 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using Source.Features.Quizzes.ActiveQuiz.VIewModels;
+using Source.Shared.Components.Elements.CustomVisualElement;
 using Source.Shared.Components.Elements.Label;
 using Source.Shared.Extensions;
 using Source.Shared.Reactive;
@@ -9,7 +10,7 @@ using UnityEngine.UIElements;
 
 namespace Source.Features.Quizzes.ActiveQuiz.Components
 {
-    public class QuizOption : VisualElement
+    public class QuizOption : ReactiveVisualElement
     {
         private readonly CustomLabel _indicatorLabel;
         private readonly CustomLabel _textLabel;
@@ -34,7 +35,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.Components
             dotElement.AddToClassList("quiz-option__dot");
 
             indicatorBox.Add(_indicatorLabel);
-            indicatorBox.Add(dotElement); 
+            indicatorBox.Add(dotElement);
 
             _textLabel = new CustomLabel
             {

@@ -125,7 +125,9 @@ namespace Source.Features.FAB.Components
 
                 AddAction(viewModel, delayIndex);
 
-                viewModel.ExecuteCommand.Executed.Subscribe(_ => _fabMediator.CloseFabCommand.Execute()).AddTo(_actionsBindings);
+                viewModel.ExecuteCommand.Executed
+                    .Subscribe(_ => _fabMediator.CloseFabCommand.Execute())
+                    .AddTo(_actionsBindings);
             }
         }
 

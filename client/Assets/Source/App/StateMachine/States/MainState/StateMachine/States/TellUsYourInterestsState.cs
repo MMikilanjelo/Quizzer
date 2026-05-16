@@ -21,14 +21,6 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
     public class TellUsYourInterestsStatePayload
     {
         public Action GoBackAction { get; set; }
-
-        public TellUsYourInterestsStatePayload Copy()
-        {
-            return new TellUsYourInterestsStatePayload()
-            {
-                GoBackAction = GoBackAction
-            };
-        }
     }
 
     public class TellUsYourInterestsState :
@@ -84,7 +76,10 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
                     _onboardingRepository.SaveSelectedInterests(selectedInterest);
 
-                    var payloadToPassBack = _payload.Copy();
+                    var payloadToPassBack = new TellUsYourInterestsStatePayload
+                    {
+                        GoBackAction = _payload.GoBackAction
+                    };
 
                     StateMachine.Enter<TellUsYourProficiencyLevelState, TellUsYourInterestsStatePayload>(new TellUsYourInterestsStatePayload
                     {

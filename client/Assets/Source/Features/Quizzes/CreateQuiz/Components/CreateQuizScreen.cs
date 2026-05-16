@@ -177,12 +177,12 @@ namespace Source.Features.Quizzes.CreateQuiz.Components
 
             _domainList.Bind(
                 makeItem: () => new Chip(),
-                bindItem: (chip, model, disposable) =>
+                bindItem: (chip, model) =>
                 {
                     chip.Text = model.Name;
                     chip.Variant = model.IsSelected.Value ? Chip.ChipVariant.Filled : Chip.ChipVariant.Outline;
                     chip.BindProperty(model.IsSelected, (c, isSelected) => { c.Variant = isSelected ? Chip.ChipVariant.Filled : Chip.ChipVariant.Outline; })
-                        .AddTo(disposable);
+                        .AddTo(chip.Disposables);
                 }
             );
 
@@ -194,13 +194,13 @@ namespace Source.Features.Quizzes.CreateQuiz.Components
 
             _difficultyLevelsList.Bind(
                 makeItem: () => new Chip(),
-                bindItem: (chip, model, disposable) =>
+                bindItem: (chip, model) =>
                 {
                     chip.Text = model.Name;
                     chip.Variant = model.IsSelected.Value ? Chip.ChipVariant.Filled : Chip.ChipVariant.Outline;
                     chip
                         .BindProperty(model.IsSelected, (c, isSelected) => { c.Variant = isSelected ? Chip.ChipVariant.Filled : Chip.ChipVariant.Outline; })
-                        .AddTo(disposable);
+                        .AddTo(chip.Disposables);
                 }
             );
 

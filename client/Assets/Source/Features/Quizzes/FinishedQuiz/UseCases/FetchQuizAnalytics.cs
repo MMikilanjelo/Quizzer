@@ -85,11 +85,13 @@ namespace Source.Features.Quizzes.FinishedQuiz.UseCases
                 _serializer = serializer;
             }
 
-            public UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken = default)
+            public async UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken = default)
             {
+                await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: cancellationToken);
+
                 var endpoint = $"{URL}{request.Id}/analytics";
 
-                return _webApi
+                return await _webApi
                     .Get(endpoint, cancellationToken: cancellationToken)
                     .Bind(serializedResponse => _serializer.Deserialize<ResponseModel>(serializedResponse))
                     .Map(response =>

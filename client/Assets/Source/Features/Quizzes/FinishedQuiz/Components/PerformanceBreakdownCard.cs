@@ -2,6 +2,7 @@
 using Source.Features.Quizzes.FinishedQuiz.ViewModels;
 using Source.Shared.Components.Elements.Label;
 using Source.Shared.Components.Elements.ProgressBar;
+using Source.Shared.Components.Skeleton;
 using Source.Shared.Reactive;
 using Source.Shared.Reactive.Disposables;
 using Source.Shared.Reactive.Events;
@@ -9,6 +10,54 @@ using UnityEngine.UIElements;
 
 namespace Source.Features.Quizzes.FinishedQuiz.Components
 {
+    public class PerformanceBreakdownSkeleton : VisualElement
+    {
+        public PerformanceBreakdownSkeleton()
+        {
+            AddToClassList("performance-card");
+            style.marginBottom = 16; 
+
+            var titleSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Title2 };
+            titleSkeleton.AddToClassList("performance-card__title");
+            titleSkeleton.style.width = Length.Percent(60);
+            titleSkeleton.style.marginBottom = 16;
+            Add(titleSkeleton);
+
+            Add(CreateRowSkeleton());
+            Add(CreateRowSkeleton());
+        }
+
+        private VisualElement CreateRowSkeleton()
+        {
+            var container = new VisualElement();
+            container.AddToClassList("performance-card__row");
+
+            var textRow = new VisualElement();
+            textRow.AddToClassList("performance-card__text-row");
+
+            var labelSkeleton = new Skeleton
+            {
+                Variant = Skeleton.SkeletonVariant.Small,
+                style =
+                {
+                    width = Length.Percent(40)
+                }
+            };
+
+            textRow.Add(labelSkeleton);
+
+            var progressBarSkeleton = new Skeleton { Variant = Skeleton.SkeletonVariant.Block };
+            progressBarSkeleton.AddToClassList("performance-card__progress");
+            progressBarSkeleton.style.height = 8; 
+            progressBarSkeleton.style.marginTop = 8;
+
+            container.Add(textRow);
+            container.Add(progressBarSkeleton);
+
+            return container;
+        }
+    }
+
     public class PerformanceBreakdownCard : VisualElement
     {
         private readonly CustomLabel _correctCountLabel;
