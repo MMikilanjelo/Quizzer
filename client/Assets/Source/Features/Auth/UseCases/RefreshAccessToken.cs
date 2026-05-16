@@ -26,7 +26,7 @@ namespace Source.Features.Auth.UseCases
             private readonly IWebApiService _webApi;
             private readonly ISerializationService _serializer;
             private readonly ITokenRepository _tokenRepository;
-            private const string URL = "api/auth/refresh";
+            private const string URL = "api/users/refresh";
 
             internal UseCase(
                 IWebApiService webApi,

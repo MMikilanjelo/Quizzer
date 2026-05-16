@@ -55,8 +55,7 @@ namespace Source.Features.Auth.SigIn.UseCases
                 return await _serializer
                     .Serialize(new Request
                     {
-                        // GuestId = SystemInfo.deviceUniqueIdentifier,
-                        GuestId = "sta11",
+                        GuestId = SystemInfo.deviceUniqueIdentifier,
                     })
                     .Bind(serializedRequest => _webApi.Post(URL, serializedRequest, cancellationToken: cancellationToken))
                     .Bind(serializedResponse => _serializer.Deserialize<Response>(serializedResponse))

@@ -6,13 +6,9 @@ using Source.App.Mediator;
 using Source.Features.Onboarding.Mediator;
 using Source.Features.Onboarding.Models;
 using Source.Features.Onboarding.TellUsYourInterests.ViewModels;
-using Source.Features.TechnicalDialogs.Mediator;
-using Source.Shared;
-using Source.Shared.Extensions;
 using Source.Shared.Reactive.Commands;
 using Source.Shared.Reactive.List;
 using Source.Shared.Reactive.SelectableList;
-using Source.Shared.Services;
 using Source.Shared.StateMachine.States;
 using Source.Shared.UIStack.Mediator;
 
@@ -39,7 +35,6 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly IOnboardingMediator _onboardingMediator;
         private readonly IScreenStackMediator _screenStackMediator;
         private readonly IOnboardingRepository _onboardingRepository;
-        private readonly IAppMediator _appMediator;
 
         private readonly SelectableList<YourInterestItemViewModel> _interests = SelectableList<YourInterestItemViewModel>.Capped(1, 3);
 
@@ -49,14 +44,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public TellUsYourInterestsState(
             IOnboardingMediator onboardingMediator,
             IScreenStackMediator screenStackMediator,
-            IOnboardingRepository onboardingRepository,
-            IAppMediator appMediator
+            IOnboardingRepository onboardingRepository
         )
         {
             _onboardingMediator = onboardingMediator;
             _screenStackMediator = screenStackMediator;
             _onboardingRepository = onboardingRepository;
-            _appMediator = appMediator;
         }
 
         public void Enter(TellUsYourInterestsStatePayload payload)
@@ -81,7 +74,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                         GoBackAction = _payload.GoBackAction
                     };
 
-                    StateMachine.Enter<TellUsYourProficiencyLevelState, TellUsYourInterestsStatePayload>(new TellUsYourInterestsStatePayload
+                    StateMachine.Enter<TellUsYourProficiencyLevelState, TellUsYourProficiencyLevelStatePayload>(new TellUsYourProficiencyLevelStatePayload
                     {
                         GoBackAction = () => StateMachine.Enter<TellUsYourInterestsState, TellUsYourInterestsStatePayload>(payloadToPassBack)
                     });

@@ -42,9 +42,7 @@ namespace Source.Features.Auth.SigIn.UseCases
                 return _serializer
                     .Serialize(new Request
                     {
-                        // GuestId = SystemInfo.deviceUniqueIdentifier
-                        GuestId = "sta11",
-                        // GuestId = "sta",
+                        GuestId = SystemInfo.deviceUniqueIdentifier
                     })
                     .Bind(serializedRequest => _webApi.Post(URL, serializedRequest, cancellationToken: cancellationToken))
                     .Map(_ => new Response());
