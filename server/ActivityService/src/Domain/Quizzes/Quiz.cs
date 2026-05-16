@@ -22,18 +22,26 @@ public sealed record Quiz
     public required QuizStatus Status { get; init; }
     public required IReadOnlyList<QuizQuestion> Questions { get; init; }
     public required IReadOnlyList<string> AnsweredQuestionIds { get; init; }
+    public required IReadOnlyList<string> CorrectQuestionIds { get; init; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? CompletedAt { get; init; }
-    public bool IsPerfect => AnsweredQuestionIds.Count == Questions.Count;
-    public float ScorePercentage => (float)AnsweredQuestionIds.Count / Questions.Count;
+    public bool IsPerfect => CorrectQuestionIds.Count == Questions.Count;
+
+    public float ScorePercentage => Questions.Count > 0
+        ? (float)CorrectQuestionIds.Count / Questions.Count
+        : 0f;
 
     public ErrorOr<QuizContentGenerated> Fill(FillQuizCommand command)
     {
         if (Status != QuizStatus.Pending)
+        {
             return QuizErrors.NotPending;
+        }
 
         if (command.Questions.Count == 0)
+        {
             return QuizErrors.EmptyQuestions;
+        }
 
         return new QuizContentGenerated
         {
@@ -87,12 +95,16 @@ public sealed record Quiz
 
         if (Status != QuizStatus.Completed && answeredCount >= Questions.Count)
         {
+            var finalCorrectCount = CorrectQuestionIds.Count + (isCorrect ? 1 : 0);
+            var finalIsPerfect = finalCorrectCount == Questions.Count;
+            var finalScore = Questions.Count > 0 ? (float)finalCorrectCount / Questions.Count : 0f;
+
             events.Add(new QuizCompleted
             {
                 QuizId = Id,
                 UserId = UserId,
-                IsPerfect = IsPerfect, 
-                ScorePercentage = ScorePercentage, 
+                IsPerfect = finalIsPerfect,
+                ScorePercentage = finalScore,
                 CompletedAt = command.AnsweredAt
             });
         }
@@ -111,6 +123,7 @@ public sealed record Quiz
             SequenceNumber = @event.SequenceNumber,
             Questions = [],
             AnsweredQuestionIds = [],
+            CorrectQuestionIds = [],
             CreatedAt = @event.CreatedAt,
             CompletedAt = null
         };
@@ -121,7 +134,10 @@ public sealed record Quiz
         return this with
         {
             Status = QuizStatus.InProgress,
-            AnsweredQuestionIds = [.. AnsweredQuestionIds, @event.QuestionId]
+            AnsweredQuestionIds = [.. AnsweredQuestionIds, @event.QuestionId],
+            CorrectQuestionIds = @event.IsCorrect
+                ? [.. CorrectQuestionIds, @event.QuestionId]
+                : CorrectQuestionIds
         };
     }
 
