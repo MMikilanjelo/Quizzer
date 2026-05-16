@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Source.App.Mediator;
 using Source.Features.Quizzes.FinishedQuiz.Components;
+using Source.Features.Quizzes.FinishedQuiz.Models;
 using Source.Features.Quizzes.FinishedQuiz.UseCases;
 using Source.Features.Quizzes.FinishedQuiz.ViewModels;
 using Source.Features.Quizzes.Mediator;
@@ -97,7 +98,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 .Finally(() => _isLoading.Value = false);
         }
 
-        private void BindAnalyticsData(FetchQuizAnalytics.QuizAnalyticsModel data)
+        private void BindAnalyticsData(QuizAnalyticsModel data)
         {
             _quizName.Value = data.Name;
 

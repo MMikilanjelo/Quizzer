@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using Source.Features.Quizzes.FinishedQuiz.Models;
 using Source.Shared;
 using Source.Shared.Extensions;
 using Source.Shared.Services;
@@ -20,26 +21,6 @@ namespace Source.Features.Quizzes.FinishedQuiz.UseCases
         public sealed record Response
         {
             public QuizAnalyticsModel Analytics { get; set; }
-        }
-
-        public sealed record QuizAnalyticsModel
-        {
-            public string Id { get; set; }
-            public string Name { get; set; }
-            public List<string> Topics { get; set; }
-            public int TotalQuestions { get; set; }
-            public int AnsweredCount { get; set; }
-            public int CorrectCount { get; set; }
-            public int IncorrectCount { get; set; }
-            public List<ConceptMasteryDeltaModel> MasteryChanges { get; set; }
-        }
-
-        public sealed record ConceptMasteryDeltaModel
-        {
-            public string ConceptId { get; set; }
-            public double StartingMastery { get; set; }
-            public double EndingMastery { get; set; }
-            public int Attempts { get; set; }
         }
 
         private sealed record ResponseModel
