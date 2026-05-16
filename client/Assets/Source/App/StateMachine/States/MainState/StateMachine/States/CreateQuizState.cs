@@ -47,15 +47,15 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly SelectableList<SelectDomainItemViewModel> _domains = SelectableList<SelectDomainItemViewModel>.Exclusive();
         private readonly ReactiveProperty<QuizCreationMode> _creationMode = new(QuizCreationMode.Smart);
 
-        private readonly IUseCase<FetchQuizConfiguration.Response> _fetchQuizConfiguration;
+        private readonly IUseCase<LoadQuizConfiguration.Response> _fetchQuizConfiguration;
         private readonly IUseCase<SmartScheduleQuiz.Response> _smartScheduleQuiz;
-        private readonly IUseCase<ManualScheduleQuiz.Response> _manualScheduleQuiz;
+        private readonly IUseCase<ManualScheduleQuiz.Request, ManualScheduleQuiz.Response> _manualScheduleQuiz;
 
         private readonly ITabBarMediator _tabBarMediator;
         private readonly IQuizzesMediator _quizzesMediator;
         private readonly IUIStackMediator _uiStackMediator;
         private readonly IAppMediator _appMediator;
-        private readonly IQuizCreationRepository _quizCreationRepository;
+        private readonly IQuizCreationStore _quizCreationStore;
 
         private readonly ReactiveProperty<bool> _isCreationAvailable = new(false);
 
@@ -69,17 +69,17 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             IQuizzesMediator quizzesMediator,
             IUIStackMediator uiStackMediator,
             IAppMediator appMediator,
-            IQuizCreationRepository quizCreationRepository,
-            IUseCase<FetchQuizConfiguration.Response> fetchQuizConfiguration,
+            IQuizCreationStore quizCreationStore,
+            IUseCase<LoadQuizConfiguration.Response> fetchQuizConfiguration,
             IUseCase<SmartScheduleQuiz.Response> smartScheduleQuiz,
-            IUseCase<ManualScheduleQuiz.Response> manualScheduleQuiz
+            IUseCase<ManualScheduleQuiz.Request, ManualScheduleQuiz.Response> manualScheduleQuiz
         )
         {
             _tabBarMediator = tabBarMediator;
             _quizzesMediator = quizzesMediator;
             _uiStackMediator = uiStackMediator;
             _appMediator = appMediator;
-            _quizCreationRepository = quizCreationRepository;
+            _quizCreationStore = quizCreationStore;
 
             _fetchQuizConfiguration = fetchQuizConfiguration;
             _smartScheduleQuiz = smartScheduleQuiz;
@@ -103,7 +103,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             ChangeModeCommand = SyncCommand<QuizCreationMode>.Create(mode =>
             {
                 _creationMode.Value = mode;
-                _quizCreationRepository.SaveMode(mode);
+                _quizCreationStore.Get().Mode = mode;
             });
 
             NumberOfQuestion.Value
@@ -143,12 +143,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 .Execute(_cancellationTokenSource.Token)
                 .Tap(_ =>
                 {
-                    _domains.Set(_quizCreationRepository
+                    _domains.Set(_quizCreationStore
                         .Get().Configuration.Domains
                         .Select(d => new SelectDomainItemViewModel(d))
                     );
 
-                    _difficultyLevels.Set(_quizCreationRepository
+                    _difficultyLevels.Set(_quizCreationStore
                         .Get().Configuration.Difficulties
                         .Select(d => new SelectDifficultyLevelItemViewModel(d))
                     );
@@ -158,10 +158,20 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
         private UniTask CreateQuiz()
         {
-            if (_quizCreationRepository.Get().Mode == QuizCreationMode.Manual)
+            if (_quizCreationStore.Get().Mode == QuizCreationMode.Manual)
             {
+                var quizCreationModel = _quizCreationStore.Get();
+
                 return _manualScheduleQuiz
-                    .Execute(_cancellationTokenSource.Token)
+                    .Execute(
+                        new ManualScheduleQuiz.Request
+                        {
+                            TopicId = quizCreationModel.SelectedDomain,
+                            QuestionCount = quizCreationModel.RequestedQuestions,
+                            DifficultyLevelId = quizCreationModel.SelectedDifficulty
+                        },
+                        _cancellationTokenSource.Token
+                    )
                     .Tap(_ => _payload.GoBackAction?.Invoke())
                     .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error));
             }
@@ -190,14 +200,14 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             _bindings.Dispose();
             _bindings = null;
 
-            _quizCreationRepository.Clear();
+            _quizCreationStore.Clear();
         }
 
         private void OnDifficultyLevelSelectionChanged(SelectDifficultyLevelItemViewModel viewModel)
         {
             if (viewModel.IsSelected.Value)
             {
-                _quizCreationRepository.SaveSelectedDifficulty(viewModel.Name);
+                _quizCreationStore.Get().SelectedDifficulty = viewModel.Name;
             }
         }
 
@@ -205,12 +215,16 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         {
             if (viewModel.IsSelected.Value)
             {
-                _quizCreationRepository.SaveSelectedDomain(viewModel.Name);
+                _quizCreationStore.Get().SelectedDomain = viewModel.Name;
             }
         }
 
-        private void OnQuizCountChanged(int count) =>
-            _quizCreationRepository.SaveRequestedQuestions(count);
+        private void OnQuizCountChanged(int count)
+        {
+            var quizCreationModel = _quizCreationStore.Get();
+
+            quizCreationModel.RequestedQuestions = count;
+        }
 
         private void EvaluateCreationAvailability()
         {

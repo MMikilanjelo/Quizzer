@@ -26,12 +26,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public ICommand ContinueCommand { get; private set; }
         public ICommand<YourGoalItemViewModel> SelectGoalCommand => _goals.SelectCommand;
         public IReadOnlyReactiveList<YourGoalItemViewModel> Goals => _goals.Items;
-        public int CurrentStep => _onboardingRepository.Get().CurrentStep;
-        public int TotalSteps => _onboardingRepository.Get().TotalSteps;
+        public int CurrentStep => _onboardingStore.Get().CurrentStep;
+        public int TotalSteps => _onboardingStore.Get().TotalSteps;
 
         private readonly IOnboardingMediator _onboardingMediator;
         private readonly IUIStackMediator _uiStackMediator;
-        private readonly IOnboardingRepository _onboardingRepository;
+        private readonly IOnboardingStore _onboardingStore;
         private readonly IAppMediator _appMediator;
 
         private readonly SelectableList<YourGoalItemViewModel> _goals = SelectableList<YourGoalItemViewModel>.Exclusive();
@@ -41,13 +41,13 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public TellUsYourGoalState(
             IOnboardingMediator onboardingMediator,
             IUIStackMediator uiStackMediator,
-            IOnboardingRepository onboardingRepository,
+            IOnboardingStore onboardingStore,
             IAppMediator appMediator
         )
         {
             _onboardingMediator = onboardingMediator;
             _uiStackMediator = uiStackMediator;
-            _onboardingRepository = onboardingRepository;
+            _onboardingStore = onboardingStore;
             _appMediator = appMediator;
         }
 
@@ -63,9 +63,11 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                         .Select(vm => vm.Model)
                         .ToList();
 
-                    _onboardingRepository.SaveSelectedGoals(selectedGoals);
+                    var onboardingModel = _onboardingStore.Get();
 
-                    _onboardingRepository.Get().AdvanceStep();
+                    onboardingModel.SelectedGoals = selectedGoals;
+
+                    onboardingModel.AdvanceStep();
 
                     StateMachine.Enter<TellUsYourInterestsState, TellUsYourInterestsStatePayload>(new TellUsYourInterestsStatePayload()
                     {
@@ -95,7 +97,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
         private void SetGoals()
         {
-            var alreadyFetchedModel = _onboardingRepository.Get();
+            var alreadyFetchedModel = _onboardingStore.Get();
 
             var selectedGoalIds = new HashSet<string>(alreadyFetchedModel.SelectedGoals.Select(g => g.Id));
 

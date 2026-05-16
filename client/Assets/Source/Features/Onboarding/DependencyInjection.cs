@@ -11,14 +11,14 @@ namespace Source.Features.Onboarding
     {
         public static IContainerBuilder RegisterOnboardingFeature(this IContainerBuilder builder)
         {
-            builder.Register<IUseCase<FetchOnboardingQuestionnaire.Response>, FetchOnboardingQuestionnaire.UseCase>(Lifetime.Singleton);
+            builder.Register<IUseCase<LoadOnboardingQuestionnaire.Response>, LoadOnboardingQuestionnaire.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<SubmitOnboarding.Request, SubmitOnboarding.Response>, SubmitOnboarding.UseCase>(Lifetime.Singleton);
 
             builder.Register<IOnboardingMediator, OnboardingMediator>(Lifetime.Singleton);
 
             builder.Register<IOnboardingUIFactory, OnboardingUIFactory>(Lifetime.Singleton);
 
-            builder.Register<IOnboardingRepository, OnboardingRepository>(Lifetime.Singleton);
+            builder.Register<IOnboardingStore, OnboardingStore>(Lifetime.Singleton);
 
             return builder;
         }

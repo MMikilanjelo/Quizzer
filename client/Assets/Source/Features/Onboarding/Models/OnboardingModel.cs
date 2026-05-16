@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Source.Features.Onboarding.TellUsYourGoal.Models;
-using Source.Features.Onboarding.TellUsYourInterests.Models;
-using Source.Features.Onboarding.TellUsYourProficiency.Models;
 
 namespace Source.Features.Onboarding.Models
 {
@@ -32,5 +29,23 @@ namespace Source.Features.Onboarding.Models
                 CurrentIndex--;
             }
         }
+    }
+
+    public record ProficiencyModel(string Id, string Name)
+    {
+        public string Id { get; } = Id;
+        public string Name { get; } = Name;
+    }
+
+    public record YourGoalModel(string Id, string Name)
+    {
+        public string Id { get; } = Id;
+        public string Name { get; } = Name;
+    }
+    
+    public record YourInterestModel(string Id, string Name)
+    {
+        public string Id { get; } = Id;
+        public string Name { get; } = Name;
     }
 }

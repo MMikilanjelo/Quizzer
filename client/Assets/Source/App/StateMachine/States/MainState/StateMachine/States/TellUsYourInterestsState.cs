@@ -29,12 +29,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public ICommand<YourInterestItemViewModel> SelectInterestCommand => _interests.SelectCommand;
         public ICommand ContinueCommand { get; private set; }
         public ICommand GoBackCommand { get; private set; }
-        public int CurrentStep => _onboardingRepository.Get().CurrentStep;
-        public int TotalSteps => _onboardingRepository.Get().TotalSteps;
+        public int CurrentStep => _onboardingStore.Get().CurrentStep;
+        public int TotalSteps => _onboardingStore.Get().TotalSteps;
 
         private readonly IOnboardingMediator _onboardingMediator;
         private readonly IScreenStackMediator _screenStackMediator;
-        private readonly IOnboardingRepository _onboardingRepository;
+        private readonly IOnboardingStore _onboardingStore;
 
         private readonly SelectableList<YourInterestItemViewModel> _interests = SelectableList<YourInterestItemViewModel>.Capped(1, 3);
 
@@ -44,12 +44,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public TellUsYourInterestsState(
             IOnboardingMediator onboardingMediator,
             IScreenStackMediator screenStackMediator,
-            IOnboardingRepository onboardingRepository
+            IOnboardingStore onboardingStore
         )
         {
             _onboardingMediator = onboardingMediator;
             _screenStackMediator = screenStackMediator;
-            _onboardingRepository = onboardingRepository;
+            _onboardingStore = onboardingStore;
         }
 
         public void Enter(TellUsYourInterestsStatePayload payload)
@@ -60,14 +60,16 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             ContinueCommand = SyncCommand
                 .Create(() =>
                 {
+                    var onboardingModel = _onboardingStore.Get();
+
                     var selectedInterest = _interests.Items
                         .Where(vm => vm.IsSelected.Value)
                         .Select(vm => vm.Model)
                         .ToList();
 
-                    _onboardingRepository.Get().AdvanceStep();
+                    onboardingModel.AdvanceStep();
 
-                    _onboardingRepository.SaveSelectedInterests(selectedInterest);
+                    onboardingModel.SelectedInterests = selectedInterest;
 
                     var payloadToPassBack = new TellUsYourInterestsStatePayload
                     {
@@ -83,7 +85,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             GoBackCommand = SyncCommand.Create(() =>
             {
-                _onboardingRepository.Get().RevertStep();
+                _onboardingStore.Get().RevertStep();
                 _payload.GoBackAction?.Invoke();
             });
 
@@ -91,7 +93,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 .CreateTellUsYourInterestsScreen(this)
                 .Forget();
 
-            _interests.Set(_onboardingRepository.Get().InterestModels.Select(i => new YourInterestItemViewModel(i)).ToList());
+            _interests.Set(_onboardingStore.Get().InterestModels.Select(i => new YourInterestItemViewModel(i)).ToList());
         }
 
         public void Exit()

@@ -5,16 +5,13 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using Source.Features.Onboarding.Models;
-using Source.Features.Onboarding.TellUsYourGoal.Models;
-using Source.Features.Onboarding.TellUsYourInterests.Models;
-using Source.Features.Onboarding.TellUsYourProficiency.Models;
 using Source.Shared;
 using Source.Shared.Extensions;
 using Source.Shared.Services;
 
 namespace Source.Features.Onboarding.UseCases
 {
-    public static class FetchOnboardingQuestionnaire
+    public static class LoadOnboardingQuestionnaire
     {
         public sealed record Response;
 
@@ -29,18 +26,18 @@ namespace Source.Features.Onboarding.UseCases
         {
             private readonly IWebApiService _webApi;
             private readonly ISerializationService _serializer;
-            private readonly IOnboardingRepository _onboardingRepository;
+            private readonly IOnboardingStore _onboardingStore;
             private const string URL = "/api/users/onboarding/questionnaire";
 
             internal UseCase(
                 IAuthorizedWebApiService webApi,
                 ISerializationService serializer,
-                IOnboardingRepository onboardingRepository
+                IOnboardingStore onboardingStore
             )
             {
                 _webApi = webApi;
                 _serializer = serializer;
-                _onboardingRepository = onboardingRepository;
+                _onboardingStore = onboardingStore;
             }
 
             public UniTask<Result<Response>> Execute(CancellationToken cancellationToken)
@@ -62,9 +59,12 @@ namespace Source.Features.Onboarding.UseCases
                             .Select(i => new ProficiencyModel(i, i))
                             .ToList();
 
-                        _onboardingRepository.SaveInterests(interests);
-                        _onboardingRepository.SaveGoals(goals);
-                        _onboardingRepository.SaveProficiencies(proficiencies);
+                        _onboardingStore.Save(new OnboardingModel
+                        {
+                            InterestModels = interests,
+                            GoalModels = goals,
+                            ProficiencyModels = proficiencies
+                        });
 
                         return new Response();
                     });

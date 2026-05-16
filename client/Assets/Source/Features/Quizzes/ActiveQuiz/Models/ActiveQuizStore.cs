@@ -1,13 +1,13 @@
 ﻿namespace Source.Features.Quizzes.ActiveQuiz.Models
 {
-    public interface IActiveQuizRepository
+    public interface IActiveQuizStore
     {
         ActiveQuizModel Get();
         void Save(ActiveQuizModel quiz);
         void Clear();
     }
 
-    internal sealed class ActiveQuizRepository : IActiveQuizRepository
+    internal sealed class ActiveQuizStore : IActiveQuizStore
     {
         private ActiveQuizModel _data;
         public ActiveQuizModel Get() => _data;

@@ -10,7 +10,7 @@ using Source.Shared.Services;
 
 namespace Source.Features.Quizzes.CreateQuiz.UseCases
 {
-    public class FetchQuizConfiguration
+    public class LoadQuizConfiguration
     {
         public sealed record Response;
 
@@ -26,18 +26,18 @@ namespace Source.Features.Quizzes.CreateQuiz.UseCases
         {
             private readonly IAuthorizedWebApiService _webApi;
             private readonly ISerializationService _serializer;
-            private readonly IQuizCreationRepository _quizCreationRepository;
+            private readonly IQuizCreationStore _quizCreationStore;
             private const string URL = "/api/quizzes/configuration";
 
             internal UseCase(
                 IAuthorizedWebApiService webApi,
                 ISerializationService serializer,
-                IQuizCreationRepository quizCreationRepository
+                IQuizCreationStore quizCreationStore
             )
             {
                 _webApi = webApi;
                 _serializer = serializer;
-                _quizCreationRepository = quizCreationRepository;
+                _quizCreationStore = quizCreationStore;
             }
 
             public UniTask<Result<Response>> Execute(CancellationToken cancellationToken)
@@ -47,13 +47,18 @@ namespace Source.Features.Quizzes.CreateQuiz.UseCases
                     .Bind(serializedResponse => _serializer.Deserialize<ResponseModel>(serializedResponse))
                     .Map(response =>
                     {
-                        _quizCreationRepository.SaveConfiguration(new QuizConfigurationModel
+                        var quizCreationModel = new QuizCreationModel
                         {
-                            Difficulties = response.Difficulties,
-                            Domains = response.Domains,
-                            MaxQuestions = response.MaxQuestions,
-                            MinQuestions = response.MinQuestions
-                        });
+                            Configuration = new QuizConfigurationModel
+                            {
+                                Difficulties = response.Difficulties,
+                                Domains = response.Domains,
+                                MaxQuestions = response.MaxQuestions,
+                                MinQuestions = response.MinQuestions
+                            }
+                        };
+
+                        _quizCreationStore.Save(quizCreationModel);
                         return new Response();
                     });
             }

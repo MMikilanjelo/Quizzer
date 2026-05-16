@@ -31,7 +31,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
         private readonly IUseCase<CreateGuestAccount.Response> _registerGuestAccountUseCase;
         private readonly IUseCase<LoginGuestAccount.Response> _loginGuestAccountUseCase;
-        private readonly IUseCase<FetchOnboardingQuestionnaire.Response> _fetchGoalsUseCase;
+        private readonly IUseCase<LoadOnboardingQuestionnaire.Response> _fetchGoalsUseCase;
 
         private CancellationTokenSource _cancellationTokenSource;
         private static string Scope => nameof(SignInState);
@@ -41,7 +41,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             IUIStackMediator uiStackMediator,
             IUseCase<CreateGuestAccount.Response> registerGuestAccountUseCase,
             IUseCase<LoginGuestAccount.Response> loginGuestAccountUseCase,
-            IUseCase<FetchOnboardingQuestionnaire.Response> fetchGoalsUseCase,
+            IUseCase<LoadOnboardingQuestionnaire.Response> fetchGoalsUseCase,
             IAppMediator appMediator
         )
         {

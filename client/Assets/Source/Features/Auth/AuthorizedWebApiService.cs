@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Source.Features.Auth.Models;
 using Source.Features.Auth.UseCases;
 using Source.Shared;
 using Source.Shared.Services;
@@ -13,16 +14,16 @@ namespace Source.Features.Auth
         public string EmptyJsonPayload => _webApiService.EmptyJsonPayload;
 
         private readonly IWebApiService _webApiService;
-        private readonly IUseCase<GetAccessToken.Response> _getAccessToken;
+        private readonly ITokensStore _tokensStore;
         private readonly IUseCase<RefreshAccessToken.Response> _refreshUseCase;
 
-        public AuthorizedWebApiService(
+        internal AuthorizedWebApiService(
             IWebApiService webApiService,
-            IUseCase<GetAccessToken.Response> getAccessToken,
+            ITokensStore tokensStore, 
             IUseCase<RefreshAccessToken.Response> refreshUseCase
         )
         {
-            _getAccessToken = getAccessToken;
+            _tokensStore = tokensStore;
             _refreshUseCase = refreshUseCase;
             _webApiService = webApiService;
         }
@@ -46,7 +47,7 @@ namespace Source.Features.Auth
             CancellationToken ct
         )
         {
-            var headers = await AddAuthorizationHeader(customHeaders, ct);
+            var headers = AddAuthorizationHeader(customHeaders, ct);
 
             if (!headers.IsSuccess)
             {
@@ -64,7 +65,7 @@ namespace Source.Features.Auth
 
             if (refreshResult.IsSuccess)
             {
-                var retryHeaders = await AddAuthorizationHeader(customHeaders, ct);
+                var retryHeaders = AddAuthorizationHeader(customHeaders, ct);
 
                 return await apiCall(retryHeaders.Value);
             }
@@ -72,9 +73,9 @@ namespace Source.Features.Auth
             return result;
         }
 
-        private async UniTask<Result<Dictionary<string, string>>> AddAuthorizationHeader(Dictionary<string, string> customHeaders, CancellationToken ct)
+        private Result<Dictionary<string, string>> AddAuthorizationHeader(Dictionary<string, string> customHeaders, CancellationToken ct)
         {
-            var tokenResult = await _getAccessToken.Execute(ct);
+            var tokenResult = _tokensStore.GetAccessToken();
 
             if (!tokenResult.IsSuccess)
             {
@@ -83,7 +84,7 @@ namespace Source.Features.Auth
 
             var headers = customHeaders ?? new Dictionary<string, string>();
 
-            headers["Authorization"] = $"Bearer {tokenResult.Value.AccessToken}";
+            headers["Authorization"] = $"Bearer {tokenResult.Value}";
 
             return headers;
         }

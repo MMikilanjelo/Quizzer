@@ -52,7 +52,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly IAppMediator _appMediator;
         private readonly IUseCase<LoadActiveQuiz.Request, LoadActiveQuiz.Response> _fetchQuizUseCase;
         private readonly IUseCase<SubmitAnswer.Request, SubmitAnswer.Response> _submitAnswerUseCase;
-        private readonly IActiveQuizRepository _activeQuizRepository;
+        private readonly IActiveQuizStore _activeQuizStore;
 
         private ICommand _goToFinishedQuizCommand;
         private ICommand _goBackCommand;
@@ -67,7 +67,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             IAppMediator appMediator,
             IUseCase<LoadActiveQuiz.Request, LoadActiveQuiz.Response> fetchQuizUseCase,
             IUseCase<SubmitAnswer.Request, SubmitAnswer.Response> submitAnswerUseCase,
-            IActiveQuizRepository activeQuizRepository
+            IActiveQuizStore activeQuizStore
         )
         {
             _quizzesMediator = quizzesMediator;
@@ -76,7 +76,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             _appMediator = appMediator;
             _fetchQuizUseCase = fetchQuizUseCase;
             _submitAnswerUseCase = submitAnswerUseCase;
-            _activeQuizRepository = activeQuizRepository;
+            _activeQuizStore = activeQuizStore;
         }
 
         public void Enter(ActiveQuizStatePayload payload)
@@ -91,7 +91,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             {
                 StateMachine.Enter<FinishedQuizState, FinishedQuizStatePayload>(new FinishedQuizStatePayload
                 {
-                    QuizId = _activeQuizRepository.Get().Id,
+                    QuizId = _activeQuizStore.Get().Id,
                     GoBackAction = () => StateMachine.Enter<MyQuizzesState>()
                 });
             });
@@ -115,7 +115,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 )
                 .Tap(_ =>
                 {
-                    var activeQuiz = _activeQuizRepository.Get();
+                    var activeQuiz = _activeQuizStore.Get();
 
                     QuizName.Value = activeQuiz.Name;
 
@@ -138,13 +138,13 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             var selectedIndex = _options.Items.IndexOf(selectedOption);
 
-            var submittedQuestionId = _activeQuizRepository.Get().GetActiveQuestion().Id;
+            var submittedQuestionId = _activeQuizStore.Get().GetActiveQuestion().Id;
 
             await _submitAnswerUseCase
                 .Execute(
                     new SubmitAnswer.Request
                     {
-                        Id = _activeQuizRepository.Get().Id,
+                        Id = _activeQuizStore.Get().Id,
                         QuestionId = submittedQuestionId,
                         SelectedIndex = selectedIndex
                     },
@@ -156,7 +156,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
         private void AdvanceToNextQuestion()
         {
-            var quiz = _activeQuizRepository.Get();
+            var quiz = _activeQuizStore.Get();
 
             if (quiz is null)
             {
@@ -194,7 +194,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public void Exit()
         {
             _payload = null;
-            _activeQuizRepository.Clear();
+            _activeQuizStore.Clear();
 
             _uiStackMediator.PopAllScreens();
             _uiStackMediator.PopAllDialogs();

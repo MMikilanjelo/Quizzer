@@ -2,7 +2,7 @@
 
 namespace Source.Features.Auth.Models
 {
-    internal interface ITokenRepository
+    internal interface ITokensStore
     {
         Result SaveTokens(string accessToken, string refreshToken);
         Result<string> GetAccessToken();

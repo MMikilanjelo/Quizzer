@@ -33,12 +33,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public ICommand<ProficiencyItemViewModel> SelectProficiencyCommand => _proficiencies.SelectCommand;
         public ICommand ContinueCommand { get; private set; }
         public ICommand GoBackCommand { get; private set; }
-        public int CurrentStep => _onboardingRepository.Get().CurrentStep;
-        public int TotalSteps => _onboardingRepository.Get().TotalSteps;
+        public int CurrentStep => _onboardingStore.Get().CurrentStep;
+        public int TotalSteps => _onboardingStore.Get().TotalSteps;
 
         private readonly IOnboardingMediator _onboardingMediator;
         private readonly IScreenStackMediator _screenStackMediator;
-        private readonly IOnboardingRepository _onboardingRepository;
+        private readonly IOnboardingStore _onboardingStore;
         private readonly IAppMediator _appMediator;
         private readonly IUseCase<SubmitOnboarding.Request, SubmitOnboarding.Response> _submitOnboardingUseCase;
         private readonly IUseCase<RefreshAccessToken.Response> _refreshTokenUseCase;
@@ -51,7 +51,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         public TellUsYourProficiencyLevelState(
             IOnboardingMediator onboardingMediator,
             IScreenStackMediator screenStackMediator,
-            IOnboardingRepository onboardingRepository,
+            IOnboardingStore onboardingStore,
             IAppMediator appMediator,
             IUseCase<SubmitOnboarding.Request, SubmitOnboarding.Response> submitOnboardingUseCase,
             IUseCase<RefreshAccessToken.Response> refreshTokenUseCase
@@ -60,7 +60,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             _appMediator = appMediator;
             _onboardingMediator = onboardingMediator;
             _screenStackMediator = screenStackMediator;
-            _onboardingRepository = onboardingRepository;
+            _onboardingStore = onboardingStore;
             _submitOnboardingUseCase = submitOnboardingUseCase;
             _refreshTokenUseCase = refreshTokenUseCase;
         }
@@ -75,7 +75,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             GoBackCommand = SyncCommand.Create(() =>
             {
-                _onboardingRepository.Get().RevertStep();
+                _onboardingStore.Get().RevertStep();
                 _payload.GoBackAction?.Invoke();
             });
 
@@ -83,12 +83,12 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 .CreateTellUsYourProficiencyScreen(this)
                 .Forget();
 
-            _proficiencies.Set(_onboardingRepository.Get().ProficiencyModels.Select(i => new ProficiencyItemViewModel(i)).ToList());
+            _proficiencies.Set(_onboardingStore.Get().ProficiencyModels.Select(i => new ProficiencyItemViewModel(i)).ToList());
         }
 
         private async UniTask<Result> SubmitOnboarding()
         {
-            var onboarding = _onboardingRepository.Get();
+            var onboarding = _onboardingStore.Get();
 
             var result = await _submitOnboardingUseCase
                 .Execute(
@@ -100,7 +100,14 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     },
                     _cancellationTokenSource.Token
                 )
-                .Bind(_ => _refreshTokenUseCase.Execute(_cancellationTokenSource.Token))
+                .AsResult()
+                .Recover(Features.Onboarding.UseCases.SubmitOnboarding.ErrorCodes.OnboardingAlreadyCompleted, _ => UniTask.FromResult(Result.Success()))
+                .Bind(() =>
+                {
+                    return _refreshTokenUseCase
+                        .Execute(_cancellationTokenSource.Token)
+                        .Tap(_ => _onboardingStore.Clear());
+                })
                 .Tap(_ => StateMachine.Enter<HomeState>())
                 .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error));
 

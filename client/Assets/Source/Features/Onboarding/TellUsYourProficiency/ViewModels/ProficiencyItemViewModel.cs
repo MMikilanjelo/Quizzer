@@ -1,4 +1,4 @@
-﻿using Source.Features.Onboarding.TellUsYourProficiency.Models;
+﻿using Source.Features.Onboarding.Models;
 using Source.Shared.Reactive.Events;
 using Source.Shared.Reactive.SelectableList;
 

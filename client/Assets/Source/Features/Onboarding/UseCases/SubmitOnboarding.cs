@@ -9,6 +9,11 @@ namespace Source.Features.Onboarding.UseCases
 {
     public static class SubmitOnboarding
     {
+        public static class ErrorCodes
+        {
+            public const string OnboardingAlreadyCompleted = "User.OnboardingCompleted";
+        }
+
         public sealed record Response;
 
         public sealed record Request

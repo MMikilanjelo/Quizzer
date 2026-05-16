@@ -16,12 +16,11 @@ namespace Source.Features.Auth
         {
             builder.Register<IUseCase<CreateGuestAccount.Response>, CreateGuestAccount.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<LoginGuestAccount.Response>, LoginGuestAccount.UseCase>(Lifetime.Singleton);
-            builder.Register<IUseCase<GetAccessToken.Response>, GetAccessToken.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<RefreshAccessToken.Response>, RefreshAccessToken.UseCase>(Lifetime.Singleton);
 
             builder.Register<ISignInUIFactory, SignInUIFactory>(Lifetime.Singleton);
             
-            builder.Register<ITokenRepository, TokenRepository>(Lifetime.Singleton);
+            builder.Register<ITokensStore, TokensStore>(Lifetime.Singleton);
 
             builder.Register<ISignInMediator, SignInScreenMediator>(Lifetime.Singleton);
 

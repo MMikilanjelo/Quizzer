@@ -18,16 +18,16 @@ namespace Source.Features.Quizzes
             builder.Register<IQuizzesUIFactory, QuizzesUIFactory>(Lifetime.Singleton);
             builder.Register<IQuizzesMediator, QuizzesMediator>(Lifetime.Singleton);
 
-            builder.Register<IQuizCreationRepository, QuizCreationRepository>(Lifetime.Singleton);
-            builder.Register<IUseCase<FetchQuizConfiguration.Response>, FetchQuizConfiguration.UseCase>(Lifetime.Singleton);
+            builder.Register<IQuizCreationStore, QuizCreationStore>(Lifetime.Singleton);
+            builder.Register<IUseCase<LoadQuizConfiguration.Response>, LoadQuizConfiguration.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<SmartScheduleQuiz.Response>, SmartScheduleQuiz.UseCase>(Lifetime.Singleton);
-            builder.Register<IUseCase<ManualScheduleQuiz.Response>, ManualScheduleQuiz.UseCase>(Lifetime.Singleton);
+            builder.Register<IUseCase<ManualScheduleQuiz.Request, ManualScheduleQuiz.Response>, ManualScheduleQuiz.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<FetchQuizzes.Request, FetchQuizzes.Response>, FetchQuizzes.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<LoadActiveQuiz.Request, LoadActiveQuiz.Response>, LoadActiveQuiz.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<SubmitAnswer.Request, SubmitAnswer.Response>, SubmitAnswer.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<FetchQuizAnalytics.Request, FetchQuizAnalytics.Response>, FetchQuizAnalytics.UseCase>(Lifetime.Singleton);
 
-            builder.Register<IActiveQuizRepository, ActiveQuizRepository>(Lifetime.Singleton);
+            builder.Register<IActiveQuizStore, ActiveQuizStore>(Lifetime.Singleton);
 
             return builder;
         }

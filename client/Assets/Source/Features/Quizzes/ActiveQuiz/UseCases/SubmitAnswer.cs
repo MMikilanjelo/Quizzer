@@ -22,18 +22,18 @@ namespace Source.Features.Quizzes.ActiveQuiz.UseCases
         {
             private readonly IAuthorizedWebApiService _webApi;
             private readonly ISerializationService _serializer;
-            private readonly IActiveQuizRepository _activeQuizRepository;
+            private readonly IActiveQuizStore _activeQuizStore;
             private const string URL = "/api/quizzes/";
 
             internal UseCase(
                 IAuthorizedWebApiService webApi,
                 ISerializationService serializer,
-                IActiveQuizRepository activeQuizRepository
+                IActiveQuizStore activeQuizStore
             )
             {
                 _webApi = webApi;
                 _serializer = serializer;
-                _activeQuizRepository = activeQuizRepository;
+                _activeQuizStore = activeQuizStore;
             }
 
             public UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken = default)
@@ -45,7 +45,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.UseCases
                     .Bind(jsonPayload => _webApi.Post(endpoint, jsonPayload, cancellationToken: cancellationToken))
                     .Tap(_ =>
                     {
-                        var activeQuiz = _activeQuizRepository.Get();
+                        var activeQuiz = _activeQuizStore.Get();
 
                         activeQuiz.RecordAnswer(request.QuestionId);
                     })

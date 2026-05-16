@@ -7,13 +7,13 @@ using UnityEngine.Device;
 
 namespace Source.Features.Auth.Models
 {
-    internal class TokenRepository : ITokenRepository
+    internal class TokensStore : ITokensStore
     {
         private readonly IRepository<TokenModel, int> _db;
         private readonly IEncryptionService _encryptionService;
         private const int TokenId = 1;
 
-        public TokenRepository(
+        public TokensStore(
             IRepository<TokenModel, int> db,
             IEncryptionService encryptionService
         )

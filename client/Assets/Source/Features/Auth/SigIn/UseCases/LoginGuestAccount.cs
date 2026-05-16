@@ -36,18 +36,18 @@ namespace Source.Features.Auth.SigIn.UseCases
         {
             private readonly IWebApiService _webApi;
             private readonly ISerializationService _serializer;
-            private readonly ITokenRepository _tokenRepository;
+            private readonly ITokensStore _tokensStore;
             private const string URL = "api/users/guests/login";
 
             internal UseCase(
                 IWebApiService webApi,
                 ISerializationService serializer,
-                ITokenRepository tokenRepository
+                ITokensStore tokensStore
             )
             {
                 _webApi = webApi;
                 _serializer = serializer;
-                _tokenRepository = tokenRepository;
+                _tokensStore = tokensStore;
             }
 
             public async UniTask<Result<Response>> Execute(CancellationToken cancellationToken = default)
@@ -59,7 +59,7 @@ namespace Source.Features.Auth.SigIn.UseCases
                     })
                     .Bind(serializedRequest => _webApi.Post(URL, serializedRequest, cancellationToken: cancellationToken))
                     .Bind(serializedResponse => _serializer.Deserialize<Response>(serializedResponse))
-                    .Bind(response => _tokenRepository
+                    .Bind(response => _tokensStore
                         .SaveTokens(response.AccessToken, response.RefreshToken)
                         .Map(() => response)
                     );

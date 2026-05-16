@@ -1,5 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
-using Source.Features.Onboarding.TellUsYourGoal.Models;
+using Source.Features.Onboarding.Models;
 using Source.Shared.Reactive.Events;
 using Source.Shared.Reactive.SelectableList;
 

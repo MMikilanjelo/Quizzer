@@ -12,40 +12,35 @@ namespace Source.Features.Quizzes.CreateQuiz.UseCases
     {
         public sealed record Response;
 
-        private sealed record Request
+        public sealed record Request
         {
             public string TopicId { get; set; }
             public int QuestionCount { get; set; }
             public string DifficultyLevelId { get; set; }
         }
 
-        internal class UseCase : IUseCase<Response>
+        internal class UseCase : IUseCase<Request, Response>
         {
             private readonly IAuthorizedWebApiService _webApi;
-            private readonly IQuizCreationRepository _quizCreationRepository;
+            private readonly IQuizCreationStore _quizCreationStore;
             private readonly ISerializationService _serializer;
             private const string URL = "/api/quizzes/schedule/manual";
 
             internal UseCase(
                 IAuthorizedWebApiService webApi,
-                IQuizCreationRepository quizCreationRepository,
+                IQuizCreationStore quizCreationStore,
                 ISerializationService serializer
             )
             {
                 _webApi = webApi;
-                _quizCreationRepository = quizCreationRepository;
+                _quizCreationStore = quizCreationStore;
                 _serializer = serializer;
             }
 
-            public UniTask<Result<Response>> Execute(CancellationToken cancellationToken)
+            public UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken)
             {
                 return _serializer
-                    .Serialize(new Request
-                    {
-                        TopicId = _quizCreationRepository.Get().SelectedDomain,
-                        QuestionCount = _quizCreationRepository.Get().RequestedQuestions,
-                        DifficultyLevelId = _quizCreationRepository.Get().SelectedDifficulty
-                    })
+                    .Serialize(request)
                     .Bind(serializedRequest => _webApi.Post(URL, serializedRequest, cancellationToken: cancellationToken))
                     .Map(_ => new Response());
             }
