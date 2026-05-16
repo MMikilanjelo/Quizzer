@@ -1,11 +1,8 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using Cysharp.Threading.Tasks;
-using Source.Features.Quizzes.CreateQuiz.Models;
 using Source.Shared;
 using Source.Shared.Extensions;
 using Source.Shared.Services;
-using UnityEditor.PackageManager.Requests;
 
 namespace Source.Features.Quizzes.CreateQuiz.UseCases
 {
@@ -25,7 +22,7 @@ namespace Source.Features.Quizzes.CreateQuiz.UseCases
 
             public UniTask<Result<Response>> Execute(CancellationToken cancellationToken)
             {
-                return _webApi
+               return _webApi
                     .Post(URL, _webApi.EmptyJsonPayload, cancellationToken: cancellationToken)
                     .Map(_ => new Response());
             }

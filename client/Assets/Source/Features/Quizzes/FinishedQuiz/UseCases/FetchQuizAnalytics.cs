@@ -87,8 +87,6 @@ namespace Source.Features.Quizzes.FinishedQuiz.UseCases
 
             public async UniTask<Result<Response>> Execute(Request request, CancellationToken cancellationToken = default)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: cancellationToken);
-
                 var endpoint = $"{URL}{request.Id}/analytics";
 
                 return await _webApi

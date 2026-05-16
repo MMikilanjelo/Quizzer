@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52c9c6cbcc81475591e2219886710232
+    m_Address: QuizQuestion
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5bb887c2df9d1f64d80aea2e9eaa4a9a
     m_Address: Inter-Bold SDF
     m_ReadOnly: 0
@@ -61,6 +66,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b4daad057417e341bbb16affba989ba
+    m_Address: img_sig-in_background
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UIAssets
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad91d2592d6543b2be8edb781629f5ec
     m_Address: FinishedQuizScreen
     m_ReadOnly: 0
@@ -81,8 +92,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bef201d809d143e9bc862143cb81de3b
+    m_Address: MyQuizzesScreen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d06421de6008dad4a975c7c70fee7656
     m_Address: Inter-Regular SDF
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d29c95d8c6e446b9bf885e6d18364b42
+    m_Address: CreateQuizScreen
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

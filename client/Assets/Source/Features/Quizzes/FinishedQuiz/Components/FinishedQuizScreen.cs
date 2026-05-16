@@ -104,6 +104,9 @@ namespace Source.Features.Quizzes.FinishedQuiz.Components
             _performanceBreakdownCard.Bind(_viewModel.Performance).AddTo(_disposable);
 
             _viewModel.IsLoading.Subscribe(UpdateViewState).AddTo(_disposable);
+
+            _quizNameLabel.text = _viewModel.QuizName.Value;
+            
             UpdateViewState(_viewModel.IsLoading.Value);
         }
 
