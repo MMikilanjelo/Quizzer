@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 using UnityEngine.Networking;
 
 namespace Source.Shared.Services
@@ -180,17 +181,16 @@ namespace Source.Shared.Services
             }
         }
 
-        [Serializable]
         private record ProblemDetails
         {
-            public ApiError[] Errors { get; set; }
+            [JsonProperty] public ApiError[] Errors { get; set; }
         }
 
         [Serializable]
         private record ApiError
         {
-            public string Code { get; set; }
-            public string Message { get; set; }
+            [JsonProperty] public string Code { get; set; }
+            [JsonProperty] public string Message { get; set; }
         }
     }
 }
