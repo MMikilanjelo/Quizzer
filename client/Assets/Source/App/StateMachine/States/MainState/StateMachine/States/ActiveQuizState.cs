@@ -50,7 +50,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly IUIStackMediator _uiStackMediator;
         private readonly ITabBarMediator _tabBarMediator;
         private readonly IAppMediator _appMediator;
-        private readonly IUseCase<FetchQuiz.Request, FetchQuiz.Response> _fetchQuizUseCase;
+        private readonly IUseCase<LoadActiveQuiz.Request, LoadActiveQuiz.Response> _fetchQuizUseCase;
         private readonly IUseCase<SubmitAnswer.Request, SubmitAnswer.Response> _submitAnswerUseCase;
         private readonly IActiveQuizRepository _activeQuizRepository;
 
@@ -65,7 +65,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             IUIStackMediator uiStackMediator,
             ITabBarMediator tabBarMediator,
             IAppMediator appMediator,
-            IUseCase<FetchQuiz.Request, FetchQuiz.Response> fetchQuizUseCase,
+            IUseCase<LoadActiveQuiz.Request, LoadActiveQuiz.Response> fetchQuizUseCase,
             IUseCase<SubmitAnswer.Request, SubmitAnswer.Response> submitAnswerUseCase,
             IActiveQuizRepository activeQuizRepository
         )
@@ -110,7 +110,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
             return _fetchQuizUseCase
                 .Execute(
-                    new FetchQuiz.Request { Id = id },
+                    new LoadActiveQuiz.Request { Id = id },
                     _cancellationTokenSource.Token
                 )
                 .Tap(_ =>

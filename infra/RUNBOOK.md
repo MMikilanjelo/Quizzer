@@ -61,6 +61,12 @@ An ingress controller such as Traefik must be installed.
 ### Sealed Secrets
 
 The Bitnami Sealed Secrets controller is installed by the platform umbrella chart.
+Command to install sealed secrets CRD:
+
+```
+bash
+kubectl apply -f https://raw.githubusercontent.com/bitnami-labs/sealed-secrets/main/helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml
+```
 
 ### Tools
 
@@ -651,6 +657,7 @@ kubectl delete namespace quizzer-dev
 ```
 
 CloudNativePG
+
 ``` bash
 helm repo add cloudnative-pg https://cloudnative-pg.github.io/charts
 helm repo update
@@ -661,6 +668,7 @@ helm upgrade --install cnpg cloudnative-pg/cloudnative-pg \
 ```
 
 Strimzi
+
 ``` bash
 helm repo add strimzi https://strimzi.io/charts/
 helm repo update
@@ -672,12 +680,14 @@ helm upgrade --install strimzi strimzi/strimzi-kafka-operator \
 ```
 
 With:
+
 ``` yaml
 watchAnyNamespace: true
 createClusterRoles: true
 ```
 
 Percona MongoDB operator
+
 ``` bash
 git clone -b v1.22.0 https://github.com/percona/percona-server-mongodb-operator
 cd percona-server-mongodb-operator

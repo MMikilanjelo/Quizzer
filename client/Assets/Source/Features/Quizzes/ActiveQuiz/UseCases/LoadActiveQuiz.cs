@@ -10,7 +10,7 @@ using Source.Shared.Services;
 
 namespace Source.Features.Quizzes.ActiveQuiz.UseCases
 {
-    public static class FetchQuiz
+    public static class LoadActiveQuiz
     {
         public sealed record Request
         {
@@ -21,7 +21,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.UseCases
 
         private sealed record ResponseModel
         {
-            public QuizResponseModel Quiz { get; set; }
+            [JsonProperty] public QuizResponseModel Quiz { get; set; }
         }
 
         private sealed record QuizResponseModel

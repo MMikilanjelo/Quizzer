@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: identity-service-mongo-auth
+  namespace: quizzer-dev
+spec:
+  encryptedData:
+    password: AgBHZDg7cEBXyIKpZruVzH2TO7g9QFhSeCY+7rtnsYxymqtouPSefeimZMg1+U0Uixk8L5voyWQpQIaT+7s+1NMILyqno8qACrrDamJuUqA8j2crQNQ2Oq1IfYpxe96sK3PQ11CGohs/oYYjwBc4PGIHGoATUUvOpUWjNdYGh/UQMBW8TshZlyTCq6SDbjmdgkeLEDZ1iXpRna+m4BoK89DJdMc80dJK+O/4+j8HVcHf9CAicow7hlrRuF+6zQnjyXx9QyTcAPt8HsUsxR3xFI7yKpFkFezo73L6GFYD74sFRB4I4m+6Hv/kGh71LAHNh8qGZWuIWXX0DC9SsuiAs/2zt6t26fxmc7notFG+kaQM1Ed5KB/mUhK+HAD8OviPqCI8QRdG3Mx94NJcqXX3RPlyjNuuiZe2x9MJjVI81xteyxqnYk2VihXUQtTndVseHemxyiCblnup9OiqMabEBWSsuzFPMX3dRKjEABazCwzfoeK942xhSFOq85hUkqcVq4L4niTWPPU6aARLzvulR1H71GE/j0ja7iIuB5AvYQKAOLzj3L2k+4jsAhHf61OwNBhYmdcs2mt1V/p7ueIzgjHn9lo71Dd4sPcVVDYO0Q6zrOT23+CEOllfREUEjyh2q1Bq2i9vwk8XQklnyGMt47mZKlBWQFBAHdxcVjAumOU2BlBJdR5CBdXxDmAdQhyoozd4jY54Kf5o4c+2m4uuZK4+4JDYBp3TXPI=
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/environment: dev
+        app.kubernetes.io/part-of: quizzer
+      name: identity-service-mongo-auth
+      namespace: quizzer-dev
+    type: Opaque

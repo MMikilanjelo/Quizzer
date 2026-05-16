@@ -1,0 +1,18 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: identity-service-postgres-auth
+  namespace: quizzer-dev
+spec:
+  encryptedData:
+    password: AgBodcObo0fUsedl3hwAyFtBQ2szhfb0m9fbjY1YkD5pJcGh4F1fdvMLj2zx0TDV90Ywid0lwQkpCIGVIp0wSOULFot36chYV0lKl+a0x7xLTFrsl3vQblKx6mLukcTnLrbjmi/SGJonv/AWfcDkwEOKj/mpFtCdW4vUKaJJgNRD7f91A4o6pO5iyeiED7XFquhF0kXpq/gKns3Xhe8yi+ZV7rr2GHXFq4yxBWFcyJiNOm9BfFX/fpPtD+J+jAbUWpuPpP6ePyvPTJjaGpcMd6Amqyb9v5wMKwtDbw+CoLCxWzHelt+YEwEBBFyYI+A1nHUSiUJDKoPzTpUClLAWPrwXiFLT/HJ1ZlHKdcV0aQsFtP0r9x3tNCqiDoUL2aqthqe+tdsFRhyWfbXxLStovzCtXuZ0ezefH4/VNBjMWysZcZ48LZfomRRoeq2gahBmHNZv9qr6Rfr8vDTMrdPFnGY6GUCehLySy9IIr/5o1JyfPyA2ukor6/ZtNMHesgAgaepQMtvuaEHiLWl5tfHCTzG8EX9UIU8INZEd5SGZINQ/MV5Q8IUb4Z3myHqAVe6MFSfG3A56THGf/cX603FPLihf/AVxjnhMt3Xi3eSYNx7IAixkL78BxYuOktc6MspdA7cwL2rq+v52xFVPZ6TC4GloNSr3t+PUpaYzRKGM/FxQG7kgiG2+igfGQFKITbrqSZiNpC7v+NWweKeTUWhOKjA=
+    username: AgApRwbuj4KJISLfLMTPUgIfg3gjE2uvpXPFRK581xMjVveXo8mxq6bQABHA5B4PauzgskT9ktdVg662zIirxy5QKnEAqx/GaBdcfUWCWn+H1iAf1dFuC5NjYMm0b7Y6ooOuvlDdI3A0y6p90BWrOecNsO0yjhh8J98aOvRxiTW8VVT2sljy4nxZgpozgk5ADSnPEUAFpZ+BpiJg/RxLPotOBMgt2cnWkklL9JQ3bQoeehTJE4wbgI3H5DxYhu8A6VK9RRJa1f1+2assGWROmLEnYUq6Lt4YD7PT43LtntLboB2B9dAXymreuWbxkUz9pCn+GBQW3QbXmJJJYrNHjUBdhei7+kM9JzXAQoLQ9rBRP6ybd6viAmeWOA/0Rd+wuTW8+EFtrLzBVOBKbwPu2u3oGzXryKw+8BEZkoUonnFEl4A6CjGwQoZHjEzcNcazW2SijaSUD02JaKveLk06RTR6g5VXwERAVFctWsIfQ050wHj8DOPOW2bP7vl9rVlJ4bySQL3hPlJxVzcUjpp9OOvNZY8KzY/EnMv/UX8piqKrRAK+7Wi9BV1T++v6vImvbFZ2ar1jgNY2C8pQeTsba2q/eQpKTn45ZsMSfZMuGorZyNbWBRQJxzEOcP7e1FixviGRsWHGvnh31ATuo90zrG4lxMA3cczrUHOXI0uRRMeFaOineeC4ucyFO8FH0ZWU1OJRMCs+6Q8RSdffLfZo1x/vBHy48Ic=
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/environment: dev
+        app.kubernetes.io/part-of: quizzer
+      name: identity-service-postgres-auth
+      namespace: quizzer-dev
+    type: kubernetes.io/basic-auth

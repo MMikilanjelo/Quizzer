@@ -23,7 +23,7 @@ namespace Source.Features.Quizzes
             builder.Register<IUseCase<SmartScheduleQuiz.Response>, SmartScheduleQuiz.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<ManualScheduleQuiz.Response>, ManualScheduleQuiz.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<FetchQuizzes.Request, FetchQuizzes.Response>, FetchQuizzes.UseCase>(Lifetime.Singleton);
-            builder.Register<IUseCase<FetchQuiz.Request, FetchQuiz.Response>, FetchQuiz.UseCase>(Lifetime.Singleton);
+            builder.Register<IUseCase<LoadActiveQuiz.Request, LoadActiveQuiz.Response>, LoadActiveQuiz.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<SubmitAnswer.Request, SubmitAnswer.Response>, SubmitAnswer.UseCase>(Lifetime.Singleton);
             builder.Register<IUseCase<FetchQuizAnalytics.Request, FetchQuizAnalytics.Response>, FetchQuizAnalytics.UseCase>(Lifetime.Singleton);
 
