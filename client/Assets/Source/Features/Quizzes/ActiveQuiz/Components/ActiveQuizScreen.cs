@@ -104,7 +104,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.Components
                 RowGap = 4,
                 ColumnGap = 4,
                 Direction = FlexDirection.Row,
-                Wrap = Wrap.Wrap,
+                Wrap = Wrap.NoWrap,
                 style = { marginBottom = 24, flexGrow = 0 }
             };
 

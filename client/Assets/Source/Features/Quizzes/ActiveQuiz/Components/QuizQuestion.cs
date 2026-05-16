@@ -18,7 +18,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.Components
 
             _questionTextLabel = new CustomLabel
             {
-                Variant = CustomLabel.TextVariant.Large,
+                Variant = CustomLabel.TextVariant.Regular,
                 Weight = CustomLabel.FontWeight.SemiBold,
                 style = { whiteSpace = WhiteSpace.Normal }
             };

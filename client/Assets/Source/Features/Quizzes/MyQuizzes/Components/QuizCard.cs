@@ -41,7 +41,7 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
             tagsRow.style.display = DisplayStyle.Flex;
 
             var tag1 = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
-            tag1.AddToClassList("quiz-card__skeleton-tag-1"); 
+            tag1.AddToClassList("quiz-card__skeleton-tag-1");
 
             var tag2 = new Skeleton { Variant = Skeleton.SkeletonVariant.Small };
             tag2.AddToClassList("quiz-card__skeleton-tag-2");
@@ -187,7 +187,7 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
         {
             switch (status.ToLower())
             {
-                case "inprogress":
+                case "in_progress":
                 case "ready":
                     _statusBadge.Variant = Badge.BadgeVariant.Info;
                     _statusBadge.Text = "Active";
@@ -196,7 +196,7 @@ namespace Source.Features.Quizzes.MyQuizzes.Components
                     _progressBar.Variant = CustomProgressBar.ProgressBarVariant.Primary;
 
                     _actionButton.style.display = DisplayStyle.Flex;
-                    _actionButton.Text = status.ToLower() == "inprogress" ? "Continue" : "Start";
+                    _actionButton.Text = status.ToLower() == "in_progress" ? "Continue" : "Start";
                     _actionButton.Variant = CustomButton.ButtonVariant.Secondary;
                     break;
 
