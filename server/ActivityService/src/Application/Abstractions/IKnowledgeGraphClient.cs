@@ -2,7 +2,7 @@
 
 namespace Application.Abstractions;
 
-public record DiscoveryNode(string Id, string Name, string Domain, double Mastery);
+public record TopicNode(string Id, string Name, string Domain, double Mastery);
 
 public interface IKnowledgeGraphClient
 {
@@ -17,7 +17,7 @@ public interface IKnowledgeGraphClient
         CancellationToken cancellationToken
     );
 
-    Task<List<DiscoveryNode>> GetDiscoveryNodesAsync(
+    Task<List<TopicNode>> GetTopicNodesAsync(
         string topicId,
         string userId,
         int limit,
@@ -25,7 +25,7 @@ public interface IKnowledgeGraphClient
     );
 
     Task UpdateMasteryEdgeAsync(
-        ConceptMasteryUpdated masteryEvent,
+        TopicMasteryUpdated masteryEvent,
         CancellationToken cancellationToken
     );
 

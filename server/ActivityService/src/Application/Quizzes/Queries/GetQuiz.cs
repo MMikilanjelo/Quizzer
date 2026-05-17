@@ -57,7 +57,7 @@ public static class GetQuiz
 
                 Questions = quizView.Questions.Select(q => new QuestionModel(
                     q.Id,
-                    q.ConceptId,
+                    q.TopicId,
                     q.Text,
                     [.. q.Options]
                 )).ToList(),

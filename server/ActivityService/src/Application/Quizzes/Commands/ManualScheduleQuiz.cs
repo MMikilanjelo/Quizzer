@@ -13,7 +13,7 @@ public static class ManualScheduleQuiz
     public sealed record Command : ICommand<Response>
     {
         public required string UserId { get; init; }
-        public required string TopicId { get; init; }
+        public required string DomainId { get; init; }
         public required int QuestionCount { get; set; }
         public required Quiz.DifficultyLevel DifficultyLevel { get; set; }
     }
@@ -26,7 +26,7 @@ public static class ManualScheduleQuiz
                 .NotEmpty()
                 .WithMessage("User ID is required.");
 
-            RuleFor(x => x.TopicId)
+            RuleFor(x => x.DomainId)
                 .NotEmpty()
                 .WithMessage("Topic ID is required.");
 
@@ -58,7 +58,7 @@ public static class ManualScheduleQuiz
             {
                 QuizId = quizId,
                 UserId = command.UserId,
-                TopicId = command.TopicId,
+                DomainId = command.DomainId,
                 QuestionCount = command.QuestionCount,
                 DifficultyLevel = command.DifficultyLevel,
                 SequenceNumber = userQuizCount + 1,

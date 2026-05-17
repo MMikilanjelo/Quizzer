@@ -12,7 +12,7 @@ internal sealed class ManualScheduleQuizEndpoint : IEndpoint<QuizEndpointGroup>
 {
     private sealed record Request
     {
-        public required string TopicId { get; set; }
+        public required string DomainId { get; set; }
         public required int QuestionCount { get; set; }
         public required Quiz.DifficultyLevel DifficultyLevel { get; set; }
     }
@@ -31,7 +31,7 @@ internal sealed class ManualScheduleQuizEndpoint : IEndpoint<QuizEndpointGroup>
     {
         var command = new ManualScheduleQuiz.Command
         {
-            TopicId = request.TopicId,
+            DomainId = request.DomainId,
             UserId = userContext.UserId,
             QuestionCount = request.QuestionCount,
             DifficultyLevel = request.DifficultyLevel

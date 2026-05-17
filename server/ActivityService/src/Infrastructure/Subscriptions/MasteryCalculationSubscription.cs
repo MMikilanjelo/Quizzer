@@ -10,6 +10,13 @@ namespace Infrastructure.Subscriptions;
 
 public class MasteryCalculationSubscription : SubscriptionBase
 {
+    public MasteryCalculationSubscription()
+    {
+        Name = "MasteryCalculation";
+        IncludeType<QuizQuestionAnswered>();
+        Options.BatchSize = 100;
+    }
+
     public override async Task<IChangeListener> ProcessEventsAsync(
         EventRange page,
         ISubscriptionController controller,
@@ -18,27 +25,27 @@ public class MasteryCalculationSubscription : SubscriptionBase
     {
         var events = page.Events
             .OfType<IEvent<QuizQuestionAnswered>>()
-            .GroupBy(x => ConceptMastery.FormatId(x.Data.UserId, x.Data.ConceptId));
+            .GroupBy(x => TopicMastery.FormatId(x.Data.UserId, x.Data.ConceptId));
 
         foreach (var group in events)
         {
             var streamId = group.Key;
 
-            var mastery = await ops.Events.AggregateStreamAsync<ConceptMastery>(streamId, token: ct);
+            var mastery = await ops.Events.AggregateStreamAsync<TopicMastery>(streamId, token: ct);
 
             var toAppend = new List<object>();
             var first = group.First().Data;
 
             if (mastery is null)
             {
-                var started = new ConceptMasteryStarted(
+                var started = new TopicMasteryStarted(
                     first.UserId,
                     first.ConceptId,
                     BktParams.Initial,
                     first.AnsweredAt);
 
                 toAppend.Add(started);
-                mastery = ConceptMastery.Create(started);
+                mastery = TopicMastery.Create(started);
             }
 
             foreach (var e in group)
@@ -54,6 +61,7 @@ public class MasteryCalculationSubscription : SubscriptionBase
 
                 mastery = mastery.Apply(updatedEvent);
             }
+
             ops.Events.Append(streamId, toAppend.ToArray());
         }
 

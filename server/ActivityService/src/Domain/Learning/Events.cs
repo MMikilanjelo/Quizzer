@@ -1,8 +1,8 @@
 ﻿namespace Domain.Learning;
 
-public record ConceptMasteryUpdated(
+public record TopicMasteryUpdated(
     string UserId,
-    string ConceptId,
+    string TopicId,
     string QuizId,
     string QuestionId,
     double OldMastery,
@@ -13,9 +13,9 @@ public record ConceptMasteryUpdated(
     DateTime Timestamp
 ) : IEvent;
 
-public record ConceptMasteryStarted(
+public record TopicMasteryStarted(
     string UserId,
-    string ConceptId,
+    string TopicId,
     BktParams InitialParams,
     DateTime StartedAt
 ) : IEvent;

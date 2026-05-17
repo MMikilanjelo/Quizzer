@@ -3,7 +3,7 @@ using ErrorOr;
 
 namespace Domain.Quizzes;
 
-public sealed record QuizQuestion(string Id, string ConceptId, string Text, List<string> Options, int CorrectIndex);
+public sealed record QuizQuestion(string Id, string TopicId, string Text, List<string> Options, int CorrectIndex);
 
 public sealed record Quiz
 {
@@ -35,7 +35,7 @@ public sealed record Quiz
 
     public required string Id { get; init; }
     public required string UserId { get; init; }
-    public required string Topic { get; init; }
+    public required string DomainId { get; init; }
     public required int SequenceNumber { get; init; }
     public required int? DesiredQuestionsCount { get; init; }
     public required QuizStatus Status { get; init; }
@@ -103,7 +103,7 @@ public sealed record Quiz
             {
                 QuizId = Id,
                 UserId = UserId,
-                ConceptId = question.ConceptId,
+                ConceptId = question.TopicId,
                 QuestionId = command.QuestionId,
                 SelectedIndex = command.SelectedIndex,
                 IsCorrect = isCorrect,
@@ -142,7 +142,7 @@ public sealed record Quiz
         {
             Id = @event.QuizId,
             UserId = @event.UserId,
-            Topic = @event.TopicId,
+            DomainId = @event.DomainId,
             Status = QuizStatus.Pending,
             Schedule = ScheduleType.Smart,
             SequenceNumber = @event.SequenceNumber,
@@ -163,7 +163,7 @@ public sealed record Quiz
         {
             Id = @event.QuizId,
             UserId = @event.UserId,
-            Topic = @event.TopicId,
+            DomainId = @event.DomainId,
             Status = QuizStatus.Pending,
             Schedule = ScheduleType.Manual,
             SequenceNumber = @event.SequenceNumber,

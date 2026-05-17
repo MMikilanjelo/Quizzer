@@ -69,7 +69,7 @@ public static class GetQuizAnalytics
                 IncorrectCount = incorrectCount,
 
                 MasteryChanges = quizView.MasteryChanges?.Select(m => new MasteryDeltaModel(
-                    m.ConceptId,
+                    m.TopicId,
                     m.StartingMastery,
                     m.EndingMastery,
                     m.AttemptsDuringQuiz

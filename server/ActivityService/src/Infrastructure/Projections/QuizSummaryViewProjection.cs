@@ -15,7 +15,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
         Identity<QuizContentGenerated>(e => e.QuizId);
         Identity<QuizQuestionAnswered>(e => e.QuizId);
         Identity<QuizCompleted>(e => e.QuizId);
-        Identity<ConceptMasteryUpdated>(e => e.QuizId);
+        Identity<TopicMasteryUpdated>(e => e.QuizId);
     }
 
     public QuizSummaryView Create(SmartQuizScheduled @event) =>
@@ -53,12 +53,12 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
         current with
         {
             Status = QuizSummaryView.QuizStatus.Ready,
-            Topics = @event.Questions.Select(q => q.ConceptId).Distinct().ToList(),
+            Topics = @event.Questions.Select(q => q.TopicId).Distinct().ToList(),
             QuestionCount = @event.Questions.Count,
             Questions = @event.Questions.Select(q => new QuestionView
             {
                 Id = q.Id,
-                ConceptId = q.ConceptId,
+                TopicId = q.TopicId,
                 Text = q.Text,
                 Options = q.Options.ToList(),
                 CorrectAnswerIndex = q.CorrectIndex,
@@ -89,17 +89,17 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
     public QuizSummaryView Apply(QuizCompleted @event, QuizSummaryView current) =>
         current with { Status = QuizSummaryView.QuizStatus.Completed };
 
-    public QuizSummaryView Apply(ConceptMasteryUpdated @event, QuizSummaryView current)
+    public QuizSummaryView Apply(TopicMasteryUpdated @event, QuizSummaryView current)
     {
         var updatedChanges = current.MasteryChanges.ToList();
 
-        var index = updatedChanges.FindIndex(m => m.ConceptId == @event.ConceptId);
+        var index = updatedChanges.FindIndex(m => m.TopicId == @event.TopicId);
 
         if (index == -1)
         {
-            updatedChanges.Add(new ConceptMasteryDeltaView
+            updatedChanges.Add(new TopicMasteryDeltaView
             {
-                ConceptId = @event.ConceptId,
+                TopicId = @event.TopicId,
                 StartingMastery = @event.OldMastery,
                 EndingMastery = @event.NewMastery,
                 AttemptsDuringQuiz = 1

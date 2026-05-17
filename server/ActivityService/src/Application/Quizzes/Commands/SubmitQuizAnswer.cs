@@ -85,12 +85,12 @@ public static class SubmitQuizAnswer
                 .OfType<QuizQuestionAnswered>()
                 .First();
 
-            var masteryStreamId = ConceptMastery.FormatId(
+            var masteryStreamId = TopicMastery.FormatId(
                 answeredEvent.UserId,
                 answeredEvent.ConceptId);
 
             var masteryStream = await session.Events
-                .FetchForWriting<ConceptMastery>(
+                .FetchForWriting<TopicMastery>(
                     masteryStreamId,
                     cancellationToken);
 
@@ -98,7 +98,7 @@ public static class SubmitQuizAnswer
 
             if (mastery is null)
             {
-                var started = new ConceptMasteryStarted(
+                var started = new TopicMasteryStarted(
                     answeredEvent.UserId,
                     answeredEvent.ConceptId,
                     BktParams.Initial,
@@ -107,7 +107,7 @@ public static class SubmitQuizAnswer
 
                 masteryStream.AppendOne(started);
 
-                mastery = ConceptMastery.Create(started);
+                mastery = TopicMastery.Create(started);
             }
 
             var updated = mastery.RecordAttempt(

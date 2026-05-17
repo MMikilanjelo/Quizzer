@@ -4,7 +4,7 @@ public sealed record SmartQuizScheduled : IEvent
 {
     public required string QuizId { get; init; }
     public required string UserId { get; init; }
-    public required string TopicId { get; init; }
+    public required string DomainId { get; init; }
     public required int SequenceNumber { get; init; }
     public required DateTime CreatedAt { get; init; }
 }
@@ -13,7 +13,7 @@ public sealed record ManualQuizScheduled : IEvent
 {
     public required string QuizId { get; init; }
     public required string UserId { get; init; }
-    public required string TopicId { get; init; }
+    public required string DomainId { get; init; }
     public required int QuestionCount { get; init; }
     public required Quiz.DifficultyLevel DifficultyLevel { get; init; }
     public required int SequenceNumber { get; init; }

@@ -14,18 +14,18 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
     public async Task<List<string>> GetGlobalPriorityDomainsAsync(string userId, int limit, CancellationToken cancellationToken)
     {
         var personalizedResponse = await driver.ExecutableQuery(@"
-            MATCH (u:User {id: $userId})-[k:KNOWS]->(sub:Topic)
-            WHERE sub.domain IS NOT NULL AND sub.domain <> ''
+            MATCH (u:User {id: $userId})-[k:KNOWS]->(topic:Topic)
+            WHERE topic.domain IS NOT NULL AND topic.domain <> ''
             
-            WITH sub.domain AS Domain,
+            WITH topic.domain AS Domain,
                  COALESCE(k.p_learned, 0.0) AS mastery,
                  duration.inDays(COALESCE(k.last_updated, datetime() - duration('P30D')), datetime()).days AS days_since_seen
             
             WITH Domain,
-                 (1.0 - mastery) + (days_since_seen * 0.015) AS node_priority
+                 (1.0 - mastery) + (days_since_seen * 0.015) AS topic_priority
             
             RETURN Domain, 
-                   AVG(node_priority) AS DomainPriorityScore
+                   AVG(topic_priority) AS DomainPriorityScore
             ORDER BY DomainPriorityScore DESC
             LIMIT $limit")
             .WithParameters(new { userId, limit = (long)limit })
@@ -41,9 +41,9 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
         }
 
         var fallbackResponse = await driver.ExecutableQuery(@"
-                MATCH (root:Topic)-[:SUPER_TOPIC_OF]->(sub:Topic)
-                WHERE root.domain IS NOT NULL AND root.domain <> ''
-                RETURN root.domain AS Domain, count(sub) AS Connections
+                MATCH (domainRoot:Topic)-[:SUPER_TOPIC_OF]->(topic:Topic)
+                WHERE domainRoot.domain IS NOT NULL AND domainRoot.domain <> ''
+                RETURN domainRoot.domain AS Domain, count(topic) AS Connections
                 ORDER BY Connections DESC
                 LIMIT $limit")
             .WithParameters(new { limit = (long)limit })
@@ -54,46 +54,45 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
         return fallbackResponse.Result.ToList();
     }
 
-    public async Task<List<DiscoveryNode>> GetDiscoveryNodesAsync(
-        string topicId,
+    public async Task<List<TopicNode>> GetTopicNodesAsync(
+        string domainId, 
         string userId,
         int limit,
         CancellationToken cancellationToken)
     {
         var response = await driver.ExecutableQuery(@"
-            MATCH (sub:Topic)
-            WHERE toLower(sub.domain) = $topicId 
-               OR toLower(sub.topic_id) = $topicId
-               OR EXISTS { (root:Topic)-[:SUPER_TOPIC_OF*1..3]->(sub) WHERE toLower(root.topic_id) = $topicId }
+            MATCH (topic:Topic)
+            WHERE toLower(topic.domain) = $domainId 
+              AND toLower(topic.topic_id) <> $domainId
 
-            OPTIONAL MATCH (u:User {id: $userId})-[k:KNOWS]->(sub)
+            OPTIONAL MATCH (u:User {id: $userId})-[k:KNOWS]->(topic)
             
-            WITH sub, 
+            WITH topic, 
                  COALESCE(k.p_learned, 0.0) AS mastery,
                  COALESCE(k.last_updated, datetime() - duration('P30D')) AS last_seen
             
-            WITH sub, mastery, 
+            WITH topic, mastery, 
                  duration.inDays(last_seen, datetime()).days AS days_since_seen
 
-            WITH sub, mastery, days_since_seen,
+            WITH topic, mastery, days_since_seen,
                  (1.0 - mastery) + (days_since_seen * 0.015) AS priority_score
             
-            WHERE mastery < 0.95 AND (days_since_seen > 0 OR mastery < 0.5)
+            WHERE mastery < 0.95 AND (k IS NULL OR days_since_seen > 0 OR mastery < 0.5)
             
-            RETURN sub.topic_id AS Id, 
-                   sub.name AS Name, 
-                   sub.domain AS Domain,
+            RETURN topic.topic_id AS Id, 
+                   topic.name AS Name, 
+                   topic.domain AS Domain,
                    mastery
             ORDER BY priority_score DESC
             LIMIT $limit")
             .WithParameters(new
             {
-                topicId,
+                domainId = domainId.ToLowerInvariant(),
                 userId,
                 limit = (long)limit
             })
             .WithConfig(new QueryConfig(database: DatabaseName))
-            .WithMap(r => new DiscoveryNode(
+            .WithMap(r => new TopicNode(
                 r["Id"].As<string>(),
                 r["Name"].As<string>(),
                 r["Domain"].As<string>(),
@@ -104,9 +103,9 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
         return response.Result.ToList();
     }
 
-    public async Task<string> GetGraphContextAsync(IEnumerable<string> nodeIds, CancellationToken cancellationToken)
+    public async Task<string> GetGraphContextAsync(IEnumerable<string> topicIds, CancellationToken cancellationToken)
     {
-        var idsList = nodeIds.ToList();
+        var idsList = topicIds.ToList();
 
         if (idsList.Count == 0)
         {
@@ -114,8 +113,8 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
         }
 
         var response = await driver.ExecutableQuery(@"
-                MATCH (t:Topic) WHERE t.topic_id IN $ids
-                MATCH path = (t)-[:SUPER_TOPIC_OF|CONTRIBUTES_TO|EQUIVALENT*1..2]-(neighbor:Topic)
+                MATCH (topic:Topic) WHERE topic.topic_id IN $ids
+                MATCH path = (topic)-[:SUPER_TOPIC_OF|CONTRIBUTES_TO|EQUIVALENT*1..2]-(neighbor:Topic)
                 UNWIND relationships(path) AS rel
                 WITH DISTINCT rel
                 RETURN startNode(rel).topic_id AS TopicId, 
@@ -129,21 +128,21 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
 
         if (!response.Result.Any())
         {
-            return "No topological relationships found for these concepts.";
+            return "No topological relationships found for these topics.";
         }
 
         return FormatTopologyResult(response.Result);
     }
 
     public async Task UpdateMasteryEdgeAsync(
-        ConceptMasteryUpdated masteryEvent,
+        TopicMasteryUpdated masteryEvent,
         CancellationToken cancellationToken
     )
     {
         var upsertQuery = @"
         MERGE (u:User {id: $userId})
-        MERGE (t:Topic {topic_id: $conceptId})
-        MERGE (u)-[k:KNOWS]->(t)
+        MERGE (topic:Topic {topic_id: $topicId})
+        MERGE (u)-[k:KNOWS]->(topic)
         
         ON CREATE SET 
             k.p_learned = $pLearned,
@@ -163,7 +162,7 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
             .WithParameters(new
             {
                 userId = masteryEvent.UserId,
-                conceptId = masteryEvent.ConceptId,
+                topicId = masteryEvent.TopicId, // Mapping your Domain 'ConceptId' to Neo4j 'topic_id'
                 pLearned = masteryEvent.NewMastery,
                 pGuess = masteryEvent.PGuess,
                 pSlip = masteryEvent.PSlip,
@@ -178,9 +177,9 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
     {
         var response = await driver
             .ExecutableQuery(@"
-                MATCH (t:Topic)
-                WHERE t.domain IS NOT NULL AND t.domain <> '' 
-                RETURN DISTINCT t.domain AS Domain
+                MATCH (topic:Topic)
+                WHERE topic.domain IS NOT NULL AND topic.domain <> '' 
+                RETURN DISTINCT topic.domain AS Domain
                 ORDER BY Domain ASC"
             )
             .WithConfig(new QueryConfig(database: DatabaseName))
@@ -195,7 +194,6 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
         var sb = new StringBuilder();
 
         sb.AppendLine("### KNOWLEDGE GRAPH TOPOLOGY");
-
         sb.AppendLine("The following relationships define the curriculum hierarchy and technical tradeoffs:");
 
         var grouped = records.GroupBy(r => r["RelType"].As<string>());
@@ -209,7 +207,6 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
             foreach (var rec in group)
             {
                 string topic = rec["TopicId"].As<string>();
-
                 string neighbor = rec["NeighborId"].As<string>();
 
                 sb.AppendLine(CultureInfo.InvariantCulture, $"- {topic} <-> {neighbor}");

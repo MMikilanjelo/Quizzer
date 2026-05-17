@@ -27,7 +27,7 @@ public static class SmartScheduleQuiz
         {
             var priorityDomains = await graphClient.GetGlobalPriorityDomainsAsync(command.UserId, limit: 1, cancellationToken);
 
-            var assignedTopic = priorityDomains.First();
+            var assignedDomainId = priorityDomains.First();
 
             var userQuizCount = await documentSession.Query<Quiz>().CountAsync(q => q.UserId == command.UserId, cancellationToken);
 
@@ -37,7 +37,7 @@ public static class SmartScheduleQuiz
             {
                 QuizId = quizId,
                 UserId = command.UserId,
-                TopicId = assignedTopic,
+                DomainId = assignedDomainId,
                 SequenceNumber = userQuizCount + 1,
                 CreatedAt = dateTimeProvider.UtcNow,
             };

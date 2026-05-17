@@ -47,7 +47,7 @@ public static class GenerateQuiz
                 return UserErrors.NotFound;
             }
 
-            var targetNodes = await graphClient.GetDiscoveryNodesAsync(quiz.Topic, quiz.UserId, limit: 5, cancellationToken);
+            var targetNodes = await graphClient.GetTopicNodesAsync(quiz.DomainId, quiz.UserId, limit: 5, cancellationToken);
             var masteryContext = string.Join("\n", targetNodes.Select(n => $"- {n.Name} (ID: {n.Id}): Mastery Level {n.Mastery:P0}"));
             var nodeIds = targetNodes.Select(n => n.Id).ToList();
 
@@ -71,7 +71,7 @@ public static class GenerateQuiz
                        - You MUST set the `SystemDifficulty` in your response to the overall level you chose.";
 
             string prompt = $@"
-            You are an elite educational architect and subject matter expert designing an adaptive, highly engaging quiz about '{quiz.Topic}'. 
+            You are an elite educational architect and subject matter expert designing an adaptive, highly engaging quiz about '{quiz.DomainId}'. 
 
             Your goal is to test the student's true understanding of the concepts and how they relate to one another in the real world.
 

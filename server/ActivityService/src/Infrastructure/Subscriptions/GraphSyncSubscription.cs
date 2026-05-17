@@ -22,7 +22,7 @@ public class GraphSyncSubscription : SubscriptionBase
         _scopeFactory = scopeFactory;
         _logger = logger;
 
-        IncludeType<ConceptMasteryUpdated>();
+        IncludeType<TopicMasteryUpdated>();
 
         Name = "Neo4jMasterySync";
         Options.BatchSize = 100;
@@ -41,7 +41,7 @@ public class GraphSyncSubscription : SubscriptionBase
 
         foreach (var @event in page.Events)
         {
-            if (@event.Data is not ConceptMasteryUpdated masteryEvent) continue;
+            if (@event.Data is not TopicMasteryUpdated masteryEvent) continue;
 
             try
             {

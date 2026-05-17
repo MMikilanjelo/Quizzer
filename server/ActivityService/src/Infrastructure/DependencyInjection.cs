@@ -150,7 +150,7 @@ public static class DependencyInjection
                 options.UseSystemTextJsonForSerialization(enumStorage: EnumStorage.AsString, Casing.SnakeCase);
 
                 options.Projections.Snapshot<Quiz>(SnapshotLifecycle.Inline);
-                options.Projections.Snapshot<ConceptMastery>(SnapshotLifecycle.Inline);
+                options.Projections.Snapshot<TopicMastery>(SnapshotLifecycle.Inline);
                 options.Projections.Add<QuizSummaryViewProjection>(ProjectionLifecycle.Async);
                 options.Projections.Add<UserDashboardProjection>(ProjectionLifecycle.Async);
 

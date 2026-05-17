@@ -10,7 +10,7 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
     public UserDashboardProjection()
     {
         Identity<QuizCompleted>(e => e.UserId);
-        Identity<ConceptMasteryUpdated>(e => e.UserId);
+        Identity<TopicMasteryUpdated>(e => e.UserId);
     }
 
     public UserDashboardView Create(QuizCompleted @event) =>
@@ -22,7 +22,7 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
             AverageScore = @event.ScorePercentage,
             LastQuizDate = @event.CompletedAt,
             StreakDays = 1,
-            ConceptMasteryLevels = []
+            TopicMasteryLevels = []
         };
 
     public UserDashboardView Apply(QuizCompleted @event, UserDashboardView current)
@@ -55,18 +55,18 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
         };
     }
 
-    public UserDashboardView Apply(ConceptMasteryUpdated @event, UserDashboardView current)
+    public UserDashboardView Apply(TopicMasteryUpdated @event, UserDashboardView current)
     {
-        var conceptMasteryLevels = current.ConceptMasteryLevels.ToList();
-        var index = conceptMasteryLevels.FindIndex(m => m.ConceptId == @event.ConceptId);
+        var conceptMasteryLevels = current.TopicMasteryLevels.ToList();
+        var index = conceptMasteryLevels.FindIndex(m => m.TopicId == @event.TopicId);
 
         var newPercentage = (int)(@event.NewMastery * 100);
 
         if (index == -1)
         {
-            conceptMasteryLevels.Add(new ConceptMasteryLevelView
+            conceptMasteryLevels.Add(new TopicMasteryLevelView
             {
-                ConceptId = @event.ConceptId,
+                TopicId = @event.TopicId,
                 MasteryPercentage = newPercentage
             });
         }
@@ -78,6 +78,6 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
             };
         }
 
-        return current with { ConceptMasteryLevels = conceptMasteryLevels };
+        return current with { TopicMasteryLevels = conceptMasteryLevels };
     }
 }

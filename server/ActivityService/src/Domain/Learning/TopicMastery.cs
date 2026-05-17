@@ -1,6 +1,6 @@
 ﻿namespace Domain.Learning;
 
-public record ConceptMastery
+public record TopicMastery
 {
     public required string Id { get; init; }
     public required string UserId { get; init; }
@@ -9,20 +9,20 @@ public record ConceptMastery
     public required BktParams Params { get; init; }
     public DateTime LastUpdated { get; init; }
 
-    public static ConceptMastery Create(ConceptMasteryStarted @event)
+    public static TopicMastery Create(TopicMasteryStarted @event)
     {
-        return new ConceptMastery
+        return new TopicMastery
         {
-            Id = FormatId(@event.UserId, @event.ConceptId),
+            Id = FormatId(@event.UserId, @event.TopicId),
             UserId = @event.UserId,
-            ConceptId = @event.ConceptId,
+            ConceptId = @event.TopicId,
             Mastery = Mastery.Initial,
             Params = @event.InitialParams,
             LastUpdated = @event.StartedAt
         };
     }
 
-    public ConceptMastery Apply(ConceptMasteryUpdated @event)
+    public TopicMastery Apply(TopicMasteryUpdated @event)
     {
         return this with
         {
@@ -31,11 +31,11 @@ public record ConceptMastery
         };
     }
 
-    public ConceptMasteryUpdated RecordAttempt(bool isCorrect, string quizId, string questionId, DateTime timestamp)
+    public TopicMasteryUpdated RecordAttempt(bool isCorrect, string quizId, string questionId, DateTime timestamp)
     {
         var nextMastery = Mastery.CalculateNext(isCorrect, Params);
 
-        return new ConceptMasteryUpdated(
+        return new TopicMasteryUpdated(
             UserId, ConceptId, quizId, questionId,
             Mastery.Value, nextMastery.Value,
             Params.PGuess, Params.PSlip, Params.PTransition,
@@ -43,5 +43,5 @@ public record ConceptMastery
         );
     }
 
-    public static string FormatId(string userId, string conceptId) => $"{userId}:{conceptId}";
+    public static string FormatId(string userId, string topicId) => $"{userId}:{topicId}";
 }

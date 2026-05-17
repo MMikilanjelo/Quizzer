@@ -10,15 +10,12 @@ namespace Web.Api.Endpoints.Quizzes;
 
 internal sealed class SmartScheduleQuizEndpoint : IEndpoint<QuizEndpointGroup>
 {
-    private sealed record Request(string TopicId);
-
     public void MapEndpoint(RouteGroupBuilder group) =>
         group
             .MapPost("schedule/smart", Handler)
             .RequireAuthorization(Policies.RequireOnboardingComplete);
 
     private static async Task<IResult> Handler(
-        Request request,
         ICommandHandler<SmartScheduleQuiz.Command, SmartScheduleQuiz.Response> handler,
         IUserContext userContext,
         CancellationToken cancellationToken

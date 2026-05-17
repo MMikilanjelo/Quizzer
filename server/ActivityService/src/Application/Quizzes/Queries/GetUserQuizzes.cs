@@ -3,7 +3,6 @@ using Application.Mapping;
 using Application.Quizzes.Views;
 using ErrorOr;
 using Marten;
-using Marten.Linq;
 using Marten.Pagination;
 
 namespace Application.Quizzes.Queries;
