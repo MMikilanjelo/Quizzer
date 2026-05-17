@@ -1,0 +1,75 @@
+﻿.my-profile__stats-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
+}
+
+.my-profile__stat-box {
+    width: 48%;
+    background-color: var(--palette-sky-white);
+    border-radius: var(--radius-l);
+    padding: var(--spacing-m) var(--spacing-s);
+    margin-bottom: var(--spacing-m);
+    border-width: 1px;
+    border-color: var(--palette-sky-light);
+    align-items: center;
+    justify-content: center;
+}
+
+.my-profile__stat-value {
+    margin-bottom: var(--spacing-xxs);
+}
+
+.my-profile__stat-label {
+    color: var(--palette-ink-lighter);
+}
+
+.my-profile__section {
+    background-color: var(--palette-sky-white);
+    border-radius: var(--radius-l);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-m);
+    border-width: 1px;
+    border-color: var(--palette-sky-light);
+}
+
+.my-profile__section-title {
+    color: var(--text-color-main);
+    margin-bottom: var(--spacing-m);
+}
+
+.my-profile__skill-row {
+    flex-direction: column;
+    margin-bottom: var(--spacing-m);
+}
+
+.my-profile__skill-header {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
+}
+
+.my-profile__skill-name {
+    color: var(--text-color-main);
+}
+
+.my-profile__skill-track {
+    height: var(--spacing-xs);
+    width: 100%;
+    background-color: var(--palette-sky-lighter);
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+}
+
+.my-profile__skill-fill {
+    height: 100%;
+    background-color: var(--palette-green-base);
+    border-radius: var(--radius-xs);
+    transition-property: width;
+    transition-duration: 0.5s;
+}
+
+.my-profile__skill-fill--warning {
+    background-color: var(--palette-yellow-base);
+}

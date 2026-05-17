@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23c50ffdb2b7454495924ce50de33151
+    m_Address: MyProfileScreen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 314c9f9fc5fc1a54ca0fad96b8f59f98
     m_Address: Backdrop
     m_ReadOnly: 0

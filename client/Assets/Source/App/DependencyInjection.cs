@@ -9,6 +9,7 @@ using Source.App.StateMachine.States.MainState.StateMachine.States;
 using Source.Features.Auth;
 using Source.Features.FAB;
 using Source.Features.LoadingOverlays;
+using Source.Features.MyProfile;
 using Source.Features.Onboarding;
 using Source.Features.Quizzes;
 using Source.Features.TabBar;
@@ -37,6 +38,7 @@ namespace Source.App
             builder.RegisterTabBarFeature();
             builder.RegisterFabFeature();
             builder.RegisterQuizzesFeature();
+            builder.RegisterMyProfileFeature();
 
             builder.Register<IAssetProviderService, AssetProviderService>(Lifetime.Singleton);
             builder.Register<ILoggingService, LoggingService>(Lifetime.Singleton);
@@ -64,7 +66,7 @@ namespace Source.App
             builder.Register<TellUsYourProficiencyLevelState>(Lifetime.Singleton);
             builder.Register<TellUsYourGoalState>(Lifetime.Singleton);
             builder.Register<HomeState>(Lifetime.Singleton);
-            builder.Register<ProfileState>(Lifetime.Singleton);
+            builder.Register<MyProfileState>(Lifetime.Singleton);
             builder.Register<MyQuizzesState>(Lifetime.Singleton);
             builder.Register<CreateQuizState>(Lifetime.Singleton);
             builder.Register<ActiveQuizState>(Lifetime.Singleton);

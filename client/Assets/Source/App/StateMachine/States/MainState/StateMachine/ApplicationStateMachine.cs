@@ -13,7 +13,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine
             TellUsYourGoalState tellUsYourGoalState,
             TellUsYourProficiencyLevelState tellUsYourProficiencyLevelState,
             HomeState homeState,
-            ProfileState profileState,
+            MyProfileState myProfileState,
             MyQuizzesState myQuizzesState,
             CreateQuizState createQuizState,
             ActiveQuizState activeQuizState,
@@ -25,7 +25,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine
             tellUsYourGoalState.Bind(this);
             tellUsYourProficiencyLevelState.Bind(this);
             homeState.Bind(this);
-            profileState.Bind(this);
+            myProfileState.Bind(this);
             myQuizzesState.Bind(this);
             createQuizState.Bind(this);
             activeQuizState.Bind(this);
@@ -36,7 +36,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine
             RegisterState(tellUsYourGoalState);
             RegisterState(tellUsYourProficiencyLevelState);
             RegisterState(homeState);
-            RegisterState(profileState);
+            RegisterState(myProfileState);
             RegisterState(myQuizzesState);
             RegisterState(createQuizState);
             RegisterState(activeQuizState);
