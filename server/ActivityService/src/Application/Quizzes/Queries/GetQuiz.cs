@@ -21,14 +21,10 @@ public static class GetQuiz
         public required string UserId { get; init; }
         public required string Name { get; init; }
         public required List<string> Topics { get; init; }
-        public required QuizStatus Status { get; init; }
+        public required QuizSummaryView.QuizStatus Status { get; init; }
         public required List<QuestionModel> Questions { get; init; }
         public required List<string> AnsweredQuestionIds { get; init; }
-
-        public string? CurrentQuestionId => Questions
-            .Select(q => q.Id)
-            .FirstOrDefault(id => !AnsweredQuestionIds.Contains(id));
-
+        public string? CurrentQuestionId => Questions.Select(q => q.Id).FirstOrDefault(id => !AnsweredQuestionIds.Contains(id));
         public int TotalQuestions => Questions.Count;
         public int AnsweredCount => AnsweredQuestionIds.Count;
     }

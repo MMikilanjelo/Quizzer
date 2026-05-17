@@ -21,7 +21,7 @@ public sealed record Quiz
         Smart
     }
 
-    public enum DifficultyLevels
+    public enum DifficultyLevel
     {
         Unspecified,
         Easy,
@@ -36,18 +36,15 @@ public sealed record Quiz
     public required int? DesiredQuestionsCount { get; init; }
     public required QuizStatus Status { get; init; }
     public required ScheduleType Schedule { get; init; }
-    public required DifficultyLevels UserDifficulty { get; init; }
-    public required DifficultyLevels SystemDifficulty { get; init; }
+    public required DifficultyLevel UserDifficulty { get; init; }
+    public required DifficultyLevel SystemDifficulty { get; init; }
     public required IReadOnlyList<QuizQuestion> Questions { get; init; }
     public required IReadOnlyList<string> AnsweredQuestionIds { get; init; }
     public required IReadOnlyList<string> CorrectQuestionIds { get; init; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? CompletedAt { get; init; }
-    public bool IsPerfect => CorrectQuestionIds.Count == Questions.Count;
-
-    public float ScorePercentage => Questions.Count > 0
-        ? (float)CorrectQuestionIds.Count / Questions.Count
-        : 0f;
+    public bool IsPerfect => Questions.Count != 0 && CorrectQuestionIds.Count == Questions.Count;
+    public float ScorePercentage => Questions.Count > 0 ? (float)CorrectQuestionIds.Count / Questions.Count : 0f;
 
     public ErrorOr<QuizContentGenerated> Fill(FillQuizCommand command)
     {
@@ -149,8 +146,8 @@ public sealed record Quiz
             DesiredQuestionsCount = null,
             AnsweredQuestionIds = [],
             CorrectQuestionIds = [],
-            SystemDifficulty = DifficultyLevels.Unspecified,
-            UserDifficulty = DifficultyLevels.Unspecified,
+            SystemDifficulty = DifficultyLevel.Unspecified,
+            UserDifficulty = DifficultyLevel.Unspecified,
             CreatedAt = @event.CreatedAt,
             CompletedAt = null
         };
@@ -170,8 +167,8 @@ public sealed record Quiz
             Questions = [],
             AnsweredQuestionIds = [],
             CorrectQuestionIds = [],
-            SystemDifficulty = DifficultyLevels.Unspecified,
-            UserDifficulty = Enum.Parse<DifficultyLevels>(@event.DifficultyLevelId),
+            SystemDifficulty = DifficultyLevel.Unspecified,
+            UserDifficulty = @event.DifficultyLevel,
             CreatedAt = @event.CreatedAt,
             CompletedAt = null
         };

@@ -4,6 +4,7 @@ using Application.Abstractions.Providers;
 using Domain.Learning;
 using Domain.Quizzes;
 using ErrorOr;
+using FluentValidation;
 using Marten;
 
 namespace Application.Quizzes.Commands;
@@ -16,6 +17,28 @@ public static class SubmitQuizAnswer
         public required string QuizId { get; init; }
         public required string QuestionId { get; init; }
         public int SelectedAnswerIndex { get; init; }
+    }
+
+    public sealed class Validator : AbstractValidator<Command>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.UserId)
+                .NotEmpty()
+                .WithMessage("User ID is required.");
+
+            RuleFor(x => x.QuizId)
+                .NotEmpty()
+                .WithMessage("Quiz ID is required.");
+
+            RuleFor(x => x.QuestionId)
+                .NotEmpty()
+                .WithMessage("Question ID is required.");
+
+            RuleFor(x => x.SelectedAnswerIndex)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Selected answer index must be zero or greater.");
+        }
     }
 
     internal sealed class Handler(

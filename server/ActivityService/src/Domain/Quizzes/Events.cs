@@ -15,7 +15,7 @@ public sealed record ManualQuizScheduled : IEvent
     public required string UserId { get; init; }
     public required string TopicId { get; init; }
     public required int QuestionCount { get; init; }
-    public required string DifficultyLevelId { get; init; }
+    public required Quiz.DifficultyLevel DifficultyLevel { get; init; }
     public required int SequenceNumber { get; init; }
     public required DateTime CreatedAt { get; init; }
 }
@@ -24,7 +24,7 @@ public sealed record QuizContentGenerated : IEvent
 {
     public required string QuizId { get; init; }
     public required List<QuizQuestion> Questions { get; init; }
-    public required Quiz.DifficultyLevels SystemDifficulty { get; init; }
+    public required Quiz.DifficultyLevel SystemDifficulty { get; init; }
     public required DateTime GeneratedAt { get; init; }
 }
 

@@ -3,6 +3,7 @@ using Application.Abstractions.Providers;
 using Application.Authentication;
 using Domain.Quizzes;
 using ErrorOr;
+using FluentValidation;
 using Marten;
 
 namespace Application.Quizzes.Commands;
@@ -14,7 +15,31 @@ public static class ManualScheduleQuiz
         public required string UserId { get; init; }
         public required string TopicId { get; init; }
         public required int QuestionCount { get; set; }
-        public required string DifficultyLevelId { get; set; }
+        public required Quiz.DifficultyLevel DifficultyLevel { get; set; }
+    }
+
+    public sealed class Validator : AbstractValidator<Command>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.UserId)
+                .NotEmpty()
+                .WithMessage("User ID is required.");
+
+            RuleFor(x => x.TopicId)
+                .NotEmpty()
+                .WithMessage("Topic ID is required.");
+
+            RuleFor(x => x.QuestionCount)
+                .GreaterThanOrEqualTo(5)
+                .WithMessage("Question count must be at least 5.")
+                .LessThanOrEqualTo(50)
+                .WithMessage("Question count cannot exceed 50 for a single manual session.");
+
+            RuleFor(x => x.DifficultyLevel)
+                .IsInEnum()
+                .WithMessage("A valid difficulty level must be specified.");
+        }
     }
 
     public sealed record Response(string Id);
@@ -37,7 +62,7 @@ public static class ManualScheduleQuiz
                 UserId = command.UserId,
                 TopicId = command.TopicId,
                 QuestionCount = command.QuestionCount,
-                DifficultyLevelId = command.DifficultyLevelId,
+                DifficultyLevel = command.DifficultyLevel,
                 SequenceNumber = userQuizCount + 1,
                 CreatedAt = dateTimeProvider.UtcNow,
             };

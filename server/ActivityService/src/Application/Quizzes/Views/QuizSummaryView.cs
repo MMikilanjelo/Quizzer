@@ -1,15 +1,15 @@
 ﻿namespace Application.Quizzes.Views;
 
-public enum QuizStatus
-{
-    Ready,
-    InProgress,
-    Pending,
-    Completed
-}
-
 public sealed record QuizSummaryView
 {
+    public enum QuizStatus
+    {
+        Ready,
+        InProgress,
+        Pending,
+        Completed
+    }
+
     public required string Id { get; set; }
     public required string UserId { get; set; }
     public required List<string> Topics { get; set; }

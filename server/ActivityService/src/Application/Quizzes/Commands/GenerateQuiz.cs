@@ -14,7 +14,7 @@ public static class GenerateQuiz
 {
     public sealed record Command(string QuizId) : ICommand;
 
-    private sealed record GenerateContentResponse(List<QuizQuestion> Questions, Quiz.DifficultyLevels SystemDifficulty);
+    private sealed record GenerateContentResponse(List<QuizQuestion> Questions, Quiz.DifficultyLevel SystemDifficulty);
 
     internal sealed class Handler(
         IDocumentSession documentSession,
@@ -60,7 +60,7 @@ public static class GenerateQuiz
                 ? $"Generate exactly {quiz.DesiredQuestionsCount.Value} questions using the following rules:"
                 : "Determine the optimal number of questions to generate (between 5 and 15) to adequately test the student's mastery of the provided concepts, using the following rules:";
 
-            string difficultyRules = quiz.Schedule == Quiz.ScheduleType.Manual && quiz.UserDifficulty != Quiz.DifficultyLevels.Unspecified
+            string difficultyRules = quiz.Schedule == Quiz.ScheduleType.Manual && quiz.UserDifficulty != Quiz.DifficultyLevel.Unspecified
                 ? $@"- This is a MANUAL session. Generate ALL questions strictly at the '{quiz.UserDifficulty}' difficulty level. 
                         - Do NOT adapt the difficulty based on mastery.
                         - You MUST set the `SystemDifficulty` in your response to exactly '{quiz.UserDifficulty}'."

@@ -14,7 +14,7 @@ public sealed record ScheduleQuizCommand
 public sealed record FillQuizCommand
 {
     public required ImmutableList<QuizQuestion> Questions { get; init; }
-    public required Quiz.DifficultyLevels SystemDifficulty { get; init; }
+    public required Quiz.DifficultyLevel SystemDifficulty { get; init; }
     public required DateTime GeneratedAt { get; init; }
 }
 

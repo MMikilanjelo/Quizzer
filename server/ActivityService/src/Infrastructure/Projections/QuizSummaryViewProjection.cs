@@ -25,7 +25,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
             Name = $"Quiz #{@event.SequenceNumber}",
             UserId = @event.UserId,
             Topics = [], 
-            Status = QuizStatus.Pending,
+            Status = QuizSummaryView.QuizStatus.Pending,
             CreatedAt = @event.CreatedAt,
             QuestionCount = 0,
             AnsweredCount = 0,
@@ -40,7 +40,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
             Name = $"Quiz #{@event.SequenceNumber}",
             UserId = @event.UserId,
             Topics = [], 
-            Status = QuizStatus.Pending,
+            Status = QuizSummaryView.QuizStatus.Pending,
             CreatedAt = @event.CreatedAt,
             QuestionCount = @event.QuestionCount, 
             AnsweredCount = 0,
@@ -52,7 +52,7 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
     public QuizSummaryView Apply(QuizContentGenerated @event, QuizSummaryView current) =>
         current with
         {
-            Status = QuizStatus.Ready,
+            Status = QuizSummaryView.QuizStatus.Ready,
             Topics = @event.Questions.Select(q => q.ConceptId).Distinct().ToList(),
             QuestionCount = @event.Questions.Count,
             Questions = @event.Questions.Select(q => new QuestionView
@@ -80,17 +80,14 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
 
         return current with
         {
-            Status = QuizStatus.InProgress,
+            Status = QuizSummaryView.QuizStatus.InProgress,
             AnsweredCount = current.AnsweredCount + 1,
             Questions = updatedQuestions
         };
     }
 
     public QuizSummaryView Apply(QuizCompleted @event, QuizSummaryView current) =>
-        current with
-        {
-            Status = QuizStatus.Completed
-        };
+        current with { Status = QuizSummaryView.QuizStatus.Completed };
 
     public QuizSummaryView Apply(ConceptMasteryUpdated @event, QuizSummaryView current)
     {

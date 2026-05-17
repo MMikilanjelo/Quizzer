@@ -37,7 +37,7 @@ public static class GetUserQuizzes
         public required string UserId { get; set; }
         public required List<string> Topics { get; set; }
         public required string Name { get; set; }
-        public required QuizStatus Status { get; set; }
+        public required QuizSummaryView.QuizStatus Status { get; set; }
         public int QuestionCount { get; init; }
         public int AnsweredCount { get; init; }
         public DateTime CreatedAt { get; set; }
@@ -53,9 +53,9 @@ public static class GetUserQuizzes
 
             queryable = query.Filter switch
             {
-                QuizFilter.Pending => queryable.Where(x => x.Status == QuizStatus.Pending),
-                QuizFilter.Active => queryable.Where(x => x.Status == QuizStatus.Ready || x.Status == QuizStatus.InProgress),
-                QuizFilter.Completed => queryable.Where(x => x.Status == QuizStatus.Completed),
+                QuizFilter.Pending => queryable.Where(x => x.Status == QuizSummaryView.QuizStatus.Pending),
+                QuizFilter.Active => queryable.Where(x => x.Status == QuizSummaryView.QuizStatus.Ready || x.Status == QuizSummaryView.QuizStatus.InProgress),
+                QuizFilter.Completed => queryable.Where(x => x.Status == QuizSummaryView.QuizStatus.Completed),
                 _ => queryable
             };
 
