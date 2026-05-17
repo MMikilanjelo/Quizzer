@@ -31,7 +31,7 @@ public class GraphSyncSubscription : SubscriptionBase
     public override async Task<IChangeListener> ProcessEventsAsync(
         EventRange page,
         ISubscriptionController controller,
-        IDocumentOperations operations, // We ignore this, no writing allowed here
+        IDocumentOperations operations,
         CancellationToken cancellationToken)
     {
         using var scope = _scopeFactory.CreateScope();

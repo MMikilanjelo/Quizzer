@@ -16,9 +16,9 @@ namespace Infrastructure.Subscriptions.Kafka;
 public partial class KafkaSubscription : SubscriptionBase
 {
     private readonly IMessagePublisher _publisher;
-    
+
     private readonly ILogger<KafkaSubscription> _logger;
-    
+
     private readonly Dictionary<Type, IIntegrationEventMapper> _eventMappers;
 
     public KafkaSubscription(
@@ -33,6 +33,7 @@ public partial class KafkaSubscription : SubscriptionBase
 
         foreach (Type type in _eventMappers.Keys)
         {
+            _logger.LogDebug("Mapping event {EventType} to topic {Topic}", type.Name, _eventMappers[type].Topic);
             IncludeType(type);
         }
 
@@ -52,7 +53,7 @@ public partial class KafkaSubscription : SubscriptionBase
         long lastProcessed = page.SequenceFloor;
 
         using IDisposable pageScope = LogContext.PushProperty("SequenceFloor", page.SequenceFloor);
-        
+
         using IDisposable ceilScope = LogContext.PushProperty("SequenceCeiling", page.SequenceCeiling);
 
         LogProcessingEventPage();
@@ -69,9 +70,9 @@ public partial class KafkaSubscription : SubscriptionBase
             if (!_eventMappers.TryGetValue(@event.Data.GetType(), out IIntegrationEventMapper? route))
             {
                 LogNoRouteFound();
-                
+
                 lastProcessed = @event.Sequence;
-                
+
                 continue;
             }
 
@@ -95,23 +96,23 @@ public partial class KafkaSubscription : SubscriptionBase
             catch (JsonException ex)
             {
                 LogSerializationFailed(ex);
-                
+
                 await controller.RecordDeadLetterEventAsync(@event, ex);
             }
             catch (ProduceException<string, string> ex)
             {
                 LogKafkaPublishFailed(ex);
-                
+
                 await controller.ReportCriticalFailureAsync(ex, lastProcessed);
-                
+
                 break;
             }
             catch (Exception ex)
             {
                 LogUnhandledError(ex);
-                
+
                 await controller.ReportCriticalFailureAsync(ex, lastProcessed);
-                
+
                 break;
             }
         }

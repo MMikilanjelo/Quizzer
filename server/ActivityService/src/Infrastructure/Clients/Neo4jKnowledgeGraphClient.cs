@@ -164,7 +164,7 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
             .WithParameters(new
             {
                 userId = masteryEvent.UserId,
-                topicId = masteryEvent.TopicId, // Mapping your Domain 'ConceptId' to Neo4j 'topic_id'
+                topicId = masteryEvent.TopicId, 
                 pLearned = masteryEvent.NewMastery,
                 pGuess = masteryEvent.PGuess,
                 pSlip = masteryEvent.PSlip,

@@ -45,6 +45,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
         private readonly ReactiveProperty<float> _progress = new(0);
         private readonly ReactiveProperty<string> _quizName = new(string.Empty);
         private readonly ReactiveProperty<string> _questionText = new(string.Empty);
+        private readonly ReactiveProperty<bool> _canSubmitAnswer = new(false);
 
         private readonly IQuizzesMediator _quizzesMediator;
         private readonly IUIStackMediator _uiStackMediator;
@@ -86,7 +87,11 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             _tabBarMediator.Hide();
 
             GoBackCommand = SyncCommand.Create(() => { _payload.GoBackAction?.Invoke(); });
-            ContinueCommand = AsyncCommand.Create(SubmitAnswer);
+
+            ContinueCommand = AsyncCommand
+                .Create(SubmitAnswer)
+                .WithExecutionRule(_canSubmitAnswer);
+
             _goToFinishedQuizCommand = SyncCommand.Create(() =>
             {
                 StateMachine.Enter<FinishedQuizState, FinishedQuizStatePayload>(new FinishedQuizStatePayload
@@ -98,6 +103,8 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             _goBackCommand = SyncCommand.Create(() => _payload.GoBackAction?.Invoke());
 
             _quizzesMediator.CreateActiveQuizScreen(this);
+
+            _options.SelectCommand.Executed.Subscribe(_ => _canSubmitAnswer.Value = true);
 
             FetchQuiz(payload.QuizId).Forget();
         }
@@ -179,6 +186,8 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                 return;
             }
 
+            _canSubmitAnswer.Value = false;
+
             _questionText.Value = nextQuestion.Text;
 
             var options = nextQuestion.Options
@@ -209,6 +218,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
             _progress.Dispose();
             _quizName.Dispose();
             _questionText.Dispose();
+            _canSubmitAnswer.Dispose();
 
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
