@@ -15,9 +15,9 @@ public class GetQuizConfiguration
 
     public sealed record Response
     {
-        public int MinQuestions { get; private init; } = 5;
+        public int MinQuestions { get; private init; } = Quiz.MinQuestionCount;
 
-        public int MaxQuestions { get; private init; } = 50;
+        public int MaxQuestions { get; private init; } = Quiz.MaxQuestionCount;
 
         public List<string> Difficulties { get; private init; } = Enum.GetNames<Quiz.DifficultyLevel>()
             .Where(name => name != nameof(Quiz.DifficultyLevel.Unspecified))

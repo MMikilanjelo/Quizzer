@@ -31,10 +31,8 @@ public static class ManualScheduleQuiz
                 .WithMessage("Topic ID is required.");
 
             RuleFor(x => x.QuestionCount)
-                .GreaterThanOrEqualTo(5)
-                .WithMessage("Question count must be at least 5.")
-                .LessThanOrEqualTo(50)
-                .WithMessage("Question count cannot exceed 50 for a single manual session.");
+                .InclusiveBetween(Quiz.MinQuestionCount, Quiz.MaxQuestionCount)
+                .WithMessage($"Question count must be between {Quiz.MinQuestionCount} and {Quiz.MaxQuestionCount}.");
 
             RuleFor(x => x.DifficultyLevel)
                 .IsInEnum()

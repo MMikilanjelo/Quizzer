@@ -7,6 +7,10 @@ public sealed record QuizQuestion(string Id, string ConceptId, string Text, List
 
 public sealed record Quiz
 {
+    public const int MinQuestionCount = 5;
+
+    public const int MaxQuestionCount = 50;
+
     public enum QuizStatus
     {
         Pending,
