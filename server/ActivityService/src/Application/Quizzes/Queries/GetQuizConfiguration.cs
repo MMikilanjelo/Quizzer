@@ -2,6 +2,7 @@
 using Application.Abstractions.Messaging;
 using Application.Mapping;
 using Application.Quizzes.Views;
+using Domain.Quizzes;
 using ErrorOr;
 using Marten;
 using Marten.Pagination;
@@ -18,7 +19,10 @@ public class GetQuizConfiguration
 
         public int MaxQuestions { get; private init; } = 50;
 
-        public List<string> Difficulties { get; private init; } = ["Easy", "Medium", "Hard"];
+        public List<string> Difficulties { get; private init; } = Enum.GetNames<Quiz.DifficultyLevel>()
+            .Where(name => name != nameof(Quiz.DifficultyLevel.Unspecified))
+            .ToList();
+
         public required List<string> Domains { get; init; }
     }
 
