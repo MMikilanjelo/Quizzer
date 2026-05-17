@@ -27,10 +27,10 @@ public static class GetUserQuizzes
 
     public sealed record Response
     {
-        public required Page<Model> Quizzes { get; init; }
+        public required Page<QuizModel> Quizzes { get; init; }
     }
 
-    public sealed record Model
+    public sealed record QuizModel
     {
         public required string Id { get; set; }
         public required string UserId { get; set; }
@@ -60,7 +60,7 @@ public static class GetUserQuizzes
 
             var pagedItems = await queryable
                 .OrderByDescending(x => x.CreatedAt)
-                .Select(view => new Model
+                .Select(view => new QuizModel
                 {
                     Id = view.Id,
                     UserId = view.UserId,

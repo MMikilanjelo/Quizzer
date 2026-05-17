@@ -31,7 +31,7 @@ public static class GetQuiz
 
     public sealed record QuestionModel(
         string Id,
-        string ConceptId,
+        string TopicId,
         string Text,
         List<string> Options
     );

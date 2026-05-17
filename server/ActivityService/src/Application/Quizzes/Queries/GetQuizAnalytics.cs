@@ -31,7 +31,7 @@ public static class GetQuizAnalytics
     }
 
     public sealed record MasteryDeltaModel(
-        string ConceptId,
+        string TopicId,
         double StartingMastery,
         double EndingMastery,
         int Attempts
