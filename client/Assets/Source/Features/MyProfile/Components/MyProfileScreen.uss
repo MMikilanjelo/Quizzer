@@ -47,11 +47,24 @@
 .my-profile__skill-header {
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: var(--spacing-xs);
+    width: 100%;
+}
+
+.my-profile__skill-pct {
+    flex-shrink: 0;
+    color: var(--palette-sky-dark);
 }
 
 .my-profile__skill-name {
-    color: var(--text-color-main);
+    flex-shrink: 1;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: var(--spacing-s);
+    color: var(--palette-ink-dark);
 }
 
 .my-profile__skill-track {
