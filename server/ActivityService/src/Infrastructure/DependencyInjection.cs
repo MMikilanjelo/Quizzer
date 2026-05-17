@@ -66,6 +66,14 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
+        var infrastructureAssembly = typeof(KafkaSubscription).Assembly;
+        var allMappersInAssembly = infrastructureAssembly.GetTypes()
+            .Where(t => typeof(IIntegrationEventMapper).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+            .Select(t => t.Name)
+            .ToList();
+
+        Console.WriteLine($"--- MAPPERS FOUND IN INFRASTRUCTURE: {string.Join(", ", allMappersInAssembly)} ---");
+
         services.Scan(scan => scan
             .FromAssembliesOf(typeof(KafkaSubscription))
             .AddClasses(classes => classes.AssignableTo<IIntegrationEventMapper>(), publicOnly: false)
