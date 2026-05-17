@@ -26,24 +26,27 @@ public static class ManualScheduleQuiz
     {
         public async Task<ErrorOr<Response>> HandleAsync(Command command, CancellationToken cancellationToken)
         {
-            var userQuizCount = await documentSession.Query<Quiz>().CountAsync(q => q.UserId == command.UserId, cancellationToken);
+            var userQuizCount = await documentSession.Query<Quiz>()
+                .CountAsync(q => q.UserId == command.UserId, cancellationToken);
 
-            var nextSequence = userQuizCount + 1;
+            var quizId = Guid.NewGuid().ToString();
 
-            var quizScheduled = new QuizScheduled
+            var quizScheduled = new ManualQuizScheduled
             {
-                QuizId = Guid.NewGuid().ToString(),
+                QuizId = quizId,
                 UserId = command.UserId,
-                Topic = command.TopicId,
-                SequenceNumber = nextSequence,
+                TopicId = command.TopicId,
+                QuestionCount = command.QuestionCount,
+                DifficultyLevelId = command.DifficultyLevelId,
+                SequenceNumber = userQuizCount + 1,
                 CreatedAt = dateTimeProvider.UtcNow,
             };
 
-            documentSession.Events.StartStream<Quiz>(quizScheduled.QuizId, quizScheduled);
+            documentSession.Events.StartStream<Quiz>(quizId, quizScheduled);
 
             await documentSession.SaveChangesAsync(cancellationToken);
 
-            return new Response(quizScheduled.QuizId);
+            return new Response(quizId);
         }
     }
 }

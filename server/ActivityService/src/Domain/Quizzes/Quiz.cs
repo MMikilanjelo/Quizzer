@@ -9,17 +9,35 @@ public sealed record Quiz
 {
     public enum QuizStatus
     {
-        Pending = 0,
-        InProgress = 1,
-        Ready = 2,
-        Completed = 3
+        Pending,
+        InProgress,
+        Ready,
+        Completed
+    }
+
+    public enum ScheduleType
+    {
+        Manual,
+        Smart
+    }
+
+    public enum DifficultyLevels
+    {
+        Unspecified,
+        Easy,
+        Medium,
+        Hard
     }
 
     public required string Id { get; init; }
     public required string UserId { get; init; }
     public required string Topic { get; init; }
     public required int SequenceNumber { get; init; }
+    public required int? DesiredQuestionsCount { get; init; }
     public required QuizStatus Status { get; init; }
+    public required ScheduleType Schedule { get; init; }
+    public required DifficultyLevels UserDifficulty { get; init; }
+    public required DifficultyLevels SystemDifficulty { get; init; }
     public required IReadOnlyList<QuizQuestion> Questions { get; init; }
     public required IReadOnlyList<string> AnsweredQuestionIds { get; init; }
     public required IReadOnlyList<string> CorrectQuestionIds { get; init; }
@@ -47,6 +65,7 @@ public sealed record Quiz
         {
             QuizId = Id,
             Questions = command.Questions.ToList(),
+            SystemDifficulty = command.SystemDifficulty,
             GeneratedAt = command.GeneratedAt
         };
     }
@@ -93,37 +112,66 @@ public sealed record Quiz
 
         var answeredCount = AnsweredQuestionIds.Count + 1;
 
-        if (Status != QuizStatus.Completed && answeredCount >= Questions.Count)
+        if (Status == QuizStatus.Completed || answeredCount < Questions.Count)
         {
-            var finalCorrectCount = CorrectQuestionIds.Count + (isCorrect ? 1 : 0);
-            var finalIsPerfect = finalCorrectCount == Questions.Count;
-            var finalScore = Questions.Count > 0 ? (float)finalCorrectCount / Questions.Count : 0f;
-
-            events.Add(new QuizCompleted
-            {
-                QuizId = Id,
-                UserId = UserId,
-                IsPerfect = finalIsPerfect,
-                ScorePercentage = finalScore,
-                CompletedAt = command.AnsweredAt
-            });
+            return events;
         }
+
+        var finalCorrectCount = CorrectQuestionIds.Count + (isCorrect ? 1 : 0);
+
+        var finalIsPerfect = finalCorrectCount == Questions.Count;
+
+        var finalScore = Questions.Count > 0 ? (float)finalCorrectCount / Questions.Count : 0f;
+
+        events.Add(new QuizCompleted
+        {
+            QuizId = Id,
+            UserId = UserId,
+            IsPerfect = finalIsPerfect,
+            ScorePercentage = finalScore,
+            CompletedAt = command.AnsweredAt
+        });
 
         return events;
     }
 
-    public static Quiz Create(QuizScheduled @event)
+    public static Quiz Create(SmartQuizScheduled @event)
     {
         return new Quiz
         {
             Id = @event.QuizId,
             UserId = @event.UserId,
-            Topic = @event.Topic,
+            Topic = @event.TopicId,
             Status = QuizStatus.Pending,
+            Schedule = ScheduleType.Smart,
             SequenceNumber = @event.SequenceNumber,
+            Questions = [],
+            DesiredQuestionsCount = null,
+            AnsweredQuestionIds = [],
+            CorrectQuestionIds = [],
+            SystemDifficulty = DifficultyLevels.Unspecified,
+            UserDifficulty = DifficultyLevels.Unspecified,
+            CreatedAt = @event.CreatedAt,
+            CompletedAt = null
+        };
+    }
+
+    public static Quiz Create(ManualQuizScheduled @event)
+    {
+        return new Quiz
+        {
+            Id = @event.QuizId,
+            UserId = @event.UserId,
+            Topic = @event.TopicId,
+            Status = QuizStatus.Pending,
+            Schedule = ScheduleType.Manual,
+            SequenceNumber = @event.SequenceNumber,
+            DesiredQuestionsCount = @event.QuestionCount,
             Questions = [],
             AnsweredQuestionIds = [],
             CorrectQuestionIds = [],
+            SystemDifficulty = DifficultyLevels.Unspecified,
+            UserDifficulty = Enum.Parse<DifficultyLevels>(@event.DifficultyLevelId),
             CreatedAt = @event.CreatedAt,
             CompletedAt = null
         };
@@ -146,6 +194,7 @@ public sealed record Quiz
         return this with
         {
             Questions = @event.Questions.ToList(),
+            SystemDifficulty = @event.SystemDifficulty,
             Status = QuizStatus.Ready
         };
     }

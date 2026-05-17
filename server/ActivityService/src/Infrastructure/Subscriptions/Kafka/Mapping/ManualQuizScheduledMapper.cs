@@ -5,11 +5,11 @@ using Messaging.Contracts.Topology;
 
 namespace Infrastructure.Subscriptions.Kafka.Mapping;
 
-internal sealed class SmartQuizScheduledMapper : IntegrationEventMapper<SmartQuizScheduled>
+internal sealed class ManualQuizScheduledMapper : IntegrationEventMapper<ManualQuizScheduled>
 {
     public override string Topic => Topology.Topics.ActivityLearningActivityRequested;
 
-    protected override IIntegrationEvent Map(SmartQuizScheduled @event)
+    protected override IIntegrationEvent Map(ManualQuizScheduled @event)
     {
         return new QuizActivityRequestedIntegrationEvent(
             @event.QuizId,

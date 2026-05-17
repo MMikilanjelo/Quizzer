@@ -10,20 +10,21 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
 {
     public QuizSummaryViewProjection()
     {
-        Identity<QuizScheduled>(e => e.QuizId);
+        Identity<SmartQuizScheduled>(e => e.QuizId);
+        Identity<ManualQuizScheduled>(e => e.QuizId);
         Identity<QuizContentGenerated>(e => e.QuizId);
         Identity<QuizQuestionAnswered>(e => e.QuizId);
         Identity<QuizCompleted>(e => e.QuizId);
         Identity<ConceptMasteryUpdated>(e => e.QuizId);
     }
 
-    public QuizSummaryView Create(QuizScheduled @event) =>
+    public QuizSummaryView Create(SmartQuizScheduled @event) =>
         new()
         {
             Id = @event.QuizId,
             Name = $"Quiz #{@event.SequenceNumber}",
             UserId = @event.UserId,
-            Topics = [],
+            Topics = [], 
             Status = QuizStatus.Pending,
             CreatedAt = @event.CreatedAt,
             QuestionCount = 0,
@@ -31,6 +32,22 @@ public class QuizSummaryViewProjection : MultiStreamProjection<QuizSummaryView, 
             Questions = [],
             MasteryChanges = []
         };
+
+    public QuizSummaryView Create(ManualQuizScheduled @event) =>
+        new()
+        {
+            Id = @event.QuizId,
+            Name = $"Quiz #{@event.SequenceNumber}",
+            UserId = @event.UserId,
+            Topics = [], 
+            Status = QuizStatus.Pending,
+            CreatedAt = @event.CreatedAt,
+            QuestionCount = @event.QuestionCount, 
+            AnsweredCount = 0,
+            Questions = [],
+            MasteryChanges = []
+        };
+
 
     public QuizSummaryView Apply(QuizContentGenerated @event, QuizSummaryView current) =>
         current with

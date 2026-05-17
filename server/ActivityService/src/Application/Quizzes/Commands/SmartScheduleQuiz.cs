@@ -1,4 +1,5 @@
-﻿using Application.Abstractions.Messaging;
+﻿using Application.Abstractions;
+using Application.Abstractions.Messaging;
 using Application.Abstractions.Providers;
 using Application.Authentication;
 using Domain.Quizzes;
@@ -18,26 +19,28 @@ public static class SmartScheduleQuiz
 
     internal sealed class Handler(
         IDocumentSession documentSession,
-        IDateTimeProvider dateTimeProvider
+        IDateTimeProvider dateTimeProvider,
+        IKnowledgeGraphClient graphClient
     ) : ICommandHandler<Command, Response>
     {
         public async Task<ErrorOr<Response>> HandleAsync(Command command, CancellationToken cancellationToken)
         {
-            var topic = "cloud_infrastructure";
+            var priorityDomains = await graphClient.GetGlobalPriorityDomainsAsync(command.UserId, limit: 1, cancellationToken);
+
+            var assignedTopic = priorityDomains.First();
 
             var userQuizCount = await documentSession.Query<Quiz>().CountAsync(q => q.UserId == command.UserId, cancellationToken);
 
-            var nextSequence = userQuizCount + 1;
+            var quizId = Guid.NewGuid().ToString();
 
-            var quizScheduled = new QuizScheduled
+            var quizScheduled = new SmartQuizScheduled
             {
-                QuizId = Guid.NewGuid().ToString(),
+                QuizId = quizId,
                 UserId = command.UserId,
-                Topic = topic,
-                SequenceNumber = nextSequence,
+                TopicId = assignedTopic,
+                SequenceNumber = userQuizCount + 1,
                 CreatedAt = dateTimeProvider.UtcNow,
             };
-
 
             documentSession.Events.StartStream<Quiz>(quizScheduled.QuizId, quizScheduled);
 

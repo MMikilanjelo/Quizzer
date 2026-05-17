@@ -6,6 +6,12 @@ public record DiscoveryNode(string Id, string Name, string Domain, double Master
 
 public interface IKnowledgeGraphClient
 {
+    Task<List<string>> GetGlobalPriorityDomainsAsync(
+        string userId,
+        int limit,
+        CancellationToken cancellationToken
+    );
+
     Task<string> GetGraphContextAsync(
         IEnumerable<string> nodeIds,
         CancellationToken cancellationToken

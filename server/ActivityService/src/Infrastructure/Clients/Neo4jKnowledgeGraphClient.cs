@@ -11,6 +11,49 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
 {
     private const string DatabaseName = "01f417e1";
 
+    public async Task<List<string>> GetGlobalPriorityDomainsAsync(string userId, int limit, CancellationToken cancellationToken)
+    {
+        var personalizedResponse = await driver.ExecutableQuery(@"
+            MATCH (u:User {id: $userId})-[k:KNOWS]->(sub:Topic)
+            WHERE sub.domain IS NOT NULL AND sub.domain <> ''
+            
+            WITH sub.domain AS Domain,
+                 COALESCE(k.p_learned, 0.0) AS mastery,
+                 duration.inDays(COALESCE(k.last_updated, datetime() - duration('P30D')), datetime()).days AS days_since_seen
+            
+            WITH Domain,
+                 (1.0 - mastery) + (days_since_seen * 0.015) AS node_priority
+            
+            RETURN Domain, 
+                   AVG(node_priority) AS DomainPriorityScore
+            ORDER BY DomainPriorityScore DESC
+            LIMIT $limit")
+            .WithParameters(new { userId, limit = (long)limit })
+            .WithConfig(new QueryConfig(database: DatabaseName))
+            .WithMap(r => r["Domain"].As<string>())
+            .ExecuteAsync(cancellationToken);
+
+        var domains = personalizedResponse.Result.ToList();
+
+        if (domains.Any())
+        {
+            return domains;
+        }
+
+        var fallbackResponse = await driver.ExecutableQuery(@"
+                MATCH (root:Topic)-[:SUPER_TOPIC_OF]->(sub:Topic)
+                WHERE root.domain IS NOT NULL AND root.domain <> ''
+                RETURN root.domain AS Domain, count(sub) AS Connections
+                ORDER BY Connections DESC
+                LIMIT $limit")
+            .WithParameters(new { limit = (long)limit })
+            .WithConfig(new QueryConfig(database: DatabaseName))
+            .WithMap(r => r["Domain"].As<string>())
+            .ExecuteAsync(cancellationToken);
+
+        return fallbackResponse.Result.ToList();
+    }
+
     public async Task<List<DiscoveryNode>> GetDiscoveryNodesAsync(
         string topicId,
         string userId,

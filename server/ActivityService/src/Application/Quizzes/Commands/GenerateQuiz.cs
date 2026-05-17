@@ -14,7 +14,7 @@ public static class GenerateQuiz
 {
     public sealed record Command(string QuizId) : ICommand;
 
-    private sealed record GenerateContentResponse(List<QuizQuestion> Questions);
+    private sealed record GenerateContentResponse(List<QuizQuestion> Questions, Quiz.DifficultyLevels SystemDifficulty);
 
     internal sealed class Handler(
         IDocumentSession documentSession,
@@ -56,6 +56,20 @@ public static class GenerateQuiz
             var goalsContext = string.Join(", ", user.Goals);
             var interestsContext = string.Join(", ", user.Interests);
 
+            string questionCountRule = quiz.DesiredQuestionsCount.HasValue
+                ? $"Generate exactly {quiz.DesiredQuestionsCount.Value} questions using the following rules:"
+                : "Determine the optimal number of questions to generate (between 5 and 15) to adequately test the student's mastery of the provided concepts, using the following rules:";
+
+            string difficultyRules = quiz.Schedule == Quiz.ScheduleType.Manual && quiz.UserDifficulty != Quiz.DifficultyLevels.Unspecified
+                ? $@"- This is a MANUAL session. Generate ALL questions strictly at the '{quiz.UserDifficulty}' difficulty level. 
+                        - Do NOT adapt the difficulty based on mastery.
+                        - You MUST set the `SystemDifficulty` in your response to exactly '{quiz.UserDifficulty}'."
+                : @"- Determine an appropriate overall difficulty (Easy, Medium, or Hard) based on the student's mastery.
+                       - For Concepts with Mastery < 30% (Novice): Write fundamental, definitional, or 'What is' questions. Use simple, clear language.
+                       - For Concepts with Mastery 30% - 60% (Intermediate): Write 'How' and 'Why' questions. Test their understanding of mechanisms or common use cases.
+                       - For Concepts with Mastery > 60% (Advanced): Write complex, scenario-based, or troubleshooting questions. Force the student to apply the concept to a realistic problem.
+                       - You MUST set the `SystemDifficulty` in your response to the overall level you chose.";
+
             string prompt = $@"
             You are an elite educational architect and subject matter expert designing an adaptive, highly engaging quiz about '{quiz.Topic}'. 
 
@@ -74,16 +88,14 @@ public static class GenerateQuiz
             {graphContext}
 
             ### 4. GENERATION RULES & ADAPTIVE DIFFICULTY
-            Generate exactly 10 questions using the following difficulty distribution based on the student's Mastery State:
-            - For Concepts with Mastery < 30% (Novice): Write fundamental, definitional, or 'What is' questions. Use simple, clear language.
-            - For Concepts with Mastery 30% - 60% (Intermediate): Write 'How' and 'Why' questions. Test their understanding of mechanisms or common use cases.
-            - For Concepts with Mastery > 60% (Advanced): Write complex, scenario-based, or troubleshooting questions. Force the student to apply the concept to a realistic problem.
+            {questionCountRule}
+            {difficultyRules}
 
             ### 5. PERSONALIZATION & CONTEXT MATCHING
             Tailor the framing, flavor scenarios, and technical vocabulary of the questions using the Student Global Profile. 
             - If their goal is 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
             - If their interest includes 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
-            - Keep the baseline linguistic tone aligned with their overall '{user.Proficiency}' level, while still adhering to the concept-specific mastery thresholds defined above.
+            - Keep the baseline linguistic tone aligned with their overall '{user.Proficiency}' level.
 
             ### 6. TESTING RELATIONSHIPS (The 'Secret Sauce')
             Use the Curriculum Topology to write questions that test the boundaries between concepts. 
@@ -93,11 +105,12 @@ public static class GenerateQuiz
 
             ### 7. STRICT NEGATIVE CONSTRAINTS (CRITICAL)
             - NEVER use phrases like 'According to the context', 'Based on the graph', or 'As shown in the topology'. The questions must read naturally.
-            - DO NOT reveal that you are adapting the difficulty or reading their profile. Never write 'Since your goal is CareerBoost...'.
             - DO NOT break character. Act strictly as the exam interface.
 
             ### 8. OUTPUT FORMAT
-            For each generated question, you MUST return the exact `ConceptId` (Node ID) from the Mastery State that the question is primarily testing.";
+            You must return a JSON response matching the requested schema.
+            - `SystemDifficulty`: The overall difficulty level you applied (Easy, Medium, or Hard).
+            - `Questions`: The array of questions. For each generated question, you MUST return the exact `ConceptId` (Node ID) from the Mastery State that the question is primarily testing.";
 
             logger.LogInformation(prompt);
 
@@ -112,6 +125,7 @@ public static class GenerateQuiz
                 new FillQuizCommand
                 {
                     Questions = geminiResult.Value.Questions.ToImmutableList(),
+                    SystemDifficulty = geminiResult.Value.SystemDifficulty,
                     GeneratedAt = dateTimeProvider.UtcNow
                 }
             );
