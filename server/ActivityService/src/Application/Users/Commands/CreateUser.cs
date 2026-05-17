@@ -3,7 +3,7 @@ using Domain.Users;
 using ErrorOr;
 using Marten;
 
-namespace Application.Users;
+namespace Application.Users.Commands;
 
 public static class CreateUser
 {

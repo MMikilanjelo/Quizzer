@@ -2,6 +2,7 @@
 using Application.Abstractions.Messaging;
 using Application.Quizzes.Commands;
 using Application.Users;
+using Application.Users.Commands;
 using Confluent.Kafka;
 using Infrastructure.Options;
 using Messaging.Contracts.IntegrationEvents.Activities;
