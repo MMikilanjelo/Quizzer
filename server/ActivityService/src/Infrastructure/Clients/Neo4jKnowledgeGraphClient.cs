@@ -20,19 +20,22 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
             OPTIONAL MATCH (u:User {id: $userId})-[k:KNOWS]->(topic)
             
             WITH topic,
+                 k IS NULL AS is_unseen,
                  COALESCE(k.p_learned, 0.0) AS mastery,
                  duration.inDays(COALESCE(k.last_updated, datetime() - duration('P30D')), datetime()).days AS days_since_seen
                  
             WITH topic,
+                 is_unseen,
                  mastery,
                  CASE 
                     WHEN mastery >= 0.95 THEN 0.0 
                     ELSE (1.0 - mastery) + (days_since_seen * 0.015) 
                  END AS topic_priority
                  
+            // 3. Now 'is_unseen' is perfectly valid to evaluate here
             RETURN topic.domain AS Domain,
                    AVG(topic_priority) AS DomainPriorityScore,
-                   COUNT(CASE WHEN k IS NULL THEN 1 END) AS UnseenTopicsCount,
+                   COUNT(CASE WHEN is_unseen THEN 1 END) AS UnseenTopicsCount,
                    COUNT(CASE WHEN mastery < 0.95 THEN 1 END) AS UnmasteredCount,
                    COUNT(topic) AS TotalStructuralSize
                    
