@@ -45,7 +45,7 @@ namespace Source.Features.Quizzes.FinishedQuiz.UseCases
 
         private sealed record MasteryDeltaResponseModel
         {
-            [JsonProperty] public string ConceptId { get; set; }
+            [JsonProperty] public string TopicId { get; set; }
             [JsonProperty] public double StartingMastery { get; set; }
             [JsonProperty] public double EndingMastery { get; set; }
             [JsonProperty] public int Attempts { get; set; }
@@ -84,13 +84,13 @@ namespace Source.Features.Quizzes.FinishedQuiz.UseCases
                             AnsweredCount = response.Analytics.AnsweredCount,
                             CorrectCount = response.Analytics.CorrectCount,
                             IncorrectCount = response.Analytics.IncorrectCount,
-                            MasteryChanges = response.Analytics.MasteryChanges?.Select(m => new ConceptMasteryDeltaModel
+                            MasteryChanges = response.Analytics.MasteryChanges?.Select(m => new TopicMasteryDeltaModel
                             {
-                                ConceptId = m.ConceptId,
+                                TopicId = m.TopicId,
                                 StartingMastery = m.StartingMastery,
                                 EndingMastery = m.EndingMastery,
                                 Attempts = m.Attempts
-                            }).ToList() ?? new List<ConceptMasteryDeltaModel>()
+                            }).ToList() ?? new List<TopicMasteryDeltaModel>()
                         };
 
                         return new Response { Analytics = analyticsData };

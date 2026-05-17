@@ -24,15 +24,6 @@ namespace Source.Features.Quizzes.MyQuizzes.UseCases
             public PageResponse<QuizModel> Quizzes { get; set; }
         }
 
-        public sealed record QuizResponseModel
-        {
-            public string Id { get; set; }
-            public string Topic { get; set; }
-            public string Status { get; set; }
-            public int QuestionCount { get; set; }
-            public int AnsweredCount { get; set; }
-        }
-
         internal class UseCase : IUseCase<Request, Response>
         {
             private readonly IAuthorizedWebApiService _webApi;

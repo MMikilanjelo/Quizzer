@@ -55,10 +55,11 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
     }
 
     public async Task<List<TopicNode>> GetTopicNodesAsync(
-        string domainId, 
+        string domainId,
         string userId,
         int limit,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var response = await driver.ExecutableQuery(@"
             MATCH (topic:Topic)
@@ -68,16 +69,17 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
             OPTIONAL MATCH (u:User {id: $userId})-[k:KNOWS]->(topic)
             
             WITH topic, 
+                 k IS NULL AS is_unseen,
                  COALESCE(k.p_learned, 0.0) AS mastery,
                  COALESCE(k.last_updated, datetime() - duration('P30D')) AS last_seen
             
-            WITH topic, mastery, 
+            WITH topic, is_unseen, mastery, 
                  duration.inDays(last_seen, datetime()).days AS days_since_seen
 
-            WITH topic, mastery, days_since_seen,
+            WITH topic, is_unseen, mastery, days_since_seen,
                  (1.0 - mastery) + (days_since_seen * 0.015) AS priority_score
             
-            WHERE mastery < 0.95 AND (k IS NULL OR days_since_seen > 0 OR mastery < 0.5)
+            WHERE mastery < 0.95 AND (is_unseen OR days_since_seen > 0 OR mastery < 0.5)
             
             RETURN topic.topic_id AS Id, 
                    topic.name AS Name, 

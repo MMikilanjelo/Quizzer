@@ -127,7 +127,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
 
                 return new KnowledgeAreaItemViewModel
                 {
-                    TopicName = m.ConceptId.ToTitleCase(),
+                    TopicName = m.TopicId.ToTitleCase(),
                     StartPercentage = start,
                     EndPercentage = end,
                     NeedsReview = needsReview,

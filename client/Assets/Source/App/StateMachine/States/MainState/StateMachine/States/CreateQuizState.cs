@@ -166,9 +166,9 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                     .Execute(
                         new ManualScheduleQuiz.Request
                         {
-                            TopicId = quizCreationModel.SelectedDomain,
+                            DomainId = quizCreationModel.SelectedDomain,
                             QuestionCount = quizCreationModel.RequestedQuestions,
-                            DifficultyLevelId = quizCreationModel.SelectedDifficulty
+                            DifficultyLevel = quizCreationModel.SelectedDifficulty
                         },
                         _cancellationTokenSource.Token
                     )

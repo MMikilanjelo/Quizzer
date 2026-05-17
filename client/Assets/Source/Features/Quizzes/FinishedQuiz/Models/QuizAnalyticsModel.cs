@@ -11,12 +11,12 @@ namespace Source.Features.Quizzes.FinishedQuiz.Models
         public int AnsweredCount { get; set; }
         public int CorrectCount { get; set; }
         public int IncorrectCount { get; set; }
-        public IReadOnlyList<ConceptMasteryDeltaModel> MasteryChanges { get; set; }
+        public IReadOnlyList<TopicMasteryDeltaModel> MasteryChanges { get; set; }
     }
 
-    public sealed record ConceptMasteryDeltaModel
+    public sealed record TopicMasteryDeltaModel
     {
-        public string ConceptId { get; set; }
+        public string TopicId { get; set; }
         public double StartingMastery { get; set; }
         public double EndingMastery { get; set; }
         public int Attempts { get; set; }

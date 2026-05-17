@@ -41,7 +41,7 @@ namespace Source.Features.Quizzes.ActiveQuiz.UseCases
         private sealed record QuestionModel
         {
             [JsonProperty] public string Id { get; set; }
-            [JsonProperty] public string ConceptId { get; set; }
+            [JsonProperty] public string TopicId { get; set; }
             [JsonProperty] public string Text { get; set; }
             [JsonProperty] public List<string> Options { get; set; }
         }

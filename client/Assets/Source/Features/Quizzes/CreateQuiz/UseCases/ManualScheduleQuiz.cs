@@ -14,9 +14,9 @@ namespace Source.Features.Quizzes.CreateQuiz.UseCases
 
         public sealed record Request
         {
-            public string TopicId { get; set; }
+            public string DomainId { get; set; }
             public int QuestionCount { get; set; }
-            public string DifficultyLevelId { get; set; }
+            public string DifficultyLevel { get; set; }
         }
 
         internal class UseCase : IUseCase<Request, Response>
