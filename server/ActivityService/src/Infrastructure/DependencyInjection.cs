@@ -77,7 +77,7 @@ public static class DependencyInjection
         services.Scan(scan => scan
             .FromAssembliesOf(typeof(KafkaSubscription))
             .AddClasses(classes => classes.AssignableTo<IIntegrationEventMapper>(), publicOnly: false)
-            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+            .UsingRegistrationStrategy(RegistrationStrategy.Append)
             .AsImplementedInterfaces()
             .WithSingletonLifetime());
 
