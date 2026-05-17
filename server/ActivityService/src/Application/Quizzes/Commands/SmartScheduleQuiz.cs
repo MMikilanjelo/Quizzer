@@ -25,9 +25,7 @@ public static class SmartScheduleQuiz
     {
         public async Task<ErrorOr<Response>> HandleAsync(Command command, CancellationToken cancellationToken)
         {
-            var priorityDomains = await graphClient.GetGlobalPriorityDomainsAsync(command.UserId, limit: 1, cancellationToken);
-
-            var assignedDomainId = priorityDomains.First();
+            var priorityDomain = await graphClient.GetAdaptiveQuizDomainAsync(command.UserId, cancellationToken);
 
             var userQuizCount = await documentSession.Query<Quiz>().CountAsync(q => q.UserId == command.UserId, cancellationToken);
 
@@ -37,7 +35,7 @@ public static class SmartScheduleQuiz
             {
                 QuizId = quizId,
                 UserId = command.UserId,
-                DomainId = assignedDomainId,
+                DomainId = priorityDomain,
                 SequenceNumber = userQuizCount + 1,
                 CreatedAt = dateTimeProvider.UtcNow,
             };

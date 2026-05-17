@@ -11,47 +11,42 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
 {
     private const string DatabaseName = "01f417e1";
 
-    public async Task<List<string>> GetGlobalPriorityDomainsAsync(string userId, int limit, CancellationToken cancellationToken)
+    public async Task<string> GetAdaptiveQuizDomainAsync(string userId, CancellationToken cancellationToken)
     {
-        var personalizedResponse = await driver.ExecutableQuery(@"
-            MATCH (u:User {id: $userId})-[k:KNOWS]->(topic:Topic)
+        var response = await driver.ExecutableQuery(@"
+            MATCH (topic:Topic)
             WHERE topic.domain IS NOT NULL AND topic.domain <> ''
             
-            WITH topic.domain AS Domain,
+            OPTIONAL MATCH (u:User {id: $userId})-[k:KNOWS]->(topic)
+            
+            WITH topic,
                  COALESCE(k.p_learned, 0.0) AS mastery,
                  duration.inDays(COALESCE(k.last_updated, datetime() - duration('P30D')), datetime()).days AS days_since_seen
-            
-            WITH Domain,
-                 (1.0 - mastery) + (days_since_seen * 0.015) AS topic_priority
-            
-            RETURN Domain, 
-                   AVG(topic_priority) AS DomainPriorityScore
-            ORDER BY DomainPriorityScore DESC
-            LIMIT $limit")
-            .WithParameters(new { userId, limit = (long)limit })
+                 
+            WITH topic,
+                 mastery,
+                 CASE 
+                    WHEN mastery >= 0.95 THEN 0.0 
+                    ELSE (1.0 - mastery) + (days_since_seen * 0.015) 
+                 END AS topic_priority
+                 
+            RETURN topic.domain AS Domain,
+                   AVG(topic_priority) AS DomainPriorityScore,
+                   COUNT(CASE WHEN k IS NULL THEN 1 END) AS UnseenTopicsCount,
+                   COUNT(CASE WHEN mastery < 0.95 THEN 1 END) AS UnmasteredCount,
+                   COUNT(topic) AS TotalStructuralSize
+                   
+            ORDER BY DomainPriorityScore DESC, 
+                     UnseenTopicsCount DESC, 
+                     UnmasteredCount DESC, 
+                     TotalStructuralSize DESC
+            LIMIT 1")
+            .WithParameters(new { userId })
             .WithConfig(new QueryConfig(database: DatabaseName))
             .WithMap(r => r["Domain"].As<string>())
             .ExecuteAsync(cancellationToken);
 
-        var domains = personalizedResponse.Result.ToList();
-
-        if (domains.Any())
-        {
-            return domains;
-        }
-
-        var fallbackResponse = await driver.ExecutableQuery(@"
-                MATCH (domainRoot:Topic)-[:SUPER_TOPIC_OF]->(topic:Topic)
-                WHERE domainRoot.domain IS NOT NULL AND domainRoot.domain <> ''
-                RETURN domainRoot.domain AS Domain, count(topic) AS Connections
-                ORDER BY Connections DESC
-                LIMIT $limit")
-            .WithParameters(new { limit = (long)limit })
-            .WithConfig(new QueryConfig(database: DatabaseName))
-            .WithMap(r => r["Domain"].As<string>())
-            .ExecuteAsync(cancellationToken);
-
-        return fallbackResponse.Result.ToList();
+        return response.Result.First();
     }
 
     public async Task<List<TopicNode>> GetTopicNodesAsync(
@@ -164,7 +159,7 @@ public class Neo4JKnowledgeGraphClient(IDriver driver, ILogger<Neo4JKnowledgeGra
             .WithParameters(new
             {
                 userId = masteryEvent.UserId,
-                topicId = masteryEvent.TopicId, 
+                topicId = masteryEvent.TopicId,
                 pLearned = masteryEvent.NewMastery,
                 pGuess = masteryEvent.PGuess,
                 pSlip = masteryEvent.PSlip,
