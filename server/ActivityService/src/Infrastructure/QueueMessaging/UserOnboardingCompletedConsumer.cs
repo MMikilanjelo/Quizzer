@@ -17,7 +17,7 @@ using Serilog.Core.Enrichers;
 
 namespace Infrastructure.QueueMessaging;
 
-public sealed class UserOnboardingCompletedConsumer(
+public partial class UserOnboardingCompletedConsumer(
     ILogger<UserOnboardingCompletedConsumer> logger,
     IServiceScopeFactory scopeFactory,
     IOptions<KafkaOptions> kafkaOptions
@@ -49,7 +49,7 @@ public sealed class UserOnboardingCompletedConsumer(
 
         consumer.Subscribe(Topology.Topics.IdentityUserOnboardingCompleted);
 
-        logger.LogInformation("Kafka consumer subscribed to onboarding topic: {Topic}", Topology.Topics.IdentityUserOnboardingCompleted);
+        LogConsumerSubscribed(logger, Topology.Topics.IdentityUserOnboardingCompleted);
 
         try
         {
@@ -99,40 +99,64 @@ public sealed class UserOnboardingCompletedConsumer(
 
                         if (result.IsError)
                         {
-                            logger.LogError("Domain context initialization failed for UserId {UserId}. Errors: {Errors}", integrationEvent.UserId, result.Errors);
+                            LogDomainInitializationFailed(logger, integrationEvent.UserId, result.Errors);
                         }
                         else
                         {
-                            logger.LogInformation("Successfully persisted user context and initialized dashboard view for UserId: {UserId}", integrationEvent.UserId);
+                            LogSuccessfullyPersistedUser(logger, integrationEvent.UserId);
                         }
 
                         consumer.Commit(consumeResult);
                     }
                     else
                     {
-                        logger.LogWarning("Received empty or un-parsable onboarding message payload.");
+                        LogEmptyPayloadWarning(logger);
                         consumer.Commit(consumeResult);
                     }
                 }
                 catch (JsonException jsonEx)
                 {
-                    logger.LogError(jsonEx, "Poison pill encountered! Failed to deserialize onboarding payload JSON.");
+                    LogPoisonPillDeserializationFailed(logger, jsonEx);
                     consumer.Commit(consumeResult);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Unhandled system error executing onboarding persistence. Retrying message stream execution.");
+                    LogUnhandledSystemError(logger, ex);
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("Onboarding consumer stream processing shutdown gracefully via cancellation token.");
+            LogStreamShutdownGracefully(logger);
         }
         finally
         {
             consumer.Close();
-            logger.LogInformation("Onboarding Kafka consumer session securely disconnected.");
+            LogConsumerSessionDisconnected(logger);
         }
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Kafka consumer subscribed to onboarding topic: {Topic}")]
+    private static partial void LogConsumerSubscribed(ILogger logger, string topic);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = "Domain context initialization failed for UserId {UserId}. Errors: {Errors}")]
+    private static partial void LogDomainInitializationFailed(ILogger logger, string userId, object errors);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Successfully persisted user context and initialized dashboard view for UserId: {UserId}")]
+    private static partial void LogSuccessfullyPersistedUser(ILogger logger, string userId);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Warning, Message = "Received empty or un-parsable onboarding message payload.")]
+    private static partial void LogEmptyPayloadWarning(ILogger logger);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "Poison pill encountered! Failed to deserialize onboarding payload JSON.")]
+    private static partial void LogPoisonPillDeserializationFailed(ILogger logger, Exception ex);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "Unhandled system error executing onboarding persistence. Retrying message stream execution.")]
+    private static partial void LogUnhandledSystemError(ILogger logger, Exception ex);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Onboarding consumer stream processing shutdown gracefully via cancellation token.")]
+    private static partial void LogStreamShutdownGracefully(ILogger logger);
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Information, Message = "Onboarding Kafka consumer session securely disconnected.")]
+    private static partial void LogConsumerSessionDisconnected(ILogger logger);
 }

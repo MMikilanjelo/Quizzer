@@ -47,3 +47,10 @@ public sealed record QuizCompleted : IEvent
     public required float ScorePercentage { get; init; }
     public required DateTime CompletedAt { get; init; }
 }
+
+public sealed record QuizGenerationFailed : IEvent
+{
+    public required string QuizId { get; init; }
+    public required string ErrorCode { get; init; }
+    public required DateTime FailedAt { get; init; }
+}

@@ -11,6 +11,7 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
     {
         Identity<QuizCompleted>(e => e.UserId);
         Identity<TopicMasteryUpdated>(e => e.UserId);
+        Identity<QuizQuestionAnswered>(e => e.UserId);
     }
 
     public UserDashboardView Create(QuizCompleted @event) =>
@@ -79,5 +80,40 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
         }
 
         return current with { TopicMasteryLevels = conceptMasteryLevels };
+    }
+
+    public UserDashboardView Apply(QuizQuestionAnswered @event, UserDashboardView current)
+    {
+        var newTotalQuestions = current.TotalQuestionsAnswered + 1;
+        var newTotalCorrect = current.TotalCorrectAnswers + (@event.IsCorrect ? 1 : 0);
+
+        var conceptPerformanceList = current.ConceptPerformance.ToList();
+        var index = conceptPerformanceList.FindIndex(c => c.ConceptId == @event.ConceptId);
+
+        if (index == -1)
+        {
+            conceptPerformanceList.Add(new ConceptPerformanceView
+            {
+                ConceptId = @event.ConceptId,
+                TotalAnswered = 1,
+                TotalCorrect = @event.IsCorrect ? 1 : 0
+            });
+        }
+        else
+        {
+            var existing = conceptPerformanceList[index];
+            conceptPerformanceList[index] = existing with
+            {
+                TotalAnswered = existing.TotalAnswered + 1,
+                TotalCorrect = existing.TotalCorrect + (@event.IsCorrect ? 1 : 0)
+            };
+        }
+
+        return current with
+        {
+            TotalQuestionsAnswered = newTotalQuestions,
+            TotalCorrectAnswers = newTotalCorrect,
+            ConceptPerformance = conceptPerformanceList
+        };
     }
 }

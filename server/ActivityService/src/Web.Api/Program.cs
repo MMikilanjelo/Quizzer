@@ -35,6 +35,7 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHostedService<QuizActivityGenerationConsumer>();
+builder.Services.AddHostedService<QuizActivityGenerationRetryConsumer>();
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 

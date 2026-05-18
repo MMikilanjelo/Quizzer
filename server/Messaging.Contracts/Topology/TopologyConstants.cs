@@ -20,6 +20,8 @@ public static class Topology
         public const string IdentityUserOnboardingCompleted = "identity.user.onboarding-completed";
 
         public const string ActivityLearningActivityRequested = "activity.learning-activity.requested";
+        public const string ActivityLearningActivityRequestedRetry = "activity.learning-activity-requested.retry";
+
         public const string ActivityLearningActivityGenerated = "activity.learning-activity.generated";
     }
 
@@ -38,5 +40,6 @@ public static class Topology
     {
         public const string ActivityServiceQuizActivityGenerator = "activity-service.learning-activity-generator-group";
         public const string ActivityServiceUserOnboarding = "activity-service.user-onboarding-group";
+        public const string ActivityServiceQuizActivityGeneratorRetry = "activity-service.quiz-activity-generator.retry";
     }
 }

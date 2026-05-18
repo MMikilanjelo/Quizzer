@@ -1,26 +1,27 @@
-﻿using System.Text.Json;
-using Application.Abstractions.Messaging;
-using Application.Quizzes;
+﻿using Application.Abstractions.Messaging;
 using Application.Quizzes.Commands;
-using Confluent.Kafka;
-using ErrorOr;
 using Infrastructure.Options;
 using Messaging.Contracts.IntegrationEvents.Activities;
 using Messaging.Contracts.Topology;
-using Microsoft.Extensions.DependencyInjection;
+using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Serilog.Context;
 using Serilog.Core.Enrichers;
+using ErrorOr;
 
 namespace ActivityService.QuizActivity.Worker;
 
-public partial class QuizActivityGenerationConsumer(
-    ILogger<QuizActivityGenerationConsumer> logger,
+public partial class QuizActivityGenerationRetryConsumer(
+    ILogger<QuizActivityGenerationRetryConsumer> logger,
     IServiceScopeFactory scopeFactory,
-    IOptions<KafkaOptions> kafkaOptions,
-    IMessagePublisher messagePublisher
+    IOptions<KafkaOptions> kafkaOptions
 ) : BackgroundService
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
@@ -36,7 +37,7 @@ public partial class QuizActivityGenerationConsumer(
         var config = new ConsumerConfig
         {
             BootstrapServers = _kafkaOptions.BootstrapServers,
-            GroupId = Topology.ConsumerGroups.ActivityServiceQuizActivityGenerator,
+            GroupId = Topology.ConsumerGroups.ActivityServiceQuizActivityGeneratorRetry,
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             SecurityProtocol = SecurityProtocol.SaslPlaintext,
@@ -47,9 +48,9 @@ public partial class QuizActivityGenerationConsumer(
 
         using IConsumer<Ignore, string> consumer = new ConsumerBuilder<Ignore, string>(config).Build();
 
-        consumer.Subscribe(Topology.Topics.ActivityLearningActivityRequested);
+        consumer.Subscribe(Topology.Topics.ActivityLearningActivityRequestedRetry);
 
-        LogConsumerStarted(logger);
+        LogRetryConsumerStarted(logger);
 
         try
         {
@@ -68,9 +69,7 @@ public partial class QuizActivityGenerationConsumer(
                     new PropertyEnricher("Offset", consumeResult.Offset.Value)
                 );
 
-                LogProcessingEvent(logger);
-
-                LogReceivedMessage(logger, consumeResult.Message.Value);
+                LogProcessingRetryEvent(logger);
 
                 try
                 {
@@ -86,35 +85,40 @@ public partial class QuizActivityGenerationConsumer(
                             new PropertyEnricher("ActivityId", integrationEvent.ActivityId)
                         );
 
-                        using IServiceScope scope = scopeFactory.CreateScope();
+                        LogWaitingForCooldown(logger, integrationEvent.ActivityId);
 
-                        ICommandHandler<GenerateQuiz.Command> commandHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<GenerateQuiz.Command>>();
+                        await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken);
 
-                        var command = new GenerateQuiz.Command(integrationEvent.ActivityId);
+                        using var scope = scopeFactory.CreateScope();
 
-                        var result = await commandHandler.HandleAsync(command, stoppingToken);
+                        var generateCommandHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<GenerateQuiz.Command>>();
+
+                        var generateCommand = new GenerateQuiz.Command(integrationEvent.ActivityId);
+
+                        var result = await generateCommandHandler.HandleAsync(generateCommand, stoppingToken);
 
                         if (result.IsError)
                         {
-                            LogQuizGenerationFailedPublishingToRetry(logger, integrationEvent.ActivityId, result.Errors);
+                            LogFinalGenerationFailure(logger, integrationEvent.ActivityId, result.Errors);
 
-                            await messagePublisher.PublishAsync(
-                                message: integrationEvent,
-                                topicName: Topology.Topics.ActivityLearningActivityRequestedRetry,
-                                routingKey: integrationEvent.ActivityId,
-                                cancellationToken: stoppingToken
-                            );
+                            ICommandHandler<FailQuiz.Command> failCommandHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<FailQuiz.Command>>();
+
+                            var failCommand = new FailQuiz.Command
+                            {
+                                QuizId = integrationEvent.ActivityId
+                            };
+
+                            await failCommandHandler.HandleAsync(failCommand, stoppingToken);
                         }
                     }
 
                     consumer.Commit(consumeResult);
 
-                    LogSuccessfullyProcessed(logger);
+                    LogSuccessfullyProcessedRetry(logger);
                 }
                 catch (JsonException jsonEx)
                 {
                     LogSerializationFailed(logger, jsonEx);
-
                     consumer.Commit(consumeResult);
                 }
                 catch (Exception ex)
@@ -133,27 +137,27 @@ public partial class QuizActivityGenerationConsumer(
         }
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Kafka Consumer started listening for learning activity events.")]
-    private static partial void LogConsumerStarted(ILogger logger);
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Kafka Retry Consumer started listening for delayed learning activity events.")]
+    private static partial void LogRetryConsumerStarted(ILogger logger);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Processing Kafka event")]
-    private static partial void LogProcessingEvent(ILogger logger);
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Processing Kafka retry event")]
+    private static partial void LogProcessingRetryEvent(ILogger logger);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Received Kafka message: {MessageValue}")]
-    private static partial void LogReceivedMessage(ILogger logger, string messageValue);
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Delaying retry for Activity {ActivityId} to allow API cooldown.")]
+    private static partial void LogWaitingForCooldown(ILogger logger, string activityId);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Successfully processed and committed event")]
-    private static partial void LogSuccessfullyProcessed(ILogger logger);
+    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "Final retry failed for Activity {ActivityId}. Marking quiz as Failed in database. Errors: {Errors}")]
+    private static partial void LogFinalGenerationFailure(ILogger logger, string activityId, object errors);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "Serialization failed, invalid JSON format. Sending to dead letter / skipping")]
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Successfully processed and committed retry event")]
+    private static partial void LogSuccessfullyProcessedRetry(ILogger logger);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "Serialization failed, invalid JSON format. Sending to dead letter / skipping")]
     private static partial void LogSerializationFailed(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Critical, Message = "Unhandled error during event processing. Offset will not be committed.")]
+    [LoggerMessage(EventId = 7, Level = LogLevel.Critical, Message = "Unhandled error during retry event processing. Offset will not be committed.")]
     private static partial void LogUnhandledError(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Gracefully stopping the Kafka Consumer.")]
+    [LoggerMessage(EventId = 8, Level = LogLevel.Information, Message = "Gracefully stopping the Kafka Retry Consumer.")]
     private static partial void LogGracefulShutdown(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 8, Level = LogLevel.Warning, Message = "Quiz generation failed for Activity {ActivityId}. Publishing to Retry Topic. Errors: {Errors}")]
-    private static partial void LogQuizGenerationFailedPublishingToRetry(ILogger logger, string activityId, object errors);
 }

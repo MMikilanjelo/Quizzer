@@ -3,18 +3,6 @@ using ErrorOr;
 
 namespace Domain.Quizzes;
 
-public sealed record QuizQuestion
-{
-    public required string Id { get; init; }
-    public required string TopicId { get; init; }
-    public required string Text { get; init; }
-    public required IReadOnlyCollection<string> Options { get; init; }
-    public required int CorrectIndex { get; init; }
-    public int? SelectedIndex { get; init; }
-    public bool IsAnswered => SelectedIndex.HasValue;
-    public bool IsCorrect => IsAnswered && SelectedIndex == CorrectIndex;
-}
-
 public sealed record Quiz
 {
     public const int MinQuestionCount = 5;
@@ -25,7 +13,8 @@ public sealed record Quiz
         Pending,
         InProgress,
         Ready,
-        Completed
+        Completed,
+        Failed
     }
 
     public enum ScheduleType
@@ -53,8 +42,6 @@ public sealed record Quiz
     public required IReadOnlyList<QuizQuestion> Questions { get; init; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? CompletedAt { get; init; }
-
-    // Computed properties
     public int AnsweredCount => Questions.Count(q => q.IsAnswered);
     public int CorrectCount => Questions.Count(q => q.IsCorrect);
     public bool IsPerfect => Questions.Count > 0 && Questions.All(q => q.IsCorrect);
@@ -136,32 +123,47 @@ public sealed record Quiz
             }
         };
 
-        var isFinalQuestion = (AnsweredCount + 1) == Questions.Count;
+        var isFinalQuestion = AnsweredCount + 1 == Questions.Count;
+
         var isAlreadyCompleted = Status == QuizStatus.Completed;
 
-        if (!isAlreadyCompleted && isFinalQuestion)
+        if (isAlreadyCompleted || !isFinalQuestion)
         {
-            var finalCorrectCount = CorrectCount;
-
-            if (isCorrectAnswer)
-            {
-                finalCorrectCount++;
-            }
-
-            var finalIsPerfect = finalCorrectCount == Questions.Count;
-            var finalScore = (float)finalCorrectCount / Questions.Count;
-
-            events.Add(new QuizCompleted
-            {
-                QuizId = Id,
-                UserId = UserId,
-                IsPerfect = finalIsPerfect,
-                ScorePercentage = finalScore,
-                CompletedAt = command.AnsweredAt
-            });
+            return events;
         }
 
+        var finalCorrectCount = CorrectCount;
+
+        if (isCorrectAnswer)
+        {
+            finalCorrectCount++;
+        }
+
+        events.Add(new QuizCompleted
+        {
+            QuizId = Id,
+            UserId = UserId,
+            IsPerfect = finalCorrectCount == Questions.Count,
+            ScorePercentage = (float)finalCorrectCount / Questions.Count,
+            CompletedAt = command.AnsweredAt
+        });
+
         return events;
+    }
+
+    public ErrorOr<QuizGenerationFailed> Fail(DateTime failedAt)
+    {
+        if (Status != QuizStatus.Pending)
+        {
+            return QuizErrors.NotPending;
+        }
+
+        return new QuizGenerationFailed
+        {
+            QuizId = Id,
+            ErrorCode = QuizErrors.GenerationFailed.Code,
+            FailedAt = failedAt
+        };
     }
 
     public static Quiz Create(SmartQuizScheduled @event)
@@ -211,12 +213,12 @@ public sealed record Quiz
             if (isTargetQuestion)
             {
                 var answeredQuestion = question with { SelectedIndex = @event.SelectedIndex };
+
                 updatedQuestions.Add(answeredQuestion);
             }
             else
             {
-                var unchangedQuestion = question;
-                updatedQuestions.Add(unchangedQuestion);
+                updatedQuestions.Add(question);
             }
         }
 
@@ -251,6 +253,14 @@ public sealed record Quiz
         {
             Status = QuizStatus.Completed,
             CompletedAt = @event.CompletedAt
+        };
+    }
+
+    public Quiz Apply(QuizGenerationFailed @event)
+    {
+        return this with
+        {
+            Status = QuizStatus.Failed
         };
     }
 }

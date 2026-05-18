@@ -43,4 +43,9 @@ public static class QuizErrors
         code: "Quiz.Incomplete",
         description: "Please answer all questions before completing the quiz."
     );
+
+    public static readonly Error GenerationFailed = Error.Failure(
+        code: "Quiz.GenerationFailed",
+        description: "Failed to generate quiz content."
+    );
 }
