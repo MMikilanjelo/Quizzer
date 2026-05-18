@@ -51,6 +51,7 @@ kafka:
     - "activity.learning-activity.requested"
     - "activity.learning-activity.generated"
     - "identity.user.onboarding-completed"
+    - "activity.learning-activity-requested.retry"
 
 mongodb:
   enabled: true
