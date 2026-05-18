@@ -14,7 +14,17 @@ public static class GenerateQuiz
 {
     public sealed record Command(string QuizId) : ICommand;
 
-    private sealed record GenerateContentResponse(List<QuizQuestion> Questions, Quiz.DifficultyLevel SystemDifficulty);
+    private sealed record GeneratedQuestion(
+        string ConceptId,
+        string Text,
+        List<string> Options,
+        int CorrectIndex
+    );
+
+    private sealed record GenerateContentResponse(
+        List<GeneratedQuestion> Questions,
+        Quiz.DifficultyLevel Difficulty
+    );
 
     internal sealed class Handler(
         IDocumentSession documentSession,
@@ -27,7 +37,6 @@ public static class GenerateQuiz
         public async Task<ErrorOr<Success>> HandleAsync(Command command, CancellationToken cancellationToken)
         {
             var stream = await documentSession.Events.FetchForWriting<Quiz>(command.QuizId, cancellationToken);
-
             var quiz = stream.Aggregate;
 
             if (quiz is null)
@@ -60,57 +69,72 @@ public static class GenerateQuiz
                 ? $"Generate exactly {quiz.DesiredQuestionsCount.Value} questions using the following rules:"
                 : "Determine the optimal number of questions to generate (between 5 and 15) to adequately test the student's mastery of the provided concepts, using the following rules:";
 
-            string difficultyRules = quiz.Schedule == Quiz.ScheduleType.Manual && quiz.UserDifficulty != Quiz.DifficultyLevel.Unspecified
-                ? $@"- This is a MANUAL session. Generate ALL questions strictly at the '{quiz.UserDifficulty}' difficulty level. 
-                        - Do NOT adapt the difficulty based on mastery.
-                        - You MUST set the `SystemDifficulty` in your response to exactly '{quiz.UserDifficulty}'."
-                : @"- Determine an appropriate overall difficulty (Easy, Medium, or Hard) based on the student's mastery.
-                       - For Concepts with Mastery < 30% (Novice): Write fundamental, definitional, or 'What is' questions. Use simple, clear language.
-                       - For Concepts with Mastery 30% - 60% (Intermediate): Write 'How' and 'Why' questions. Test their understanding of mechanisms or common use cases.
-                       - For Concepts with Mastery > 60% (Advanced): Write complex, scenario-based, or troubleshooting questions. Force the student to apply the concept to a realistic problem.
-                       - You MUST set the `SystemDifficulty` in your response to the overall level you chose.";
+            string difficultyRules = quiz.Difficulty != Quiz.DifficultyLevel.Unspecified
+                ? $"""
+                   - Generate ALL questions strictly at the '{quiz.Difficulty}' difficulty level. 
+                   - Do NOT adapt the difficulty based on mastery.
+                   - You MUST set the `Difficulty` in your response to exactly '{quiz.Difficulty}'.
+                   """
+                : """
+                  - Determine an appropriate overall difficulty (Easy, Medium, or Hard) based on the student's mastery.
+                  - For Concepts with Mastery < 30% (Novice): Write fundamental, definitional, or 'What is' questions. Use simple, clear language.
+                  - For Concepts with Mastery 30% - 60% (Intermediate): Write 'How' and 'Why' questions. Test their understanding of mechanisms or common use cases.
+                  - For Concepts with Mastery > 60% (Advanced): Write complex, scenario-based, or troubleshooting questions. Force the student to apply the concept to a realistic problem.
+                  - You MUST set the `Difficulty` in your response to the overall level you chose.
+                  """;
 
-            string prompt = $@"
-            You are an elite educational architect and subject matter expert designing an adaptive, highly engaging quiz about '{quiz.DomainId}'. 
+            string prompt = $"""
+                             You are an expert educational architect designing an adaptive, highly engaging quiz for the domain: '{quiz.DomainId}'.
 
-            Your goal is to test the student's true understanding of the concepts and how they relate to one another in the real world.
+                             Your objective is to generate questions that test the student's practical understanding of concepts and how they interrelate in real-world scenarios.
 
-            ### 1. STUDENT GLOBAL PROFILE
-            - Baseline Proficiency: {user.Proficiency}
-            - Core Learning Goals: {goalsContext}
-            - Topic Interests: {interestsContext}
+                             === INPUT DATA ===
 
-            ### 2. CONCEPT-SPECIFIC MASTERY STATE
-            The student's current proficiency in these targeted sub-concepts is:
-            {masteryContext}
+                             <student_profile>
+                             Baseline Proficiency: {user.Proficiency}
+                             Core Learning Goals: {goalsContext}
+                             Topic Interests: {interestsContext}
+                             </student_profile>
 
-            ### 3. CURRICULUM TOPOLOGY (How concepts relate)
-            {graphContext}
+                             <mastery_state>
+                             {masteryContext}
+                             </mastery_state>
 
-            ### 4. GENERATION RULES & ADAPTIVE DIFFICULTY
-            {questionCountRule}
-            {difficultyRules}
+                             <curriculum_topology>
+                             {graphContext}
+                             </curriculum_topology>
 
-            ### 5. PERSONALIZATION & CONTEXT MATCHING
-            Tailor the framing, flavor scenarios, and technical vocabulary of the questions using the Student Global Profile. 
-            - If their goal is 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
-            - If their interest includes 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
-            - Keep the baseline linguistic tone aligned with their overall '{user.Proficiency}' level.
+                             === GENERATION RULES ===
 
-            ### 6. TESTING RELATIONSHIPS (The 'Secret Sauce')
-            Use the Curriculum Topology to write questions that test the boundaries between concepts. 
-            - If A is a 'Hierarchy/Prerequisite' to B: Ask a question about why A must be understood before implementing B, or how A forms the foundation of B.
-            - If A 'Contributes to' or 'Impacts' B: Ask a scenario question about technical tradeoffs. (e.g., 'If we optimize A, what is the expected impact on B?')
-            - If A is 'Equivalent' to B: Test the student's ability to recognize both terms interchangeably in a practical context.
+                             <adaptive_constraints>
+                             {questionCountRule}
+                             {difficultyRules}
+                             </adaptive_constraints>
 
-            ### 7. STRICT NEGATIVE CONSTRAINTS (CRITICAL)
-            - NEVER use phrases like 'According to the context', 'Based on the graph', or 'As shown in the topology'. The questions must read naturally.
-            - DO NOT break character. Act strictly as the exam interface.
+                             <personalization_rules>
+                             - Tailor the framing, flavor scenarios, and technical vocabulary strictly to the <student_profile>.
+                             - If a goal includes 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
+                             - If interests include 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
+                             - Align the baseline linguistic tone strictly with the '{user.Proficiency}' level.
+                             </personalization_rules>
 
-            ### 8. OUTPUT FORMAT
-            You must return a JSON response matching the requested schema.
-            - `SystemDifficulty`: The overall difficulty level you applied (Easy, Medium, or Hard).
-            - `Questions`: The array of questions. For each generated question, you MUST return the exact `ConceptId` (Node ID) from the Mastery State that the question is primarily testing.";
+                             <relationship_testing>
+                             Use the <curriculum_topology> to write questions that test the boundaries between concepts:
+                             - Hierarchy/Prerequisite (A -> B): Ask why A must be understood before implementing B, or how A forms the foundation of B.
+                             - Contributes/Impacts (A -> B): Ask a scenario question about technical tradeoffs (e.g., "If we optimize A, what is the expected impact on B?").
+                             - Equivalent (A = B): Test the student's ability to recognize both terms interchangeably in a practical context.
+                             </relationship_testing>
+
+                             === STRICT CONSTRAINTS (CRITICAL) ===
+                             - NEVER use meta-phrases like "According to the context", "Based on the graph", or "As shown in the topology". The questions must read naturally as if written by a human professor.
+                             - DO NOT break character. You are the exam engine. Provide NO conversational filler.
+                             - Output ONLY valid JSON. Do not include markdown formatting, code blocks, or any text outside of the JSON object.
+
+                             === OUTPUT FORMAT ===
+                             You must return a JSON response matching the requested schema exactly.
+                             - `Difficulty`: The overall difficulty level you applied (Easy, Medium, or Hard).
+                             - `Questions`: The array of generated questions. For each question, you MUST return the exact `ConceptId` (Node ID) from the <mastery_state> that the question is primarily testing.
+                             """;
 
             logger.LogInformation(prompt);
 
@@ -121,11 +145,20 @@ public static class GenerateQuiz
                 return geminiResult.Errors;
             }
 
+            var domainQuestions = geminiResult.Value.Questions.Select(generatedQuestion => new QuizQuestion
+            {
+                Id = Guid.NewGuid().ToString(),
+                TopicId = generatedQuestion.ConceptId,
+                Text = generatedQuestion.Text,
+                Options = generatedQuestion.Options,
+                CorrectIndex = generatedQuestion.CorrectIndex
+            }).ToList();
+
             var domainResult = quiz.Fill(
                 new FillQuizCommand
                 {
-                    Questions = geminiResult.Value.Questions.ToImmutableList(),
-                    SystemDifficulty = geminiResult.Value.SystemDifficulty,
+                    Questions = domainQuestions.ToImmutableList(),
+                    Difficulty = geminiResult.Value.Difficulty,
                     GeneratedAt = dateTimeProvider.UtcNow
                 }
             );
@@ -136,7 +169,6 @@ public static class GenerateQuiz
             }
 
             stream.AppendOne(domainResult.Value);
-
             await documentSession.SaveChangesAsync(cancellationToken);
 
             return Result.Success;

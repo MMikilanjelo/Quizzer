@@ -3,12 +3,21 @@ using ErrorOr;
 
 namespace Domain.Quizzes;
 
-public sealed record QuizQuestion(string Id, string TopicId, string Text, List<string> Options, int CorrectIndex);
+public sealed record QuizQuestion
+{
+    public required string Id { get; init; }
+    public required string TopicId { get; init; }
+    public required string Text { get; init; }
+    public required IReadOnlyCollection<string> Options { get; init; }
+    public required int CorrectIndex { get; init; }
+    public int? SelectedIndex { get; init; }
+    public bool IsAnswered => SelectedIndex.HasValue;
+    public bool IsCorrect => IsAnswered && SelectedIndex == CorrectIndex;
+}
 
 public sealed record Quiz
 {
     public const int MinQuestionCount = 5;
-
     public const int MaxQuestionCount = 50;
 
     public enum QuizStatus
@@ -40,15 +49,31 @@ public sealed record Quiz
     public required int? DesiredQuestionsCount { get; init; }
     public required QuizStatus Status { get; init; }
     public required ScheduleType Schedule { get; init; }
-    public required DifficultyLevel UserDifficulty { get; init; }
-    public required DifficultyLevel SystemDifficulty { get; init; }
+    public required DifficultyLevel Difficulty { get; init; }
     public required IReadOnlyList<QuizQuestion> Questions { get; init; }
-    public required IReadOnlyList<string> AnsweredQuestionIds { get; init; }
-    public required IReadOnlyList<string> CorrectQuestionIds { get; init; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? CompletedAt { get; init; }
-    public bool IsPerfect => Questions.Count != 0 && CorrectQuestionIds.Count == Questions.Count;
-    public float ScorePercentage => Questions.Count > 0 ? (float)CorrectQuestionIds.Count / Questions.Count : 0f;
+
+    // Computed properties
+    public int AnsweredCount => Questions.Count(q => q.IsAnswered);
+    public int CorrectCount => Questions.Count(q => q.IsCorrect);
+    public bool IsPerfect => Questions.Count > 0 && Questions.All(q => q.IsCorrect);
+
+    public float ScorePercentage
+    {
+        get
+        {
+            var hasQuestions = Questions.Count > 0;
+
+            if (!hasQuestions)
+            {
+                return 0f;
+            }
+
+            var calculatedScore = (float)CorrectCount / Questions.Count;
+            return calculatedScore;
+        }
+    }
 
     public ErrorOr<QuizContentGenerated> Fill(FillQuizCommand command)
     {
@@ -66,7 +91,7 @@ public sealed record Quiz
         {
             QuizId = Id,
             Questions = command.Questions.ToList(),
-            SystemDifficulty = command.SystemDifficulty,
+            Difficulty = command.Difficulty,
             GeneratedAt = command.GeneratedAt
         };
     }
@@ -83,19 +108,19 @@ public sealed record Quiz
             return QuizErrors.NotActive;
         }
 
-        if (AnsweredQuestionIds.Contains(command.QuestionId))
-        {
-            return QuizErrors.AlreadyAnswered;
-        }
+        var targetQuestion = Questions.FirstOrDefault(q => q.Id == command.QuestionId);
 
-        var question = Questions.FirstOrDefault(q => q.Id == command.QuestionId);
-
-        if (question is null)
+        if (targetQuestion is null)
         {
             return QuizErrors.QuestionNotFound;
         }
 
-        var isCorrect = question.CorrectIndex == command.SelectedIndex;
+        if (targetQuestion.IsAnswered)
+        {
+            return QuizErrors.AlreadyAnswered;
+        }
+
+        var isCorrectAnswer = targetQuestion.CorrectIndex == command.SelectedIndex;
 
         var events = new List<IEvent>
         {
@@ -103,35 +128,38 @@ public sealed record Quiz
             {
                 QuizId = Id,
                 UserId = UserId,
-                ConceptId = question.TopicId,
+                ConceptId = targetQuestion.TopicId,
                 QuestionId = command.QuestionId,
                 SelectedIndex = command.SelectedIndex,
-                IsCorrect = isCorrect,
+                IsCorrect = isCorrectAnswer,
                 AnsweredAt = command.AnsweredAt
             }
         };
 
-        var answeredCount = AnsweredQuestionIds.Count + 1;
+        var isFinalQuestion = (AnsweredCount + 1) == Questions.Count;
+        var isAlreadyCompleted = Status == QuizStatus.Completed;
 
-        if (Status == QuizStatus.Completed || answeredCount < Questions.Count)
+        if (!isAlreadyCompleted && isFinalQuestion)
         {
-            return events;
+            var finalCorrectCount = CorrectCount;
+
+            if (isCorrectAnswer)
+            {
+                finalCorrectCount++;
+            }
+
+            var finalIsPerfect = finalCorrectCount == Questions.Count;
+            var finalScore = (float)finalCorrectCount / Questions.Count;
+
+            events.Add(new QuizCompleted
+            {
+                QuizId = Id,
+                UserId = UserId,
+                IsPerfect = finalIsPerfect,
+                ScorePercentage = finalScore,
+                CompletedAt = command.AnsweredAt
+            });
         }
-
-        var finalCorrectCount = CorrectQuestionIds.Count + (isCorrect ? 1 : 0);
-
-        var finalIsPerfect = finalCorrectCount == Questions.Count;
-
-        var finalScore = Questions.Count > 0 ? (float)finalCorrectCount / Questions.Count : 0f;
-
-        events.Add(new QuizCompleted
-        {
-            QuizId = Id,
-            UserId = UserId,
-            IsPerfect = finalIsPerfect,
-            ScorePercentage = finalScore,
-            CompletedAt = command.AnsweredAt
-        });
 
         return events;
     }
@@ -146,12 +174,9 @@ public sealed record Quiz
             Status = QuizStatus.Pending,
             Schedule = ScheduleType.Smart,
             SequenceNumber = @event.SequenceNumber,
-            Questions = [],
             DesiredQuestionsCount = null,
-            AnsweredQuestionIds = [],
-            CorrectQuestionIds = [],
-            SystemDifficulty = DifficultyLevel.Unspecified,
-            UserDifficulty = DifficultyLevel.Unspecified,
+            Difficulty = DifficultyLevel.Unspecified,
+            Questions = [],
             CreatedAt = @event.CreatedAt,
             CompletedAt = null
         };
@@ -168,11 +193,8 @@ public sealed record Quiz
             Schedule = ScheduleType.Manual,
             SequenceNumber = @event.SequenceNumber,
             DesiredQuestionsCount = @event.QuestionCount,
+            Difficulty = @event.DifficultyLevel,
             Questions = [],
-            AnsweredQuestionIds = [],
-            CorrectQuestionIds = [],
-            SystemDifficulty = DifficultyLevel.Unspecified,
-            UserDifficulty = @event.DifficultyLevel,
             CreatedAt = @event.CreatedAt,
             CompletedAt = null
         };
@@ -180,22 +202,45 @@ public sealed record Quiz
 
     public Quiz Apply(QuizQuestionAnswered @event)
     {
+        var updatedQuestions = new List<QuizQuestion>(Questions.Count);
+
+        foreach (var question in Questions)
+        {
+            var isTargetQuestion = question.Id == @event.QuestionId;
+
+            if (isTargetQuestion)
+            {
+                var answeredQuestion = question with { SelectedIndex = @event.SelectedIndex };
+                updatedQuestions.Add(answeredQuestion);
+            }
+            else
+            {
+                var unchangedQuestion = question;
+                updatedQuestions.Add(unchangedQuestion);
+            }
+        }
+
         return this with
         {
             Status = QuizStatus.InProgress,
-            AnsweredQuestionIds = [.. AnsweredQuestionIds, @event.QuestionId],
-            CorrectQuestionIds = @event.IsCorrect
-                ? [.. CorrectQuestionIds, @event.QuestionId]
-                : CorrectQuestionIds
+            Questions = updatedQuestions
         };
     }
 
     public Quiz Apply(QuizContentGenerated @event)
     {
+        var resolvedDifficulty = Difficulty;
+        var isDifficultyUnspecified = Difficulty == DifficultyLevel.Unspecified;
+
+        if (isDifficultyUnspecified)
+        {
+            resolvedDifficulty = @event.Difficulty;
+        }
+
         return this with
         {
             Questions = @event.Questions.ToList(),
-            SystemDifficulty = @event.SystemDifficulty,
+            Difficulty = resolvedDifficulty,
             Status = QuizStatus.Ready
         };
     }
