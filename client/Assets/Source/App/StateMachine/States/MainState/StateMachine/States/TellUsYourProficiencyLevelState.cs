@@ -108,7 +108,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                         .Execute(_cancellationTokenSource.Token)
                         .Tap(_ => _onboardingStore.Clear());
                 })
-                .Tap(_ => StateMachine.Enter<HomeState>())
+                .Tap(_ => StateMachine.Enter<MyQuizzesState>())
                 .CatchAll(error => _appMediator.TechnicalErrorOccured.Invoke(error));
 
             return result;

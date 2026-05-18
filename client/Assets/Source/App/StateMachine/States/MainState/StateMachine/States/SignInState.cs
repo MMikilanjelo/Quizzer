@@ -86,7 +86,7 @@ namespace Source.App.StateMachine.States.MainState.StateMachine.States
                             .Tap(_ => StateMachine.Enter<TellUsYourGoalState>());
                     }
 
-                    StateMachine.Enter<HomeState>();
+                    StateMachine.Enter<MyQuizzesState>();
 
                     return Result.Success();
                 })

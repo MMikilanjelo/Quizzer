@@ -23,6 +23,7 @@ namespace Source.Features.MyProfile.Components
 
         private readonly VisualElement _realContentContainer;
         private readonly VisualElement _skeletonContainer;
+        private readonly VisualElement _emptyStateContainer;
 
         private readonly ProfileStatBox _scoreBox;
         private readonly ProfileStatBox _quizzesBox;
@@ -51,11 +52,13 @@ namespace Source.Features.MyProfile.Components
             };
             Header.AddToClassList("screen__title");
 
+            // 1. Skeleton Container
             _skeletonContainer = new VisualElement();
             _skeletonContainer.Add(new MyProfileStatsGridSkeleton());
             _skeletonContainer.Add(new MyProfileMasterySectionSkeleton());
             _skeletonContainer.Add(new MyProfileMasterySectionSkeleton(2));
 
+            // 2. Real Content Container
             _realContentContainer = new VisualElement
             {
                 style =
@@ -110,18 +113,58 @@ namespace Source.Features.MyProfile.Components
             focusSection.Add(_focusContainer);
             _realContentContainer.Add(focusSection);
 
+            // 3. Empty State Container
+            _emptyStateContainer = new VisualElement
+            {
+                style =
+                {
+                    display = DisplayStyle.None,
+                    alignItems = Align.Center,
+                    justifyContent = Justify.Center,
+                    marginTop = 64
+                }
+            };
+            _emptyStateContainer.AddToClassList("my-profile__empty-state");
+
+            var emptyTitle = new CustomLabel
+            {
+                text = "No Quizzes Yet",
+                Variant = CustomLabel.TextVariant.Title3,
+                Weight = CustomLabel.FontWeight.Bold,
+                Alignment = TextAnchor.MiddleCenter,
+                style = { marginBottom = 8 }
+            };
+
+            var emptySubtitle = new CustomLabel
+            {
+                text = "Complete your first quiz to start tracking your progress and building your stats!",
+                Variant = CustomLabel.TextVariant.Regular,
+                Alignment = TextAnchor.MiddleCenter,
+                style = { whiteSpace = WhiteSpace.Normal }
+            };
+
+            _emptyStateContainer.Add(emptyTitle);
+            _emptyStateContainer.Add(emptySubtitle);
+
+            // Add all containers to the main screen
             screenContainer.Add(_skeletonContainer);
             screenContainer.Add(_realContentContainer);
+            screenContainer.Add(_emptyStateContainer);
             Root.Add(screenContainer);
         }
-
 
         public void Initialize()
         {
             _disposable = new CompositeDisposable();
 
             _viewModel.AverageScore.Subscribe(score => _scoreBox.SetValue($"{score:0.0}%")).AddTo(_disposable);
-            _viewModel.TotalQuizzes.Subscribe(total => _quizzesBox.SetValue(total.ToString())).AddTo(_disposable);
+
+            _viewModel.TotalQuizzes.Subscribe(total =>
+            {
+                _quizzesBox.SetValue(total.ToString());
+                UpdateViewStates();
+            }).AddTo(_disposable);
+
             _viewModel.PerfectQuizzes.Subscribe(perfect => _perfectBox.SetValue(perfect.ToString())).AddTo(_disposable);
             _viewModel.StreakDays.Subscribe(streak => _streakBox.SetValue($"{streak}")).AddTo(_disposable);
 
@@ -135,25 +178,42 @@ namespace Source.Features.MyProfile.Components
             _viewModel.FocusAreas.Removed.Subscribe(_ => RefreshFocusAreas()).AddTo(_disposable);
             _viewModel.FocusAreas.Cleared.Subscribe(_ => RefreshFocusAreas()).AddTo(_disposable);
 
-            _viewModel.IsLoading
-                .Subscribe(isLoading =>
-                {
-                    _skeletonContainer.style.display = isLoading ? DisplayStyle.Flex : DisplayStyle.None;
-                    _realContentContainer.style.display = isLoading ? DisplayStyle.None : DisplayStyle.Flex;
-                })
-                .AddTo(_disposable);
+            _viewModel.IsLoading.Subscribe(_ => UpdateViewStates()).AddTo(_disposable);
 
             _scoreBox.SetValue($"{_viewModel.AverageScore.Value:0.0}%");
             _quizzesBox.SetValue(_viewModel.TotalQuizzes.Value.ToString());
             _perfectBox.SetValue(_viewModel.PerfectQuizzes.Value.ToString());
             _streakBox.SetValue($"{_viewModel.StreakDays.Value}");
 
-            _skeletonContainer.style.display = _viewModel.IsLoading.Value ? DisplayStyle.Flex : DisplayStyle.None;
-            _realContentContainer.style.display = _viewModel.IsLoading.Value ? DisplayStyle.None : DisplayStyle.Flex;
+            UpdateViewStates();
         }
 
-        public void Dispose() =>
-            _disposable?.Dispose();
+        public void Dispose() => _disposable?.Dispose();
+
+        private void UpdateViewStates()
+        {
+            bool isLoading = _viewModel.IsLoading.Value;
+            bool isEmpty = _viewModel.TotalQuizzes.Value == 0;
+
+            if (isLoading)
+            {
+                _skeletonContainer.style.display = DisplayStyle.Flex;
+                _realContentContainer.style.display = DisplayStyle.None;
+                _emptyStateContainer.style.display = DisplayStyle.None;
+            }
+            else if (isEmpty)
+            {
+                _skeletonContainer.style.display = DisplayStyle.None;
+                _realContentContainer.style.display = DisplayStyle.None;
+                _emptyStateContainer.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                _skeletonContainer.style.display = DisplayStyle.None;
+                _realContentContainer.style.display = DisplayStyle.Flex;
+                _emptyStateContainer.style.display = DisplayStyle.None;
+            }
+        }
 
         private void RefreshStrengths()
         {

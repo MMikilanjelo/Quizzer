@@ -38,7 +38,7 @@ namespace Source.Features.MyProfile.Components
             var nameLabel = new CustomLabel
             {
                 text = concept.ConceptId,
-                Variant = CustomLabel.TextVariant.Regular, 
+                Variant = CustomLabel.TextVariant.Regular,
                 Weight = CustomLabel.FontWeight.Bold
             };
             nameLabel.AddToClassList("my-profile__skill-name");

@@ -95,7 +95,7 @@ namespace Source.Features.MyProfile.UseCase
 
                             FocusAreas = response.FocusAreas?.Select(t => new TopicMasteryLevelModel
                             {
-                                TopicId = t.TopicId,
+                                TopicId = t.TopicId, 
                                 MasteryPercentage = t.MasteryPercentage
                             }).ToList() ?? new List<TopicMasteryLevelModel>()
                         };
