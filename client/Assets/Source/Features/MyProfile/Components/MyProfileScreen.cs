@@ -52,16 +52,14 @@ namespace Source.Features.MyProfile.Components
             };
             Header.AddToClassList("screen__title");
 
-            // 1. Skeleton Container
             _skeletonContainer = new VisualElement();
             _skeletonContainer.Add(new MyProfileStatsGridSkeleton());
             _skeletonContainer.Add(new MyProfileMasterySectionSkeleton());
             _skeletonContainer.Add(new MyProfileMasterySectionSkeleton(2));
 
-            // 2. Real Content Container
             _realContentContainer = new VisualElement
             {
-                style =
+                style = 
                 {
                     display = DisplayStyle.None
                 }
@@ -113,7 +111,6 @@ namespace Source.Features.MyProfile.Components
             focusSection.Add(_focusContainer);
             _realContentContainer.Add(focusSection);
 
-            // 3. Empty State Container
             _emptyStateContainer = new VisualElement
             {
                 style =
@@ -146,7 +143,6 @@ namespace Source.Features.MyProfile.Components
             _emptyStateContainer.Add(emptyTitle);
             _emptyStateContainer.Add(emptySubtitle);
 
-            // Add all containers to the main screen
             screenContainer.Add(_skeletonContainer);
             screenContainer.Add(_realContentContainer);
             screenContainer.Add(_emptyStateContainer);

@@ -68,8 +68,7 @@ namespace Source.App.StateMachine.States.MainState
         {
             _tabBarMediator.Set(new List<TabBarItemViewModel>
             {
-                // new(new TabItemModel(nameof(HomeState), Icons.Home), true),
-                new(new TabItemModel(nameof(MyQuizzesState), Icons.SealQuestion)),
+                new(new TabItemModel(nameof(MyQuizzesState), Icons.SealQuestion), true),
                 new(new TabItemModel(nameof(MyProfileState), Icons.UserCircle))
             });
             _tabBarMediator.TabSelectionChanged.Subscribe(OnTabSelectionChanged);
@@ -84,9 +83,6 @@ namespace Source.App.StateMachine.States.MainState
 
             switch (model.Model.Id)
             {
-                // case nameof(HomeState):
-                //     _applicationStateMachine.Enter<HomeState>();
-                //     break;
                 case nameof(MyQuizzesState):
                     _applicationStateMachine.Enter<MyQuizzesState>();
                     break;
