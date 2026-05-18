@@ -83,58 +83,59 @@ public static class GenerateQuiz
                   - You MUST set the `Difficulty` in your response to the overall level you chose.
                   """;
 
-            string prompt = $"""
-                             You are an expert educational architect designing an adaptive, highly engaging quiz for the domain: '{quiz.DomainId}'.
+            string prompt =
+                $"""
+                 You are an expert educational architect designing an adaptive, highly engaging quiz for the domain: '{quiz.DomainId}'.
 
-                             Your objective is to generate questions that test the student's practical understanding of concepts and how they interrelate in real-world scenarios.
+                 Your objective is to generate questions that test the student's practical understanding of concepts and how they interrelate in real-world scenarios.
 
-                             === INPUT DATA ===
+                 === INPUT DATA ===
 
-                             <student_profile>
-                             Baseline Proficiency: {user.Proficiency}
-                             Core Learning Goals: {goalsContext}
-                             Topic Interests: {interestsContext}
-                             </student_profile>
+                 <student_profile>
+                 Baseline Proficiency: {user.Proficiency}
+                 Core Learning Goals: {goalsContext}
+                 Topic Interests: {interestsContext}
+                 </student_profile>
 
-                             <mastery_state>
-                             {masteryContext}
-                             </mastery_state>
+                 <mastery_state>
+                 {masteryContext}
+                 </mastery_state>
 
-                             <curriculum_topology>
-                             {graphContext}
-                             </curriculum_topology>
+                 <curriculum_topology>
+                 {graphContext}
+                 </curriculum_topology>
 
-                             === GENERATION RULES ===
+                 === GENERATION RULES ===
 
-                             <adaptive_constraints>
-                             {questionCountRule}
-                             {difficultyRules}
-                             </adaptive_constraints>
+                 <adaptive_constraints>
+                 {questionCountRule}
+                 {difficultyRules}
+                 </adaptive_constraints>
 
-                             <personalization_rules>
-                             - Tailor the framing, flavor scenarios, and technical vocabulary strictly to the <student_profile>.
-                             - If a goal includes 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
-                             - If interests include 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
-                             - Align the baseline linguistic tone strictly with the '{user.Proficiency}' level.
-                             </personalization_rules>
+                 <personalization_rules>
+                 - Tailor the framing, flavor scenarios, and technical vocabulary strictly to the <student_profile>.
+                 - If a goal includes 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
+                 - If interests include 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
+                 - Align the baseline linguistic tone strictly with the '{user.Proficiency}' level.
+                 </personalization_rules>
 
-                             <relationship_testing>
-                             Use the <curriculum_topology> to write questions that test the boundaries between concepts:
-                             - Hierarchy/Prerequisite (A -> B): Ask why A must be understood before implementing B, or how A forms the foundation of B.
-                             - Contributes/Impacts (A -> B): Ask a scenario question about technical tradeoffs (e.g., "If we optimize A, what is the expected impact on B?").
-                             - Equivalent (A = B): Test the student's ability to recognize both terms interchangeably in a practical context.
-                             </relationship_testing>
+                 <relationship_testing>
+                 Use the <curriculum_topology> to write questions that test the boundaries between concepts:
+                 - Hierarchy/Prerequisite (A -> B): Ask why A must be understood before implementing B, or how A forms the foundation of B.
+                 - Contributes/Impacts (A -> B): Ask a scenario question about technical tradeoffs (e.g., "If we optimize A, what is the expected impact on B?").
+                 - Equivalent (A = B): Test the student's ability to recognize both terms interchangeably in a practical context.
+                 </relationship_testing>
 
-                             === STRICT CONSTRAINTS (CRITICAL) ===
-                             - NEVER use meta-phrases like "According to the context", "Based on the graph", or "As shown in the topology". The questions must read naturally as if written by a human professor.
-                             - DO NOT break character. You are the exam engine. Provide NO conversational filler.
-                             - Output ONLY valid JSON. Do not include markdown formatting, code blocks, or any text outside of the JSON object.
+                 === STRICT CONSTRAINTS (CRITICAL) ===
+                 - NEVER use meta-phrases like "According to the context", "Based on the graph", or "As shown in the topology". The questions must read naturally as if written by a human professor.
+                 - DO NOT break character. You are the exam engine. Provide NO conversational filler.
+                 - Output ONLY valid JSON. Do not include markdown formatting, code blocks, or any text outside of the JSON object.
 
-                             === OUTPUT FORMAT ===
-                             You must return a JSON response matching the requested schema exactly.
-                             - `Difficulty`: The overall difficulty level you applied (Easy, Medium, or Hard).
-                             - `Questions`: The array of generated questions. For each question, you MUST return the exact `ConceptId` (Node ID) from the <mastery_state> that the question is primarily testing.
-                             """;
+                 === OUTPUT FORMAT ===
+                 You must return a JSON response matching the requested schema exactly.
+                 - `Difficulty`: The overall difficulty level you applied (Easy, Medium, or Hard).
+                 - `Questions`: The array of generated questions. For each question, you MUST return the exact `ConceptId` (Node ID) from the <mastery_state> that the question is primarily testing.
+                 """;
 
             logger.LogInformation(prompt);
 
