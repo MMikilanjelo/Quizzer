@@ -4,7 +4,7 @@ public record TopicMastery
 {
     public required string Id { get; init; }
     public required string UserId { get; init; }
-    public required string ConceptId { get; init; }
+    public required string TopicId { get; init; }
     public required Mastery Mastery { get; init; }
     public required BktParams Params { get; init; }
     public DateTime LastUpdated { get; init; }
@@ -15,9 +15,12 @@ public record TopicMastery
         {
             Id = FormatId(@event.UserId, @event.TopicId),
             UserId = @event.UserId,
-            ConceptId = @event.TopicId,
+            TopicId = @event.TopicId,
             Mastery = Mastery.Initial,
-            Params = @event.InitialParams,
+            Params = new BktParams
+            {
+                PTransition = @event.PTransition
+            },
             LastUpdated = @event.StartedAt
         };
     }
@@ -31,16 +34,29 @@ public record TopicMastery
         };
     }
 
-    public TopicMasteryUpdated RecordAttempt(bool isCorrect, string quizId, string questionId, DateTime timestamp)
+    public TopicMasteryUpdated RecordAttempt(
+        bool isCorrect,
+        string quizId,
+        string questionId,
+        QuestionDynamics dynamics,
+        DateTime timestamp
+    )
     {
-        var nextMastery = Mastery.CalculateNext(isCorrect, Params);
+        var nextMastery = Mastery.CalculateNext(isCorrect, Params, dynamics);
 
-        return new TopicMasteryUpdated(
-            UserId, ConceptId, quizId, questionId,
-            Mastery.Value, nextMastery.Value,
-            Params.PGuess, Params.PSlip, Params.PTransition,
-            timestamp
-        );
+        return new TopicMasteryUpdated
+        {
+            UserId = UserId,
+            TopicId = TopicId,
+            QuizId = quizId,
+            QuestionId = questionId,
+            OldMastery = Mastery.Value,
+            NewMastery = nextMastery.Value,
+            PGuess = dynamics.PGuess,
+            PSlip = dynamics.PSlip,
+            PTransition = Params.PTransition,
+            Timestamp = timestamp
+        };
     }
 
     public static string FormatId(string userId, string topicId) => $"{userId}:{topicId}";

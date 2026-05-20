@@ -88,13 +88,13 @@ public class UserDashboardProjection : MultiStreamProjection<UserDashboardView, 
         var newTotalCorrect = current.TotalCorrectAnswers + (@event.IsCorrect ? 1 : 0);
 
         var conceptPerformanceList = current.ConceptPerformance.ToList();
-        var index = conceptPerformanceList.FindIndex(c => c.ConceptId == @event.ConceptId);
+        var index = conceptPerformanceList.FindIndex(c => c.TopicId == @event.TopicId);
 
         if (index == -1)
         {
             conceptPerformanceList.Add(new ConceptPerformanceView
             {
-                ConceptId = @event.ConceptId,
+                TopicId = @event.TopicId,
                 TotalAnswered = 1,
                 TotalCorrect = @event.IsCorrect ? 1 : 0
             });

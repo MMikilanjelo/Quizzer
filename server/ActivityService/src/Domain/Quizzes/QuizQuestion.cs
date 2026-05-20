@@ -8,6 +8,8 @@ public sealed record QuizQuestion
     public required IReadOnlyCollection<string> Options { get; init; }
     public required int CorrectIndex { get; init; }
     public int? SelectedIndex { get; init; }
+    public required double PGuess { get; init; }
+    public required double PSlip { get; init; }
     public bool IsAnswered => SelectedIndex.HasValue;
     public bool IsCorrect => IsAnswered && SelectedIndex == CorrectIndex;
 }

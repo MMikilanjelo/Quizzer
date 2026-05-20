@@ -25,7 +25,7 @@ public class MasteryCalculationSubscription : SubscriptionBase
     {
         var events = page.Events
             .OfType<IEvent<QuizQuestionAnswered>>()
-            .GroupBy(x => TopicMastery.FormatId(x.Data.UserId, x.Data.ConceptId));
+            .GroupBy(x => TopicMastery.FormatId(x.Data.UserId, x.Data.TopicId));
 
         foreach (var group in events)
         {
@@ -38,11 +38,13 @@ public class MasteryCalculationSubscription : SubscriptionBase
 
             if (mastery is null)
             {
-                var started = new TopicMasteryStarted(
-                    first.UserId,
-                    first.ConceptId,
-                    BktParams.Initial,
-                    first.AnsweredAt);
+                var started = new TopicMasteryStarted
+                {
+                    UserId = first.UserId,
+                    TopicId = first.TopicId,
+                    PTransition = BktParams.Initial.PTransition,
+                    StartedAt = first.AnsweredAt
+                };
 
                 toAppend.Add(started);
                 mastery = TopicMastery.Create(started);
@@ -51,11 +53,20 @@ public class MasteryCalculationSubscription : SubscriptionBase
             foreach (var e in group)
             {
                 var answer = e.Data;
+
+                var questionDynamics = new QuestionDynamics
+                {
+                    PGuess = answer.PGuess,
+                    PSlip = answer.PSlip
+                };
+
                 var updatedEvent = mastery.RecordAttempt(
                     answer.IsCorrect,
                     answer.QuizId,
                     answer.QuestionId,
-                    answer.AnsweredAt);
+                    questionDynamics,
+                    answer.AnsweredAt
+                );
 
                 toAppend.Add(updatedEvent);
 

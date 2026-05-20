@@ -10,25 +10,24 @@ public record Mastery
 
     public bool IsMastered => Value >= 0.85;
 
-    public static Mastery Initial =>
-        new()
-        {
-            Value = 0.1
-        };
+    public static Mastery Initial => new() { Value = 0.1 };
 
-    public Mastery CalculateNext(bool isCorrect, BktParams bktParams)
+    public Mastery CalculateNext(bool isCorrect, BktParams topicParams, QuestionDynamics questionDynamics)
     {
+        double pGuess = questionDynamics.PGuess;
+        double pSlip = questionDynamics.PSlip;
+
         double numerator = isCorrect
-            ? Value * (1 - bktParams.PSlip)
-            : Value * bktParams.PSlip;
+            ? Value * (1 - pSlip)
+            : Value * pSlip;
 
         double denominator = isCorrect
-            ? numerator + (1 - Value) * bktParams.PGuess
-            : numerator + (1 - Value) * (1 - bktParams.PGuess);
+            ? numerator + (1 - Value) * pGuess
+            : numerator + (1 - Value) * (1 - pGuess);
 
         double pLObs = numerator / denominator;
 
-        double nextValue = pLObs + (1 - pLObs) * bktParams.PTransition;
+        double nextValue = pLObs + (1 - pLObs) * topicParams.PTransition;
 
         return new Mastery { Value = nextValue };
     }

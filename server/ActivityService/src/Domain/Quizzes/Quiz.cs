@@ -115,11 +115,13 @@ public sealed record Quiz
             {
                 QuizId = Id,
                 UserId = UserId,
-                ConceptId = targetQuestion.TopicId,
+                TopicId = targetQuestion.TopicId,
                 QuestionId = command.QuestionId,
                 SelectedIndex = command.SelectedIndex,
                 IsCorrect = isCorrectAnswer,
-                AnsweredAt = command.AnsweredAt
+                AnsweredAt = command.AnsweredAt,
+                PGuess = targetQuestion.PGuess,
+                PSlip = targetQuestion.PSlip
             }
         };
 

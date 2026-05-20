@@ -15,10 +15,12 @@ public static class GenerateQuiz
     public sealed record Command(string QuizId) : ICommand;
 
     private sealed record GeneratedQuestion(
-        string ConceptId,
+        string TopicId,
         string Text,
         List<string> Options,
-        int CorrectIndex
+        int CorrectIndex,
+        double PGuess,
+        double PSlip
     );
 
     private sealed record GenerateContentResponse(
@@ -83,6 +85,15 @@ public static class GenerateQuiz
                   - You MUST set the `Difficulty` in your response to the overall level you chose.
                   """;
 
+            string bktRules =
+                """
+                <bkt_parameters>
+                For every question generated, you MUST determine its specific Bayesian Knowledge Tracing (BKT) properties based on the question's design:
+                - `PGuess`: The probability (0.0 to 1.0) a student guesses correctly without knowing the concept. For standard 4-option multiple choice, default to 0.25. If the incorrect distractors are obviously wrong, increase to 0.30-0.40. If the question requires code analysis with deeply similar options, lower it to 0.10-0.20.
+                - `PSlip`: The probability (0.0 to 1.0) a student who knows the concept gets it wrong anyway. Default to 0.10. If the question uses tricky phrasing, edge-case syntax, or "find the bug" mechanics, increase to 0.15-0.20. If it is a straightforward definition, lower it to 0.05.
+                </bkt_parameters>
+                """;
+
             string prompt =
                 $"""
                  You are an expert educational architect designing an adaptive, highly engaging quiz for the domain: '{quiz.DomainId}'.
@@ -112,29 +123,20 @@ public static class GenerateQuiz
                  {difficultyRules}
                  </adaptive_constraints>
 
+                 {bktRules}
+
                  <personalization_rules>
                  - Tailor the framing, flavor scenarios, and technical vocabulary strictly to the <student_profile>.
-                 - If a goal includes 'CareerBoost', focus scenario questions on production codebase issues, architecture trade-offs, or industry performance constraints.
-                 - If interests include 'Programming', express technical context using concrete implementations or functional examples rather than abstract theory.
                  - Align the baseline linguistic tone strictly with the '{user.Proficiency}' level.
                  </personalization_rules>
 
                  <relationship_testing>
-                 Use the <curriculum_topology> to write questions that test the boundaries between concepts:
-                 - Hierarchy/Prerequisite (A -> B): Ask why A must be understood before implementing B, or how A forms the foundation of B.
-                 - Contributes/Impacts (A -> B): Ask a scenario question about technical tradeoffs (e.g., "If we optimize A, what is the expected impact on B?").
-                 - Equivalent (A = B): Test the student's ability to recognize both terms interchangeably in a practical context.
+                 Use the <curriculum_topology> to write questions that test the boundaries between concepts (Hierarchy, Impacts, Equivalents).
                  </relationship_testing>
 
                  === STRICT CONSTRAINTS (CRITICAL) ===
-                 - NEVER use meta-phrases like "According to the context", "Based on the graph", or "As shown in the topology". The questions must read naturally as if written by a human professor.
-                 - DO NOT break character. You are the exam engine. Provide NO conversational filler.
-                 - Output ONLY valid JSON. Do not include markdown formatting, code blocks, or any text outside of the JSON object.
-
-                 === OUTPUT FORMAT ===
-                 You must return a JSON response matching the requested schema exactly.
-                 - `Difficulty`: The overall difficulty level you applied (Easy, Medium, or Hard).
-                 - `Questions`: The array of generated questions. For each question, you MUST return the exact `ConceptId` (Node ID) from the <mastery_state> that the question is primarily testing.
+                 - NEVER use meta-phrases like "According to the context".
+                 - Output ONLY valid JSON. Do not include markdown formatting or code blocks.
                  """;
 
             logger.LogInformation(prompt);
@@ -149,10 +151,12 @@ public static class GenerateQuiz
             var domainQuestions = geminiResult.Value.Questions.Select(generatedQuestion => new QuizQuestion
             {
                 Id = Guid.NewGuid().ToString(),
-                TopicId = generatedQuestion.ConceptId,
+                TopicId = generatedQuestion.TopicId,
                 Text = generatedQuestion.Text,
                 Options = generatedQuestion.Options,
-                CorrectIndex = generatedQuestion.CorrectIndex
+                CorrectIndex = generatedQuestion.CorrectIndex,
+                PGuess = generatedQuestion.PGuess,
+                PSlip = generatedQuestion.PSlip,
             }).ToList();
 
             var domainResult = quiz.Fill(

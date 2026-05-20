@@ -24,7 +24,7 @@ public sealed record TopicMasteryLevelView
 
 public record ConceptPerformanceView
 {
-    public required string ConceptId { get; init; }
+    public required string TopicId { get; init; }
     public int TotalAnswered { get; init; }
     public int TotalCorrect { get; init; }
     public float RawAccuracy => TotalAnswered == 0 ? 0f : (float)TotalCorrect / TotalAnswered;

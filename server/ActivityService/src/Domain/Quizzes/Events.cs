@@ -32,10 +32,12 @@ public sealed record QuizQuestionAnswered : IEvent
 {
     public required string QuizId { get; init; }
     public required string UserId { get; init; }
-    public required string ConceptId { get; init; }
+    public required string TopicId { get; init; }
     public required string QuestionId { get; init; }
     public required int SelectedIndex { get; init; }
     public required bool IsCorrect { get; init; }
+    public required double PGuess { get; init; }
+    public required double PSlip { get; init; }
     public required DateTime AnsweredAt { get; init; }
 }
 

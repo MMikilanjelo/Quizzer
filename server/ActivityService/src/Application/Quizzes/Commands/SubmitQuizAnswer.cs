@@ -81,44 +81,6 @@ public static class SubmitQuizAnswer
 
             stream.AppendMany(answerResult.Value);
 
-            var answeredEvent = answerResult.Value
-                .OfType<QuizQuestionAnswered>()
-                .First();
-
-            var masteryStreamId = TopicMastery.FormatId(
-                answeredEvent.UserId,
-                answeredEvent.ConceptId);
-
-            var masteryStream = await session.Events
-                .FetchForWriting<TopicMastery>(
-                    masteryStreamId,
-                    cancellationToken);
-
-            var mastery = masteryStream.Aggregate;
-
-            if (mastery is null)
-            {
-                var started = new TopicMasteryStarted(
-                    answeredEvent.UserId,
-                    answeredEvent.ConceptId,
-                    BktParams.Initial,
-                    dateTimeProvider.UtcNow
-                );
-
-                masteryStream.AppendOne(started);
-
-                mastery = TopicMastery.Create(started);
-            }
-
-            var updated = mastery.RecordAttempt(
-                answeredEvent.IsCorrect,
-                answeredEvent.QuizId,
-                answeredEvent.QuestionId,
-                dateTimeProvider.UtcNow
-            );
-
-            masteryStream.AppendOne(updated);
-
             await session.SaveChangesAsync(cancellationToken);
 
             return Result.Success;
