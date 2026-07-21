@@ -180,22 +180,6 @@ deploy/
 
 ---
 
-# Getting Started
-
-```bash
-git clone <repository>
-
-dotnet restore
-
-docker compose up -d
-
-dotnet run
-```
-
-For infrastructure setup, Kubernetes deployment, secrets, and ETL instructions, see **RUNBOOK.md**.
-
----
-
 # Screenshots
 
 | Authentication | Onboarding | Dashboard |
